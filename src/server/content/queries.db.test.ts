@@ -25,7 +25,7 @@ describe.skipIf(!hasDb)("truy vấn nội dung (cần DATABASE_URL_TEST)", () =>
   it("listApps trả tên hiển thị, không trả slug", async () => {
     const { listApps } = await import("./queries");
     const apps = await listApps("vi");
-    expect(apps.find(a => a.slug === "web-store-apps")!.name).toBe("Web Store Apps");
+    expect(apps.find(a => a.slug === "ducker-id")!.name).toBe("Ducker ID");
   });
 
   it("getApp lùi về locale mặc định khi thiếu bản dịch", async () => {
@@ -35,13 +35,13 @@ describe.skipIf(!hasDb)("truy vấn nội dung (cần DATABASE_URL_TEST)", () =>
     // ngôn ngữ bị chặn), nên với "en" không có gì để lùi và `isFallback` toàn false.
     // Bản đầu của test này kỳ vọng "en" fallback — kỳ vọng đó viết theo một giả
     // định đã không còn đúng, và nó chưa từng chạy nên không ai thấy.
-    const app = await getApp("web-store-apps", "ja");
+    const app = await getApp("ducker-id", "ja");
     expect(app).not.toBeNull();
     expect(app!.sections.length).toBeGreaterThan(0);
     expect(app!.sections.every(s => s.isFallback)).toBe(true);
     expect(app!.isFallback).toBe(true);
     // Lùi về locale mặc định nghĩa là ra chữ tiếng Việt, KHÔNG phải ra slug.
-    expect(app!.name).toBe("Web Store Apps");
+    expect(app!.name).toBe("Ducker ID");
   });
 
   it("getApp trả null với app chưa publish", async () => {

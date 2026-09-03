@@ -248,7 +248,7 @@
       "saveFailed": "Chưa lưu được. {reason}",
       "savedExcept": "Đã lưu các phần còn lại. Chưa lưu: {problems}",
       "notSaved": "Chưa lưu gì cả. {problems}",
-      "errorSlug": "Slug chỉ gồm chữ thường, số và dấu gạch nối — ví dụ web-store-apps.",
+      "errorSlug": "Slug chỉ gồm chữ thường, số và dấu gạch nối — ví dụ ducker-id.",
       "errorUrl": "Ô {field} phải là địa chỉ đầy đủ, bắt đầu bằng https://",
       "blockName": "khối Nội dung, vì bản {locale} chưa có tên hiển thị",
       "blockAnchor": "cả khối Mục nội dung, vì anchor của mục thứ {index} không hợp lệ — chỉ dùng chữ thường, số và dấu gạch nối",

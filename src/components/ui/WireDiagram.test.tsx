@@ -4,7 +4,7 @@ import { describe, it, expect } from "vitest";
 import { WireDiagram } from "./WireDiagram";
 
 const items = [
-  { name: "Web Store Apps",     desc: "Đăng nhập",  integration: "core" as const },
+  { name: "Ducker ID",     desc: "Đăng nhập",  integration: "core" as const },
   { name: "Match CV",           desc: "Đối chiếu",  integration: "planned" as const },
   { name: "Calculate Badminton",desc: "Chia tiền",  integration: "standalone" as const },
 ];

@@ -12,7 +12,7 @@ import { test, expect } from "@playwright/test";
 const PAGES = [
   "/vi",
   "/vi/apps",
-  "/vi/apps/web-store-apps",
+  "/vi/apps/ducker-id",
   // Slug thật của trang hướng dẫn tích hợp OAuth. Kế hoạch viết
   // `/vi/docs/tich-hop-oauth` — slug đó không tồn tại, và một trang 404 vẫn đạt mọi
   // assertion dưới đây, nên sai chỗ này là bộ test tự báo xanh mà không kiểm gì.
@@ -64,7 +64,7 @@ for (const path of PAGES) {
 // ---------------------------------------------------------------------------
 
 /** Trang chắc chắn có cột trái, nên chắc chắn có ngăn kéo ở 375px. */
-const DRAWER_PAGE = "/vi/apps/web-store-apps";
+const DRAWER_PAGE = "/vi/apps/ducker-id";
 
 test("ở 375px điều hướng tới được ngay đầu bài, không phải cuộn", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });

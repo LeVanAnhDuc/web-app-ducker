@@ -390,7 +390,7 @@ Script được viết để không làm sập deploy: thiếu `DATABASE_URL` ho
 
 ### 6.5 Sau deploy đầu tiên — kiểm bằng tay
 
-1. Mở `/vi` → thấy danh sách 6 ứng dụng, tên hiển thị dạng **Web Store Apps** (không phải `web-store-apps`).
+1. Mở `/vi` → thấy danh sách 6 ứng dụng, tên hiển thị dạng **Ducker ID** (không phải `ducker-id`).
 2. Mở `/en` → giao diện tiếng Anh, nội dung chưa dịch thì fallback về `vi` kèm badge.
 3. Mở `/vi/admin` → bị đá sang `/vi/admin/login`. Đăng nhập bằng `ADMIN_EMAIL` + mật khẩu thô.
 4. Sửa một tagline → lưu → mở lại trang công khai tương ứng → thấy nội dung mới **mà không deploy lại**. Đây là lời hứa trung tâm của hệ thống; hỏng chỗ này thì revalidate sai.
@@ -453,7 +453,7 @@ Ghi chú:
 - `ADMIN_PASSWORD` là **mật khẩu thô**, phải khớp với `ADMIN_PASSWORD_HASH`. Test dùng nó để điền form đăng nhập.
 - `ADMIN_PASSWORD_HASH` gán bằng **nháy đơn** trong PowerShell (chuỗi có `$`).
 - `e2e/admin-auth.spec.ts` không cần DB: nó kiểm `/admin` đá về trang đăng nhập, và kiểm POST thẳng vào server action khi chưa đăng nhập thì bị chặn.
-- Branch `test` phải **có dữ liệu seed** trước khi chạy: `npx tsx prisma/seed.ts` sau `migrate reset`. Test roundtrip mở `/vi/admin/apps/web-store-apps` và tìm tiêu đề "Web Store Apps"; branch rỗng thì cả hai test đều đỏ vì thiếu dữ liệu, không phải vì mã sai. `npm run build` cũng cần bảng `Locale` có dòng để `prebuild` sinh đúng danh sách locale.
+- Branch `test` phải **có dữ liệu seed** trước khi chạy: `npx tsx prisma/seed.ts` sau `migrate reset`. Test roundtrip mở `/vi/admin/apps/ducker-id` và tìm tiêu đề "Ducker ID"; branch rỗng thì cả hai test đều đỏ vì thiếu dữ liệu, không phải vì mã sai. `npm run build` cũng cần bảng `Locale` có dòng để `prebuild` sinh đúng danh sách locale.
 - Chạy e2e trên domain khác `localhost:3000` thì đặt `NEXT_PUBLIC_SITE_URL` tương ứng.
 
 ### 7.4 Không có DB thì kiểm được tới đâu

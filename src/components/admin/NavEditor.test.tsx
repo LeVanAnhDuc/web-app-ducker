@@ -137,9 +137,9 @@ const nodes: NavEditorNode[] = [
     parentId: "c-core",
     kind: "APP",
     status: "PUBLISHED",
-    label: "Web Store Apps",
-    labels: { vi: "Web Store Apps" },
-    href: "/vi/apps/web-store-apps",
+    label: "Ducker ID",
+    labels: { vi: "Ducker ID" },
+    href: "/vi/apps/ducker-id",
   },
   {
     id: "c-retired",
@@ -234,9 +234,9 @@ describe("NavEditor", () => {
 
   it("chọn nút lá thì bảng thuộc tính CÓ ô nội dung — nếu không, phép kiểm trên vô nghĩa", () => {
     setup();
-    selectNode("a-store", "Web Store Apps");
+    selectNode("a-store", "Ducker ID");
 
-    expect(screen.getByLabelText("Nội dung")).toHaveValue("/vi/apps/web-store-apps");
+    expect(screen.getByLabelText("Nội dung")).toHaveValue("/vi/apps/ducker-id");
     expect(screen.queryByText(/vì sao không có ô nội dung/i)).toBeNull();
   });
 

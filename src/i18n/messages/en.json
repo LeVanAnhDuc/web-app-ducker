@@ -248,7 +248,7 @@
       "saveFailed": "Not saved. {reason}",
       "savedExcept": "Everything else was saved. Not saved: {problems}",
       "notSaved": "Nothing was saved. {problems}",
-      "errorSlug": "A slug holds lowercase letters, digits and hyphens only — for example web-store-apps.",
+      "errorSlug": "A slug holds lowercase letters, digits and hyphens only — for example ducker-id.",
       "errorUrl": "The {field} field needs a full address starting with https://",
       "blockName": "the Content block, because the {locale} version has no display name",
       "blockAnchor": "the Sections block, because the anchor of section {index} is invalid — use lowercase letters, digits and hyphens only",

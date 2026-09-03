@@ -26,14 +26,14 @@ describe("Sidebar", () => {
     {
       id: "core", kind: "CONTAINER" as const, label: "Lõi", href: null, isFallback: false,
       children: [
-        { id: "a", kind: "APP" as const, label: "Web Store Apps", href: "/vi/apps/a", isFallback: false, children: [] },
+        { id: "a", kind: "APP" as const, label: "Ducker ID", href: "/vi/apps/a", isFallback: false, children: [] },
       ],
     },
   ];
 
   it("đánh dấu trang đang mở bằng aria-current", () => {
     render(<Sidebar nodes={nodes} activeHref="/vi/apps/a" label="Điều hướng tài liệu" />);
-    expect(screen.getByRole("link", { name: "Web Store Apps" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Ducker ID" })).toHaveAttribute(
       "aria-current",
       "page",
     );

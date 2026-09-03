@@ -22,7 +22,7 @@ import { tags } from "./tags";
  *    ngay, còn build đổ vỡ thì chặn mọi việc khác.
  * 3. **Không bao giờ bịa nhãn từ slug.** Thiếu cả bản dịch mặc định thì bỏ qua
  *    bản ghi (danh sách) hoặc trả `null` (trang chi tiết) để trang gọi
- *    `notFound()`. "web-store-apps" hiện ra chỗ đáng lẽ là "Web Store Apps"
+ *    `notFound()`. "ducker-id" hiện ra chỗ đáng lẽ là "Ducker ID"
  *    trông như dữ liệu thật nên sẽ lọt qua mọi vòng kiểm tra.
  */
 

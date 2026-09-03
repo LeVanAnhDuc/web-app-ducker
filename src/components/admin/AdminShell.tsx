@@ -119,7 +119,7 @@ export function AdminShell({
         <nav className={styles.nav} aria-label={t("admin.nav.label")}>
           {items.map((item) => {
             // "Tổng quan" chỉ sáng khi trùng khít; các mục khác sáng cho cả trang
-            // con (`/admin/apps/web-store-apps` vẫn thuộc mục Ứng dụng).
+            // con (`/admin/apps/ducker-id` vẫn thuộc mục Ứng dụng).
             const current =
               item.key === "overview" ? pathname === item.href : pathname.startsWith(item.href);
 

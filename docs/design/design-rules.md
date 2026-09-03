@@ -12,15 +12,16 @@ Tên hiển thị **viết hoa đầu từ, cách nhau bằng khoảng trắng**
 
 | Slug repo | Tên hiển thị |
 |---|---|
-| `web-store-apps` | Web Store Apps |
-| `api-web-store-apps` | API Web Store Apps |
-| `client-web-app-match-cv` | Match CV |
-| `app-manage-gym` | Manage Gym |
-| `app-AI-study-coach` | AI Study Coach |
+| `web-app-ducker-id` | Ducker ID |
+| `web-app-match-cv` | Match CV |
+| `web-app-manage-gym` | Manage Gym |
+| `web-app-AI-study-coach` | AI Study Coach |
 | `app-calculate-badminton` | Calculate Badminton |
-| `client-web-app-shorten-link` | Shorten Link |
+| `web-app-shorten-link` | Shorten Link |
 
-Quy tắc rút gọn: bỏ các tiền tố hạ tầng (`app-`, `client-web-app-`, `client-`) vì chúng nói về kho mã, không nói về sản phẩm. Giữ `api-` khi bản thân nó là một dịch vụ riêng. Từ viết tắt giữ nguyên chữ hoa: **API**, **AI**, **CV**, **OAuth**, **IDMS**.
+Quy tắc rút gọn: bỏ tiền tố hạ tầng (`web-app-`, `app-`) vì chúng nói về kho mã, không nói về sản phẩm. Từ viết tắt giữ nguyên chữ hoa: **API**, **AI**, **CV**, **OAuth**, **IDMS**.
+
+Mỗi sản phẩm là **một** kho mã (monorepo `client/` + `server/` + `docs/`), nên mỗi sản phẩm chỉ có **một** slug. Các slug tách đôi kiểu `client-…` / `api-…` / `doc-…` đã bị xoá khỏi GitHub ngày 03.09.2026 — đừng dùng lại chúng.
 
 Slug repo vẫn được hiển thị, nhưng luôn ở vai trò **phụ**: chữ mono, cỡ nhỏ, màu `--muted`, đặt dưới hoặc bên cạnh tên hiển thị. Class `.m-slug` trong mockup.
 

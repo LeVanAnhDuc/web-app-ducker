@@ -142,7 +142,7 @@ from Neon and R2: [`docs/operations.md`](docs/operations.md).
 
 | Repo | Role |
 |---|---|
-| [`web-app-store`](https://github.com/LeVanAnhDuc/web-app-store) | IDMS — the sign-in gateway and app launcher. The OAuth 2.0/OIDC provider itself is not built yet |
+| [`web-app-ducker-id`](https://github.com/LeVanAnhDuc/web-app-ducker-id) | Ducker ID — the IDMS: sign-in gateway and app launcher. The OAuth 2.0/OIDC provider itself is not built yet |
 | [`web-app-match-cv`](https://github.com/LeVanAnhDuc/web-app-match-cv) | Matching a CV against a job description |
 | [`web-app-manage-gym`](https://github.com/LeVanAnhDuc/web-app-manage-gym) | Training log |
 | [`web-app-AI-study-coach`](https://github.com/LeVanAnhDuc/web-app-AI-study-coach) | Study assistant |

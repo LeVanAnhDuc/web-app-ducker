@@ -23,8 +23,8 @@ export type Translated<T> = {
  * Chọn bản dịch cho locale `want`, lùi về `fallback` khi thiếu.
  *
  * Trả `null` khi không có cả bản mặc định, để trang gọi `notFound()`. Tuyệt đối
- * không bịa nhãn thay thế từ slug: "web-store-apps" hiện ra chỗ đáng lẽ là
- * "Web Store Apps" trông như dữ liệu thật nên sẽ lọt qua mọi vòng kiểm tra,
+ * không bịa nhãn thay thế từ slug: "ducker-id" hiện ra chỗ đáng lẽ là
+ * "Ducker ID" trông như dữ liệu thật nên sẽ lọt qua mọi vòng kiểm tra,
  * còn 404 thì lộ ngay.
  */
 export function resolveTranslation<T extends { locale: string }>(

@@ -137,7 +137,7 @@ Xếp theo mức đáng làm.
 
 ### Việc lớn của tương lai
 
-- **Đổi sang đăng nhập qua IDMS.** Chỉ cần thêm `src/server/auth/providers/idms-oauth.ts` cài đúng ba hàm `getCurrentUser` / `requireAdmin` / `signOut`. Không file nào khác phải sửa — đó là lý do lớp abstraction tồn tại. Trước khi làm, phải xác minh luồng OAuth trong `api-web-store-apps` đã chạy hoàn chỉnh; hiện **chưa app nào dùng thật**.
+- **Đổi sang đăng nhập qua IDMS.** Chỉ cần thêm `src/server/auth/providers/idms-oauth.ts` cài đúng ba hàm `getCurrentUser` / `requireAdmin` / `signOut`. Không file nào khác phải sửa — đó là lý do lớp abstraction tồn tại. Trước khi làm, phải xác minh luồng OAuth trong `web-app-ducker-id` đã chạy hoàn chỉnh; hiện **chưa app nào dùng thật**.
 - **Trình soạn block-based.** Schema đã mở đường: `SectionTranslation.body` là JSON có discriminator `type`, hôm nay chỉ tồn tại `{"type":"markdown"}`. Thêm `{"type":"blocks"}` không phải migrate dữ liệu cũ.
 
 ---

@@ -4,10 +4,10 @@ import { appInputSchema, sectionInputSchema } from "./schemas";
 
 describe("appInputSchema", () => {
   it("từ chối slug có chữ hoa hoặc khoảng trắng", () => {
-    expect(appInputSchema.safeParse({ slug: "Web Store Apps", kind: "CORE", status: "DRAFT" }).success).toBe(false);
+    expect(appInputSchema.safeParse({ slug: "Ducker ID", kind: "CORE", status: "DRAFT" }).success).toBe(false);
   });
   it("nhận slug hợp lệ", () => {
-    const r = appInputSchema.safeParse({ slug: "web-store-apps", kind: "CORE", status: "DRAFT" });
+    const r = appInputSchema.safeParse({ slug: "ducker-id", kind: "CORE", status: "DRAFT" });
     expect(r.success).toBe(true);
   });
   it("techStack mặc định là mảng rỗng", () => {

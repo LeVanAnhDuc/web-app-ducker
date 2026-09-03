@@ -6,19 +6,19 @@ import { FeatureGrid } from "./FeatureGrid";
 
 const app: AppDetail = {
   id: "a1",
-  slug: "web-store-apps",
+  slug: "ducker-id",
   kind: "CORE",
   status: "PUBLISHED",
   order: 0,
   logoUrl: null,
-  repoUrl: "https://github.com/LeVanAnhDuc/web-store-apps",
+  repoUrl: "https://github.com/LeVanAnhDuc/web-app-ducker-id",
   apiRepoUrl: null,
   demoUrl: null,
   isRepoPrivate: false,
   isStandalone: false,
   techStack: ["Next.js 16"],
   integration: "core",
-  name: "Web Store Apps",
+  name: "Ducker ID",
   tagline: "Cổng đăng nhập và bảng khởi chạy ứng dụng",
   summary: "Giao diện của IDMS.",
   locale: "vi",
@@ -41,9 +41,9 @@ describe("AppHero", () => {
   it("tên hiển thị là h1, slug repo chỉ ở vai phụ", () => {
     render(<AppHero app={app} locale="vi" crumb="Ứng dụng / Lõi" labels={labels} />);
     const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toHaveTextContent("Web Store Apps");
-    expect(heading).not.toHaveTextContent("web-store-apps");
-    expect(screen.getByText("web-store-apps")).toBeInTheDocument();
+    expect(heading).toHaveTextContent("Ducker ID");
+    expect(heading).not.toHaveTextContent("ducker-id");
+    expect(screen.getByText("ducker-id")).toBeInTheDocument();
   });
 
   it("repo riêng tư thì không dựng liên kết chết, thay bằng huy hiệu", () => {

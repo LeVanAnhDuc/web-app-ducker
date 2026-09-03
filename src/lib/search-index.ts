@@ -75,7 +75,7 @@ function flattenSections(sections: SectionInput[]): string {
 }
 
 /**
- * Dựng chỉ mục cho một locale. `title` luôn là tên hiển thị (Web Store Apps),
+ * Dựng chỉ mục cho một locale. `title` luôn là tên hiển thị (Ducker ID),
  * không bao giờ là slug — slug chỉ đóng vai trò phụ trong giao diện.
  */
 export function buildSearchIndex(input: SearchIndexInput): SearchDoc[] {

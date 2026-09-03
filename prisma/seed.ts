@@ -13,10 +13,10 @@
  * - Phần **"Chạy thử trong 5 phút" (`quick-start`) có thể thiếu hoặc sai**: số
  *   cổng, tên biến môi trường và tên script npm đều lấy từ README, mà README là
  *   thứ lạc hậu nhanh nhất trong một repo đang phát triển.
- * - `app-AI-study-coach` mới có `docs/`, chưa có mã chạy được; nội dung của nó
+ * - `web-app-AI-study-coach` mới có `docs/`, chưa có mã chạy được; nội dung của nó
  *   nói đúng điều đó chứ không dựng ra một quick start không tồn tại.
- * - `shorten-link` là repo riêng tư, không đọc được, nên bản ghi của nó **không có
- *   nội dung** — chỉ có tên hiển thị, `isRepoPrivate = true`, `status = DRAFT`.
+ * - `shorten-link` lúc khảo sát là repo riêng tư nên bản ghi của nó **không có nội
+ *   dung** — chỉ có tên hiển thị, `status = DRAFT`. Repo đã công khai từ 03.09.2026.
  *
  * Ai kiểm chứng được phần nào thì sửa phần đó **qua CMS** rồi bỏ dòng cảnh báo
  * tương ứng ở đây. Đừng sửa file này để "cập nhật nội dung": sau lần deploy đầu,
@@ -123,11 +123,11 @@ const LOCALES = [
 
 const APPS: SeedApp[] = [
   {
-    slug: "web-store-apps",
+    slug: "ducker-id",
     kind: "CORE",
     status: "PUBLISHED",
     order: 0,
-    repoUrl: `${GITHUB}/web-app-store`,
+    repoUrl: `${GITHUB}/web-app-ducker-id`,
     techStack: [
       "Next.js 15",
       "React 19",
@@ -140,7 +140,7 @@ const APPS: SeedApp[] = [
       "MongoDB",
       "Redis",
     ],
-    name: { vi: "Web Store Apps", en: "Web Store Apps" },
+    name: { vi: "Ducker ID", en: "Ducker ID" },
     tagline: {
       vi: "Cổng đăng nhập và bảng khởi chạy ứng dụng",
       en: "Sign-in gateway and app launcher",
@@ -209,15 +209,15 @@ const APPS: SeedApp[] = [
         title: { vi: "Là gì", en: "What it is" },
         body: {
           vi:
-            "IDMS gồm hai kho mã: `api-web-store-apps` là máy chủ định danh (OAuth 2.0 / OIDC), " +
-            "và `web-store-apps` là giao diện người dùng nhìn thấy — trang đăng nhập, màn hình " +
-            "đồng ý quyền và bảng khởi chạy.\n\n" +
+            "IDMS là một kho mã duy nhất, `web-app-ducker-id`: `server/` là máy chủ định danh " +
+            "(OAuth 2.0 / OIDC), `client/` là giao diện người dùng nhìn thấy — trang đăng nhập, " +
+            "màn hình đồng ý quyền và bảng khởi chạy.\n\n" +
             "Mọi ứng dụng khác trong hệ sinh thái *dự kiến* lấy danh tính từ đây. Tính tới " +
             "17.08.2026 chưa ứng dụng vệ tinh nào nối xong.",
           en:
-            "IDMS is two repositories: `api-web-store-apps` is the identity server (OAuth 2.0 / " +
-            "OIDC), and `web-store-apps` is what users actually see — the sign-in page, the " +
-            "consent screen and the launcher.\n\n" +
+            "IDMS is a single repository, `web-app-ducker-id`: `server/` is the identity server " +
+            "(OAuth 2.0 / OIDC), and `client/` is what users actually see — the sign-in page, " +
+            "the consent screen and the launcher.\n\n" +
             "Every other app in the ecosystem is *expected* to take its identity from here. As " +
             "of 2026-08-17 no satellite app has finished wiring it up.",
         },
@@ -230,12 +230,12 @@ const APPS: SeedApp[] = [
             "Cần Node 20 trở lên. Client và server nay nằm cùng một kho; server phải chạy " +
             "trước, mặc định ở cổng 5000 (`APP_PORT`).\n\n" +
             "```bash\n" +
-            "git clone https://github.com/LeVanAnhDuc/web-app-store.git\n" +
-            "cd web-app-store/server && yarn install && yarn dev\n" +
+            "git clone https://github.com/LeVanAnhDuc/web-app-ducker-id.git\n" +
+            "cd web-app-ducker-id/server && yarn install && yarn dev\n" +
             "```\n\n" +
             "Rồi tới giao diện, ở một shell khác:\n\n" +
             "```bash\n" +
-            "cd web-app-store/client && yarn install && yarn dev\n" +
+            "cd web-app-ducker-id/client && yarn install && yarn dev\n" +
             "```\n\n" +
             "Tên script lấy từ `package.json` của từng bên; chưa chạy thử nên số cổng và " +
             "biến môi trường vẫn nên đối chiếu với `.env.example`.",
@@ -243,12 +243,12 @@ const APPS: SeedApp[] = [
             "Needs Node 20 or newer. The client and server now live in one repository; start " +
             "the server first, on port 5000 by default (`APP_PORT`).\n\n" +
             "```bash\n" +
-            "git clone https://github.com/LeVanAnhDuc/web-app-store.git\n" +
-            "cd web-app-store/server && yarn install && yarn dev\n" +
+            "git clone https://github.com/LeVanAnhDuc/web-app-ducker-id.git\n" +
+            "cd web-app-ducker-id/server && yarn install && yarn dev\n" +
             "```\n\n" +
             "Then the front end, in a second shell:\n\n" +
             "```bash\n" +
-            "cd web-app-store/client && yarn install && yarn dev\n" +
+            "cd web-app-ducker-id/client && yarn install && yarn dev\n" +
             "```\n\n" +
             "Script names come from each side's `package.json`; nothing was executed, so check " +
             "ports and environment variables against `.env.example`.",
@@ -335,12 +335,12 @@ const APPS: SeedApp[] = [
         title: { vi: "Là gì", en: "What it is" },
         body: {
           vi:
-            "Hai kho mã: `client-web-app-match-cv` (TanStack Start + Ant Design) và " +
-            "`api-web-app-match-cv` (NestJS 11 + Prisma 6 + PostgreSQL có pgvector). Phần gọi " +
+            "Một kho mã `web-app-match-cv`: `client/` (TanStack Start + Ant Design) và " +
+            "`server/` (NestJS 11 + Prisma 6 + PostgreSQL có pgvector). Phần gọi " +
             "mô hình ngôn ngữ đi qua OpenRouter.",
           en:
-            "Two repositories: `client-web-app-match-cv` (TanStack Start + Ant Design) and " +
-            "`api-web-app-match-cv` (NestJS 11 + Prisma 6 + PostgreSQL with pgvector). Calls to " +
+            "One repository, `web-app-match-cv`: `client/` (TanStack Start + Ant Design) and " +
+            "`server/` (NestJS 11 + Prisma 6 + PostgreSQL with pgvector). Calls to " +
             "language models go through OpenRouter.",
         },
       },
@@ -659,10 +659,9 @@ const APPS: SeedApp[] = [
     kind: "SATELLITE",
     status: "DRAFT",
     order: 5,
-    isRepoPrivate: true,
     techStack: [],
-    // Chỉ có tên hiển thị. Repo riêng tư nên không đọc được README, và bịa nội
-    // dung cho một kho mã không đọc được thì tài liệu thành chỗ đăng phỏng đoán.
+    // Chỉ có tên hiển thị. Repo từng riêng tư nên không đọc được README lúc viết seed;
+    // từ 03.09.2026 `web-app-shorten-link` đã công khai, nhưng nội dung vẫn chưa ai viết.
     // Bản ghi vẫn tồn tại để chủ dự án tự nhập rồi bấm Công khai.
     name: { vi: "Shorten Link", en: "Shorten Link" },
     features: [],
@@ -731,12 +730,12 @@ const DOC_PAGES: SeedDocPage[] = [
         body: {
           vi:
             "Hệ sinh thái có **một lõi** và **nhiều ứng dụng vệ tinh**.\n\n" +
-            "Lõi là IDMS: `api-web-store-apps` cấp token, `web-store-apps` là giao diện đăng " +
+            "Lõi là IDMS (`web-app-ducker-id`): `server/` cấp token, `client/` là giao diện đăng " +
             "nhập và bảng khởi chạy. Vệ tinh là các ứng dụng nghiệp vụ; mỗi ứng dụng tự lo dữ " +
             "liệu của mình và chỉ hỏi lõi một câu: *người đang dùng là ai*.",
           en:
             "The ecosystem has **one core** and **several satellite apps**.\n\n" +
-            "The core is IDMS: `api-web-store-apps` issues tokens, `web-store-apps` is the " +
+            "The core is IDMS (`web-app-ducker-id`): `server/` issues tokens, `client/` is the " +
             "sign-in screen and the launcher. The satellites are the product apps; each keeps its " +
             "own data and asks the core exactly one question: *who is using this*.",
         },
@@ -1018,7 +1017,7 @@ const NAV_TREE: SeedNavNode[] = [
       {
         id: "nav-apps-core",
         label: { vi: "Lõi", en: "Core" },
-        children: [{ id: "nav-app-web-store-apps", appSlug: "web-store-apps" }],
+        children: [{ id: "nav-app-ducker-id", appSlug: "ducker-id" }],
       },
       {
         id: "nav-apps-satellite",

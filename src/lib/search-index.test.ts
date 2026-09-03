@@ -16,7 +16,7 @@ describe("stripMarkdown", () => {
 
 describe("buildSearchIndex", () => {
   const input = {
-    apps: [{ slug: "web-store-apps", name: "Web Store Apps",
+    apps: [{ slug: "ducker-id", name: "Ducker ID",
              sections: [{ title: "Là gì", body: "Giao diện của IDMS." }] }],
     docs: [{ slug: "tich-hop-oauth", title: "Tích hợp OAuth",
              sections: [{ title: "Luồng", body: "Năm bước." }] }],
@@ -25,11 +25,11 @@ describe("buildSearchIndex", () => {
 
   it("sinh href có tiền tố locale", () => {
     const idx = buildSearchIndex(input);
-    expect(idx.map(d => d.href)).toEqual(["/vi/apps/web-store-apps", "/vi/docs/tich-hop-oauth"]);
+    expect(idx.map(d => d.href)).toEqual(["/vi/apps/ducker-id", "/vi/docs/tich-hop-oauth"]);
   });
 
   it("dùng tên hiển thị làm tiêu đề, không dùng slug", () => {
-    expect(buildSearchIndex(input)[0].title).toBe("Web Store Apps");
+    expect(buildSearchIndex(input)[0].title).toBe("Ducker ID");
   });
 
   it("gộp nội dung mọi mục vào một chuỗi tìm được", () => {

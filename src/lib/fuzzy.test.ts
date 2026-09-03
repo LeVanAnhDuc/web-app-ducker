@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import { fuzzyMatch } from "./fuzzy";
 
 const docs = [
-  { href: "/vi/apps/web-store-apps", title: "Web Store Apps", kind: "app" as const, text: "đăng nhập oauth consent" },
+  { href: "/vi/apps/ducker-id", title: "Ducker ID", kind: "app" as const, text: "đăng nhập oauth consent" },
   { href: "/vi/apps/manage-gym",     title: "Manage Gym",     kind: "app" as const, text: "nhật ký tập luyện" },
 ];
 
@@ -12,7 +12,7 @@ describe("fuzzyMatch", () => {
     expect(fuzzyMatch("gym", docs)[0].title).toBe("Manage Gym");
   });
   it("khớp theo nội dung", () => {
-    expect(fuzzyMatch("consent", docs)[0].title).toBe("Web Store Apps");
+    expect(fuzzyMatch("consent", docs)[0].title).toBe("Ducker ID");
   });
   it("bỏ qua dấu — gõ 'tap luyen' vẫn ra 'tập luyện'", () => {
     expect(fuzzyMatch("tap luyen", docs)[0].title).toBe("Manage Gym");

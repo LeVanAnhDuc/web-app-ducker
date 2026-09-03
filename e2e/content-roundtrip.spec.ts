@@ -18,7 +18,7 @@ test("sửa nội dung trong CMS thì trang công khai đổi mà không cần d
   // rằng nguyên nhân là chưa đăng nhập.
   await page.waitForURL(/\/admin(?!\/login)/);
 
-  await page.goto("/vi/admin/apps/web-store-apps");
+  await page.goto("/vi/admin/apps/ducker-id");
   await page.fill('input[name="tagline"]', TAGLINE_TEST);
   await page.click('button:has-text("Lưu")');
   // Bắt đúng vùng thông báo, không bắt theo chữ: "Đã lưu" là tiền tố của "Đã lưu trữ"
@@ -30,7 +30,7 @@ test("sửa nội dung trong CMS thì trang công khai đổi mà không cần d
   // stale-while-revalidate: **lượt xem đầu tiên sau khi ghi vẫn nhận bản cũ**, bản
   // mới dựng ở nền và tới từ lượt sau. Vậy nên phải tải lại, không phải kiểm một lần.
   // Lời hứa của hệ thống là "đổi mà không cần deploy", không phải "đổi ngay ở lượt đầu".
-  await page.goto("/vi/apps/web-store-apps");
+  await page.goto("/vi/apps/ducker-id");
   await expect(async () => {
     await page.reload();
     await expect(page.getByText(TAGLINE_TEST)).toBeVisible({ timeout: 1500 });
@@ -40,7 +40,7 @@ test("sửa nội dung trong CMS thì trang công khai đổi mà không cần d
   // lúc kiểm thử" mãi mãi — đã xảy ra thật, và chỉ lộ ra khi mở trang bằng mắt
   // chứ không test nào báo. Một test ghi dữ liệu mà không dọn thì lần sau người
   // ta không phân biệt được đâu là nội dung thật, đâu là rác của lần chạy trước.
-  await page.goto("/vi/admin/apps/web-store-apps");
+  await page.goto("/vi/admin/apps/ducker-id");
   await page.fill('input[name="tagline"]', TAGLINE_GOC);
   await page.click('button:has-text("Lưu")');
   await expect(page.getByRole("status")).toHaveText("Đã lưu");
@@ -48,11 +48,11 @@ test("sửa nội dung trong CMS thì trang công khai đổi mà không cần d
 
 test("tên ứng dụng hiển thị dạng viết hoa đầu từ, không phải slug", async ({ page }) => {
   await page.goto("/vi");
-  await expect(page.getByRole("heading", { name: "Web Store Apps" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ducker ID" })).toBeVisible();
   // Slug **được phép** xuất hiện: design-rules §1 đòi nó hiện ở vai phụ, chữ mono
   // màu `--muted`, ngay dưới tên hiển thị. Điều bị cấm là slug leo vào chỗ của tên.
   // Bản đầu của test này kỳ vọng slug vắng mặt hoàn toàn — kỳ vọng viết theo một
   // quy tắc đã bị thay, và vì test chưa từng chạy nên không ai thấy nó sai.
-  await expect(page.locator("h1, h2, h3, h4").filter({ hasText: "web-store-apps" })).toHaveCount(0);
-  await expect(page.getByText("web-store-apps", { exact: true }).first()).toBeVisible();
+  await expect(page.locator("h1, h2, h3, h4").filter({ hasText: "ducker-id" })).toHaveCount(0);
+  await expect(page.getByText("ducker-id", { exact: true }).first()).toBeVisible();
 });
