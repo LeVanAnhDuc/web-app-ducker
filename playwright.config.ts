@@ -27,7 +27,7 @@ loadEnvConfig(process.cwd());
  * là đủ để nhận ra Ducker, và mỗi lần đổi giao diện là một lần phải sửa lại dấu hiệu
  * đó. Cổng riêng thì không có gì để đoán — Playwright luôn tự dựng server từ chính
  * mã trong thư mục này, và nếu cổng bị chiếm nó **dừng với lỗi** thay vì âm thầm
- * test sai app. Cái giá phải trả: `npm run build` phải chạy trước `npm run e2e`, vì
+ * test sai app. Cái giá phải trả: `pnpm build` phải chạy trước `pnpm e2e`, vì
  * không còn dev server nào để mượn.
  */
 const port = Number(process.env.E2E_PORT ?? 3210);
@@ -49,7 +49,7 @@ export default defineConfig({
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {
-    command: `npm run start -- --port ${port} --hostname 127.0.0.1`,
+    command: `pnpm start -- --port ${port} --hostname 127.0.0.1`,
     url: baseURL,
     // Không bao giờ mượn server có sẵn: xem khối chú thích trên.
     reuseExistingServer: false,

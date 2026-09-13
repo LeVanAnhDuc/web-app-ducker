@@ -11,7 +11,7 @@
  * - Nội dung là **sơ bộ**. Nó tồn tại để CMS có gì để sửa, không phải để làm
  *   nguồn tham chiếu.
  * - Phần **"Chạy thử trong 5 phút" (`quick-start`) có thể thiếu hoặc sai**: số
- *   cổng, tên biến môi trường và tên script npm đều lấy từ README, mà README là
+ *   cổng, tên biến môi trường và tên script đều lấy từ README, mà README là
  *   thứ lạc hậu nhanh nhất trong một repo đang phát triển.
  * - `web-app-AI-study-coach` mới có `docs/`, chưa có mã chạy được; nội dung của nó
  *   nói đúng điều đó chứ không dựng ra một quick start không tồn tại.
@@ -38,7 +38,7 @@
  * tầng đó gọi `revalidateTag`, mà `revalidateTag` chỉ chạy được trong một request
  * của Next. Trước lần deploy đầu cũng chưa có cache nào để làm mới.
  *
- * Chạy: `npx prisma db seed` (hoặc `npx tsx prisma/seed.ts`). Cần `DATABASE_URL`.
+ * Chạy: `pnpm exec prisma db seed` (hoặc `pnpm exec tsx prisma/seed.ts`). Cần `DATABASE_URL`.
  * Chạy lại được nhiều lần: mọi bản ghi upsert theo `slug`/`code`, còn tính năng và
  * mục nội dung thì xoá rồi dựng lại — nên **id của chúng không bền qua các lần seed**.
  */
@@ -1376,7 +1376,7 @@ async function main(): Promise<void> {
   if (!hasDatabase()) {
     console.error(
       "[seed] Thiếu DATABASE_URL nên không kết nối được cơ sở dữ liệu.\n" +
-        "[seed] Khai biến đó (xem .env.example) rồi chạy `npx prisma migrate deploy` trước khi seed.",
+        "[seed] Khai biến đó (xem .env.example) rồi chạy `pnpm exec prisma migrate deploy` trước khi seed.",
     );
     process.exit(1);
   }

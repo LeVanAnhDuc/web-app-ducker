@@ -340,7 +340,7 @@
     },
     "media": {
       "title": "Images",
-      "noDatabase": "DATABASE_URL is not set, so the image library cannot be read. Set it, run `npx prisma migrate deploy`, then reload this page. The four R2_* variables also have to be in place before uploads work.",
+      "noDatabase": "DATABASE_URL is not set, so the image library cannot be read. Set it, run `pnpm exec prisma migrate deploy`, then reload this page. The four R2_* variables also have to be in place before uploads work.",
       "scope": "{count, plural, =0 {No files yet} one {# file} other {# files}} · {size}",
       "limitScope": "Shared across every page · {max} per file at most",
       "dropTitle": "Drag images here",
