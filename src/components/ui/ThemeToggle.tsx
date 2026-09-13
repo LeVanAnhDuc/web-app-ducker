@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactElement } from "react";
+import { useSyncExternalStore, type ReactElement } from "react";
 import { useTheme } from "next-themes";
 
 import styles from "./ThemeToggle.module.css";
@@ -46,6 +46,20 @@ const ICONS: Record<ThemeChoice, ReactElement> = {
 const CHOICES: ThemeChoice[] = ["system", "light", "dark"];
 
 /**
+ * "Has this component hydrated yet?", expressed as a store React already knows
+ * how to read differently on the server and on the client.
+ *
+ * The obvious spelling is a boolean state set from an effect, but
+ * `react-hooks/set-state-in-effect` bans it, and rightly: it renders twice for
+ * something React can answer directly. Nothing here ever changes, so subscribing
+ * hands back a no-op unsubscribe. All three are module-level constants because a
+ * fresh `subscribe` identity on every render would resubscribe on every render.
+ */
+const subscribeToNothing = () => () => {};
+const isMountedOnClient = () => true;
+const isMountedOnServer = () => false;
+
+/**
  * The theme switch — three joined buttons, the same shape as the language
  * switch in `TopBar`.
  *
@@ -59,10 +73,13 @@ export function ThemeToggle({ labels }: ThemeToggleProps) {
 
   // The server cannot read `localStorage`, and next-themes seeds its state from
   // it on the client's very first render — so reading `theme` during hydration
-  // is a mismatch. Rendering "system" until mounted reproduces exactly what the
-  // hand-rolled version did, and the effect then swaps in the real choice.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  // is a mismatch. Reporting "system" until mounted reproduces exactly what the
+  // hand-rolled version rendered, and the real choice lands immediately after.
+  const mounted = useSyncExternalStore(
+    subscribeToNothing,
+    isMountedOnClient,
+    isMountedOnServer,
+  );
 
   const choice: ThemeChoice =
     mounted && (theme === "dark" || theme === "light") ? theme : "system";

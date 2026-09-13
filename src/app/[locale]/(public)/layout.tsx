@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 
 import { TopBar } from "@/components/docs/TopBar";
-import { ThemeScript } from "@/components/ui/ThemeScript";
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { locales } from "@/i18n/locales.generated";
 import { getNavTree } from "@/server/content/queries";
 import styles from "./layout.module.css";
@@ -46,22 +46,23 @@ export default async function PublicLayout({
 
   return (
     /**
-     * `suppressHydrationWarning` chỉ cho MỘT việc: `ThemeScript` sửa thuộc tính
-     * `data-theme` của chính thẻ này trước khi React hydrate, nên HTML máy chủ
-     * in ra và DOM lúc hydrate cố ý khác nhau. Không có nó thì console đỏ một
-     * cảnh báo mà nguyên nhân nằm cách đó hai file.
+     * `suppressHydrationWarning` does exactly ONE job: next-themes sets the
+     * `data-theme` attribute on this very tag before React hydrates, so the
+     * server HTML and the hydrating DOM differ on purpose. Without it the
+     * console reds out over a cause that lives two files away.
      */
     <html lang={locale} suppressHydrationWarning>
       <body>
-        {/* Phải là phần tử ĐẦU TIÊN của body: script đồng bộ ở đây chạy trước
-            khung hình đầu tiên, nên không có nháy màu sai. */}
-        <ThemeScript />
-        <NextIntlClientProvider>
-          <div className={styles.shell}>
-            <TopBar locale={locale} tree={tree} />
-            <main className={styles.main}>{children}</main>
-          </div>
-        </NextIntlClientProvider>
+        {/* next-themes injects its own synchronous pre-paint script from here,
+            which is why there is no hand-written anti-flash script any more. */}
+        <ThemeProvider>
+          <NextIntlClientProvider>
+            <div className={styles.shell}>
+              <TopBar locale={locale} tree={tree} />
+              <main className={styles.main}>{children}</main>
+            </div>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
