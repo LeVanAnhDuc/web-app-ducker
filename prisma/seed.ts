@@ -231,11 +231,11 @@ const APPS: SeedApp[] = [
             "trước, mặc định ở cổng 5000 (`APP_PORT`).\n\n" +
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/web-app-ducker-id.git\n" +
-            "cd web-app-ducker-id/server && yarn install && yarn dev\n" +
+            "cd web-app-ducker-id/server && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "Rồi tới giao diện, ở một shell khác:\n\n" +
             "```bash\n" +
-            "cd web-app-ducker-id/client && yarn install && yarn dev\n" +
+            "cd web-app-ducker-id/client && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "Tên script lấy từ `package.json` của từng bên; chưa chạy thử nên số cổng và " +
             "biến môi trường vẫn nên đối chiếu với `.env.example`.",
@@ -244,11 +244,11 @@ const APPS: SeedApp[] = [
             "the server first, on port 5000 by default (`APP_PORT`).\n\n" +
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/web-app-ducker-id.git\n" +
-            "cd web-app-ducker-id/server && yarn install && yarn dev\n" +
+            "cd web-app-ducker-id/server && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "Then the front end, in a second shell:\n\n" +
             "```bash\n" +
-            "cd web-app-ducker-id/client && yarn install && yarn dev\n" +
+            "cd web-app-ducker-id/client && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "Script names come from each side's `package.json`; nothing was executed, so check " +
             "ports and environment variables against `.env.example`.",
@@ -353,12 +353,12 @@ const APPS: SeedApp[] = [
             "server nay nằm cùng một kho; server mặc định ở cổng 5200, client ở 5300.\n\n" +
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/web-app-match-cv.git\n" +
-            "cd web-app-match-cv/server && yarn install\n" +
-            "npx prisma migrate deploy && yarn start:dev\n" +
+            "cd web-app-match-cv/server && pnpm install\n" +
+            "pnpm exec prisma migrate deploy && pnpm start:dev\n" +
             "```\n\n" +
             "Rồi tới giao diện, ở một shell khác:\n\n" +
             "```bash\n" +
-            "cd web-app-match-cv/client && yarn install && yarn dev\n" +
+            "cd web-app-match-cv/client && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "Tên script lấy từ `package.json` của từng bên; chưa chạy thử nên tên biến môi " +
             "trường vẫn nên đối chiếu với `.env.example`.",
@@ -368,12 +368,12 @@ const APPS: SeedApp[] = [
             "client to 5300.\n\n" +
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/web-app-match-cv.git\n" +
-            "cd web-app-match-cv/server && yarn install\n" +
-            "npx prisma migrate deploy && yarn start:dev\n" +
+            "cd web-app-match-cv/server && pnpm install\n" +
+            "pnpm exec prisma migrate deploy && pnpm start:dev\n" +
             "```\n\n" +
             "Then the front end, in a second shell:\n\n" +
             "```bash\n" +
-            "cd web-app-match-cv/client && yarn install && yarn dev\n" +
+            "cd web-app-match-cv/client && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "Script names come from each side's `package.json`; nothing was executed, so check " +
             "environment variable names against `.env.example`.",
@@ -465,16 +465,16 @@ const APPS: SeedApp[] = [
             "Cần Node 20 trở lên và một PostgreSQL.\n\n" +
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/web-app-manage-gym.git\n" +
-            "cd web-app-manage-gym && npm install\n" +
-            "npx prisma migrate deploy && npm run dev\n" +
+            "cd web-app-manage-gym && pnpm install\n" +
+            "pnpm exec prisma migrate deploy && pnpm dev\n" +
             "```\n\n" +
             "Phần này viết từ README, chưa chạy thử — danh sách biến môi trường có thể đã khác.",
           en:
             "Needs Node 20 or newer and a PostgreSQL database.\n\n" +
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/web-app-manage-gym.git\n" +
-            "cd web-app-manage-gym && npm install\n" +
-            "npx prisma migrate deploy && npm run dev\n" +
+            "cd web-app-manage-gym && pnpm install\n" +
+            "pnpm exec prisma migrate deploy && pnpm dev\n" +
             "```\n\n" +
             "Written from the README and never executed — the environment variables may differ.",
         },
@@ -557,13 +557,13 @@ const APPS: SeedApp[] = [
           vi:
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/app-calculate-badminton.git\n" +
-            "cd app-calculate-badminton && npm install && npm run dev\n" +
+            "cd app-calculate-badminton && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "Không cần biến môi trường nào.",
           en:
             "```bash\n" +
             "git clone https://github.com/LeVanAnhDuc/app-calculate-badminton.git\n" +
-            "cd app-calculate-badminton && npm install && npm run dev\n" +
+            "cd app-calculate-badminton && pnpm install && pnpm dev\n" +
             "```\n\n" +
             "No environment variables needed.",
         },
