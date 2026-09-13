@@ -23,7 +23,7 @@ export type SearchIndexInput = {
 /**
  * Gỡ ký hiệu markdown, chỉ giữ lại chữ người đọc thấy.
  *
- * Khối mã bị bỏ hẳn chứ không chỉ gỡ dấu nháy: lệnh shell (`npm install`,
+ * Khối mã bị bỏ hẳn chứ không chỉ gỡ dấu nháy: lệnh shell (`pnpm install`,
  * `docker compose up`) lặp lại ở hàng chục trang nên nếu giữ, mọi truy vấn
  * dính từ khoá kỹ thuật đều trả về gần như toàn bộ chỉ mục.
  */

@@ -28,9 +28,9 @@ describe("renderMarkdown", () => {
   });
 
   it("tô màu khối mã", async () => {
-    const html = await renderMarkdown("```bash\nnpm install\n```");
+    const html = await renderMarkdown("```bash\npnpm install\n```");
     expect(html).toContain("<pre");
-    expect(html).toContain("npm install");
+    expect(html).toContain("pnpm install");
   });
 
   it("giữ nguyên dấu tiếng Việt", async () => {
@@ -43,7 +43,7 @@ describe("renderMarkdown", () => {
 // không có class đó. CSS không khớp thì không báo lỗi, nên phải có test.
 describe("hợp đồng với globals.css", () => {
   it("token mang biến màu trên phần tử mà selector của globals.css khớp", async () => {
-    const html = await renderMarkdown("```bash\nnpm install\n```");
+    const html = await renderMarkdown("```bash\npnpm install\n```");
     // Biến màu nằm ở `style` nội tuyến, không phải class.
     expect(html).toContain("--shiki-light");
     expect(html).toContain("--shiki-dark");
@@ -52,7 +52,7 @@ describe("hợp đồng với globals.css", () => {
   });
 
   it("không sinh class `shiki` — đừng viết CSS bám vào nó", async () => {
-    const html = await renderMarkdown("```bash\nnpm install\n```");
+    const html = await renderMarkdown("```bash\npnpm install\n```");
     expect(html).not.toMatch(/class="[^"]*\bshiki\b/);
   });
 

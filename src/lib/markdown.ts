@@ -150,7 +150,7 @@ const prettyCodeOptions: PrettyCodeOptions = {
     {
       name: "keep-source",
       /**
-       * Shiki cắt mã thành từng token nằm trong `<span>` riêng, nên `npm install`
+       * Shiki cắt mã thành từng token nằm trong `<span>` riêng, nên `pnpm install`
        * không còn là một chuỗi liền trong HTML. Giữ lại mã nguyên bản trên `<pre>`
        * để nút Sao chép và chỉ mục tìm kiếm vẫn lấy được đúng những gì tác giả gõ.
        */
