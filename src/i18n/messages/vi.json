@@ -340,7 +340,7 @@
     },
     "media": {
       "title": "Ảnh",
-      "noDatabase": "Chưa cấu hình DATABASE_URL nên không đọc được thư viện ảnh. Khai biến đó, chạy `npx prisma migrate deploy`, rồi tải lại trang. Bốn biến R2_* cũng phải có trước khi tải ảnh lên được.",
+      "noDatabase": "Chưa cấu hình DATABASE_URL nên không đọc được thư viện ảnh. Khai biến đó, chạy `pnpm exec prisma migrate deploy`, rồi tải lại trang. Bốn biến R2_* cũng phải có trước khi tải ảnh lên được.",
       "scope": "{count, plural, =0 {Chưa có tệp nào} other {# tệp}} · {size}",
       "limitScope": "Dùng chung cho mọi trang · tối đa {max} mỗi tệp",
       "dropTitle": "Kéo ảnh vào đây",

@@ -35,12 +35,12 @@ on 2026-09-13 by starting the app against a freshly created container on port 15
 
 | Check | Result |
 | --- | --- |
-| `npm run test:run` | **242 green**, 26 skipped (33/34 files) |
-| `DATABASE_URL_TEST=… npx vitest run src/server/content --maxWorkers=1` | **69 green**, 0 skipped |
-| `npm run typecheck` · `npm run lint` | clean |
-| `npm run build` | succeeds, and still succeeds with no database |
-| `npm run e2e` | **14 green**, 2 skipped |
-| `DATABASE_URL_TEST=… npm run e2e` | **16 green**, 0 skipped |
+| `pnpm test:run` | **242 green**, 26 skipped (33/34 files) |
+| `DATABASE_URL_TEST=… pnpm exec vitest run src/server/content --maxWorkers=1` | **69 green**, 0 skipped |
+| `pnpm typecheck` · `pnpm lint` | clean |
+| `pnpm build` | succeeds, and still succeeds with no database |
+| `pnpm e2e` | **14 green**, 2 skipped |
+| `DATABASE_URL_TEST=… pnpm e2e` | **16 green**, 0 skipped |
 
 The 21 remaining skips are all database tests in `*.db.test.ts`; setting
 `DATABASE_URL_TEST` runs them.
@@ -59,7 +59,7 @@ credentials.
 | Deploy, then run the five manual checks in [`../05-operations/runbook.md`](../05-operations/runbook.md) §6.5 | — | high | the project has never been deployed |
 | Review the seeded content through the CMS | — | medium | it was written from public READMEs and **never verified against source**; the "run it in 5 minutes" parts may have wrong ports or script names |
 | Write content for **Shorten Link** | — | medium | its repo is private, so nothing could be seeded; the record is empty and `DRAFT` |
-| Wire `npm audit` into CI | NFR-SEC-05 | medium | there is no `.github/workflows/` at all, so the threshold is manual today |
+| Wire `pnpm audit` into CI | NFR-SEC-05 | medium | there is no `.github/workflows/` at all, so the threshold is manual today |
 | Arrange a database backup | NFR-DATA-03 | medium | once content is edited through the CMS, the database is the only copy |
 
 ## Open decisions
@@ -95,7 +95,7 @@ credentials.
 | --- | --- | --- | --- |
 | `src/server/auth/` (Credentials provider) | One account, bcrypt hash in an env var, instead of real identity | The docs site had to ship without waiting on Ducker ID; the abstraction keeps the swap to one new file | when Ducker ID actually exposes `/oauth/authorize` (FR-21) |
 | `prisma/seed.ts` content | Written from public READMEs, unverified against source | Better than an empty site while the real content is being written | before showing the site to anyone outside |
-| No CI at all | `npm audit`, tests, typecheck and build run only on a developer machine | Single contributor, every gate is run manually before commit | as soon as a second person commits, or NFR-SEC-05 must be automatic |
+| No CI at all | `pnpm audit`, tests, typecheck and build run only on a developer machine | Single contributor, every gate is run manually before commit | as soon as a second person commits, or NFR-SEC-05 must be automatic |
 | No database backup | The CMS database is the single copy of edited content | Nothing has been deployed yet, so nothing is at risk today | before the first real content is entered post-deploy |
 
 ## Two traps when re-running the deploy steps
@@ -114,9 +114,9 @@ Full detail in [`../05-operations/runbook.md`](../05-operations/runbook.md). The
 ```bash
 git clone https://github.com/LeVanAnhDuc/web-app-ducker.git
 cd web-app-ducker
-npm install                 # postinstall runs `prisma generate`
+pnpm install                # postinstall runs `prisma generate`
 cp .env.example .env
-npm run dev                 # http://localhost:3000 → redirects to /vi
+pnpm dev                    # http://localhost:3000 → redirects to /vi
 ```
 
 Node 20+. With no `DATABASE_URL` the site opens but has no content — by design.
@@ -128,8 +128,8 @@ For the database-backed tests, a local Postgres is needed. Verified working on
 docker run -d --name app-store-doc-pg -e POSTGRES_PASSWORD=devpass \
   -e POSTGRES_DB=app_store_doc -p 15433:5432 postgres:16
 docker exec app-store-doc-pg psql -U postgres -c "CREATE DATABASE app_store_doc_test;"
-DATABASE_URL="postgresql://postgres:devpass@localhost:15433/app_store_doc" npx prisma migrate deploy
-DATABASE_URL="postgresql://postgres:devpass@localhost:15433/app_store_doc" npx prisma db seed
+DATABASE_URL="postgresql://postgres:devpass@localhost:15433/app_store_doc" pnpm exec prisma migrate deploy
+DATABASE_URL="postgresql://postgres:devpass@localhost:15433/app_store_doc" pnpm exec prisma db seed
 rm -rf .next          # required after any seed — see I12
 ```
 

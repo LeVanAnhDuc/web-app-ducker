@@ -288,7 +288,7 @@ File đang commit ra **5357** byte. Ra `0` là đã dính bẫy này.
 Thêm một chi tiết về cờ dòng lệnh: Prisma 7 **bỏ** `--to-schema-datamodel`, đổi thành `--to-schema`. Dùng cờ cũ thì lệnh lỗi ngay (may là lần này lỗi ồn ào). Lệnh sinh lại migration cho đúng phiên bản hiện tại:
 
 ```powershell
-npx prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script --output prisma/migrations/0001_init/migration.sql
+pnpm exec prisma migrate diff --from-empty --to-schema prisma/schema.prisma --script --output prisma/migrations/0001_init/migration.sql
 ```
 
 Dùng `--output` chứ **đừng** chuyển hướng bằng `>`: PowerShell ghi file kèm BOM UTF-8, còn `--output` ghi UTF-8 sạch (đã kiểm bằng xxd — byte đầu là `--`, không có BOM). Đã kiểm cả nội dung: lệnh trên sinh đúng phần DDL của file đang commit.
@@ -315,7 +315,7 @@ Dùng chuỗi **direct connection** (không `-pooler`) của branch chính:
 
 ```powershell
 $env:DATABASE_URL = "postgresql://...@ep-xxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
-npx prisma migrate deploy
+pnpm exec prisma migrate deploy
 ```
 
 Nhớ mục 0, phần "Cách nạp biến": Prisma 7 không đọc `.env`. Quên đặt biến thì `prisma.config.ts` rơi về URL dự phòng `postgresql://localhost:5432/app_store_doc` và lệnh chết vì không kết nối được localhost — lỗi trông như "Postgres chưa chạy" chứ không nói "bạn quên đặt biến".
@@ -323,19 +323,19 @@ Nhớ mục 0, phần "Cách nạp biến": Prisma 7 không đọc `.env`. Quên
 Kiểm tra kết quả:
 
 ```powershell
-npx prisma migrate status
+pnpm exec prisma migrate status
 ```
 
 ### 5.4 Chạy seed
 
 ```powershell
-npx prisma db seed
+pnpm exec prisma db seed
 ```
 
 Hoặc gọi thẳng, kết quả như nhau:
 
 ```powershell
-npx tsx prisma/seed.ts
+pnpm exec tsx prisma/seed.ts
 ```
 
 > **Bẫy đã gặp và đã sửa.** Lệnh seed từng khai trong khối `prisma` của `package.json` — chỗ Prisma 6 đọc. Prisma 7 **bỏ hỗ trợ khối đó** và chỉ đọc `migrations.seed` trong `prisma.config.ts`, nên `prisma db seed` chỉ in `⚠️ No seed command configured` rồi thoát **mã 0** — trông y như "không có gì để seed" chứ không như một lỗi. Nay đã khai đúng chỗ trong `prisma.config.ts`; nếu về sau ai thấy thông báo đó quay lại thì kiểm khoá này trước tiên.
@@ -346,7 +346,7 @@ Kết quả mong đợi: 2 locale (`vi` mặc định, `en`), 6 ứng dụng, 4 
 
 ### 5.5 Nội dung seed là bản nháp, không phải nguồn tham chiếu
 
-`prisma/seed.ts` viết từ **README công khai** của các repo, không từ mã nguồn, và chưa qua lần chạy thử nào. Phần "Chạy thử trong 5 phút" **có thể sai** số cổng, tên biến môi trường, tên script npm.
+`prisma/seed.ts` viết từ **README công khai** của các repo, không từ mã nguồn, và chưa qua lần chạy thử nào. Phần "Chạy thử trong 5 phút" **có thể sai** số cổng, tên biến môi trường, tên script.
 
 Sau lần deploy đầu, **nguồn sự thật là DB**. Sửa nội dung qua CMS, đừng sửa `seed.ts` — chạy seed lại sẽ ghi đè bản đã sửa.
 
@@ -359,7 +359,7 @@ Sau lần deploy đầu, **nguồn sự thật là DB**. Sửa nội dung qua CM
 ### 6.1 Import project
 
 1. [vercel.com](https://vercel.com) → **Add New** → **Project** → import repo `web-app-ducker`.
-2. Framework Preset: Vercel tự nhận **Next.js**. Build Command để mặc định (`npm run build`) — `prebuild` tự chạy trước nó.
+2. Framework Preset: Vercel tự nhận **Next.js**. Build Command để mặc định — `prebuild` tự chạy trước nó. Vercel nhận trình quản lý gói từ lockfile: repo commit `pnpm-lock.yaml` nên nó chạy `pnpm install` rồi `pnpm build`. Đừng ghi đè Install Command bằng `npm ci`.
 
 ### 6.2 Khai biến môi trường
 
@@ -424,8 +424,8 @@ Vitest không đọc `.env` (mục 0), nên đặt biến trong shell:
 ```powershell
 $env:DATABASE_URL_TEST = "postgresql://...@ep-xxx-test...neon.tech/neondb?sslmode=require"
 $env:DATABASE_URL = $env:DATABASE_URL_TEST
-npx prisma migrate reset --force
-npm run test:run
+pnpm exec prisma migrate reset --force
+pnpm test:run
 ```
 
 Năm điểm cần nhớ:
@@ -440,7 +440,7 @@ Muốn tuyệt đối an toàn, mở một cửa sổ shell riêng chỉ để c
 
 ### 7.3 Playwright e2e
 
-`e2e/content-roundtrip.spec.ts` cần thêm mật khẩu thô. `playwright.config.ts` tự dựng server bằng `npm run start`, nên phải build trước:
+`e2e/content-roundtrip.spec.ts` cần thêm mật khẩu thô. `playwright.config.ts` tự dựng server bằng `pnpm start`, nên phải build trước:
 
 ```powershell
 $env:DATABASE_URL_TEST = "postgresql://...branch-test..."
@@ -449,10 +449,10 @@ $env:ADMIN_EMAIL = "admin@example.com"
 $env:ADMIN_PASSWORD = "mat-khau-thuc-cua-ban"
 $env:ADMIN_PASSWORD_HASH = '$2b$10$...'
 $env:AUTH_SECRET = "..."
-npx prisma migrate reset --force
-npx tsx prisma/seed.ts
-npm run build
-npm run e2e
+pnpm exec prisma migrate reset --force
+pnpm exec tsx prisma/seed.ts
+pnpm build
+pnpm e2e
 ```
 
 Ghi chú:
@@ -460,7 +460,7 @@ Ghi chú:
 - `ADMIN_PASSWORD` là **mật khẩu thô**, phải khớp với `ADMIN_PASSWORD_HASH`. Test dùng nó để điền form đăng nhập.
 - `ADMIN_PASSWORD_HASH` gán bằng **nháy đơn** trong PowerShell (chuỗi có `$`).
 - `e2e/admin-auth.spec.ts` không cần DB: nó kiểm `/admin` đá về trang đăng nhập, và kiểm POST thẳng vào server action khi chưa đăng nhập thì bị chặn.
-- Branch `test` phải **có dữ liệu seed** trước khi chạy: `npx tsx prisma/seed.ts` sau `migrate reset`. Test roundtrip mở `/vi/admin/apps/ducker-id` và tìm tiêu đề "Ducker ID"; branch rỗng thì cả hai test đều đỏ vì thiếu dữ liệu, không phải vì mã sai. `npm run build` cũng cần bảng `Locale` có dòng để `prebuild` sinh đúng danh sách locale.
+- Branch `test` phải **có dữ liệu seed** trước khi chạy: `pnpm exec tsx prisma/seed.ts` sau `migrate reset`. Test roundtrip mở `/vi/admin/apps/ducker-id` và tìm tiêu đề "Ducker ID"; branch rỗng thì cả hai test đều đỏ vì thiếu dữ liệu, không phải vì mã sai. `pnpm build` cũng cần bảng `Locale` có dòng để `prebuild` sinh đúng danh sách locale.
 - Chạy e2e trên domain khác `localhost:3000` thì đặt `NEXT_PUBLIC_SITE_URL` tương ứng.
 
 ### 7.4 Không có DB thì kiểm được tới đâu
@@ -468,13 +468,13 @@ Ghi chú:
 Chạy được, không cần thông tin đăng nhập nào:
 
 ```powershell
-npm run test:run      # test thuần, các test cần DB tự skip
-npm run typecheck     # tsc --noEmit
-npm run lint
-npm run build         # generateStaticParams trả [] khi thiếu DATABASE_URL
+pnpm test:run      # test thuần, các test cần DB tự skip
+pnpm typecheck     # tsc --noEmit
+pnpm lint
+pnpm build         # generateStaticParams trả [] khi thiếu DATABASE_URL
 ```
 
-`vitest` **không** typecheck. Suite xanh không chứng minh `tsc` sạch — luôn chạy `npm run typecheck` riêng, và chạy `npm run build` trước khi tuyên bố hoàn thành.
+`vitest` **không** typecheck. Suite xanh không chứng minh `tsc` sạch — luôn chạy `pnpm typecheck` riêng, và chạy `pnpm build` trước khi tuyên bố hoàn thành.
 
 ---
 
@@ -528,8 +528,8 @@ Thiết lập lần đầu:
 - [ ] `ADMIN_EMAIL` + `ADMIN_PASSWORD_HASH` (hash bcrypt)
 - [ ] `AUTH_SECRET` và `PREVIEW_SECRET` (hai giá trị khác nhau)
 - [ ] `.env` cục bộ copy từ `.env.example`
-- [ ] `npx prisma migrate deploy` với direct URL
-- [ ] `npx tsx prisma/seed.ts`
+- [ ] `pnpm exec prisma migrate deploy` với direct URL
+- [ ] `pnpm exec tsx prisma/seed.ts`
 - [ ] Khai biến trên Vercel (Production + Preview), **không** khai `ADMIN_PASSWORD`, `DATABASE_URL_TEST`
 - [ ] Deploy, rồi chạy năm bước kiểm tay ở mục 6.5
 

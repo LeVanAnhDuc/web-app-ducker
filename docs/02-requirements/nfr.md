@@ -39,7 +39,7 @@ still referenced by older documents.
 | NFR-SEC-02 | Do not log the administrator email, the password hash, session tokens, or request bodies | review the log format |
 | NFR-SEC-03 | Sign-in is rate limited: **5 attempts per 15 minutes** per client key | `src/server/auth/rate-limit.ts`, plus its test |
 | NFR-SEC-04 | Secrets are read from environment variables only. Never hardcoded, never committed. `.env` is gitignored, `.env.example` carries names with empty values | grep + review |
-| NFR-SEC-05 | No dependency vulnerability at high severity or above | `npm audit`. ⚠️ **not yet wired into CI** — this repo has no `.github/workflows/`; the check is manual today |
+| NFR-SEC-05 | No dependency vulnerability at high severity or above | `pnpm audit`. ⚠️ **not yet wired into CI** — this repo has no `.github/workflows/`; the check is manual today |
 | NFR-SEC-06 | Errors returned to the client carry no stack trace, table name, or SQL | test |
 | NFR-SEC-07 | Draft preview is gated by `PREVIEW_SECRET`. ⚠️ A refused preview currently answers **200** with an explanatory block instead of 403/503 — returning the right status needs `experimental.authInterrupts` | manual, see [`backlog.md`](../04-state/backlog.md) |
 
@@ -72,7 +72,7 @@ still referenced by older documents.
 | NFR-REL-01 | Every outbound call (object storage) has a timeout and an error branch | review |
 | NFR-REL-02 | Seeding is idempotent — running it repeatedly does not duplicate records | run it twice and count |
 | NFR-REL-03 | No infinite loading state: every request has an error branch on screen | manual |
-| NFR-REL-04 | The site renders with **no database configured** — empty, not broken. This is by design, not a bug | `npm run build` with no `DATABASE_URL` |
+| NFR-REL-04 | The site renders with **no database configured** — empty, not broken. This is by design, not a bug | `pnpm build` with no `DATABASE_URL` |
 | NFR-REL-05 | Content written to the database from outside the running server does not invalidate its cache, and the cache is on disk. Any such write must be followed by `rm -rf .next` | [ADR-0012](../decisions/0012-ssg-cache-is-per-process-and-on-disk.md) |
 
 ## Data & privacy

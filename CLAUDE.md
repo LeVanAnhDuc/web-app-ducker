@@ -29,18 +29,18 @@ The full map is [`docs/README.md`](docs/README.md).
 ## Commands
 
 ```bash
-npm ci                 # install; postinstall runs `prisma generate`
-npm run dev            # http://localhost:3000 → redirects to /vi
-npm run test:run       # vitest, --maxWorkers=1
-npm run typecheck      # tsc --noEmit
-npm run lint
-npm run build          # prebuild generates the locale list
-npm run e2e            # Playwright, on its own port 3210
+pnpm install --frozen-lockfile   # install; postinstall runs `prisma generate`
+pnpm dev               # http://localhost:3000 → redirects to /vi
+pnpm test:run          # vitest, --maxWorkers=1
+pnpm typecheck         # tsc --noEmit
+pnpm lint
+pnpm build             # prebuild generates the locale list
+pnpm e2e               # Playwright, on its own port 3210
 ```
 
 ⚠️ **The Prisma CLI does not read `.env`** — nor do vitest, tsx or Playwright's config
 loader by default. Only Next does. Pass the variable inline:
-`DATABASE_URL="…" npx prisma migrate deploy`. Without it Prisma falls back to the
+`DATABASE_URL="…" pnpm exec prisma migrate deploy`. Without it Prisma falls back to the
 placeholder in `prisma.config.ts` and fails with `P1010`, which looks like a permissions
 problem and is actually the wrong database.
 
@@ -62,7 +62,7 @@ fails the suite rather than waiting to be noticed. Reasoning: [ADR-0016](docs/de
    *not* guard the action. Every writing action calls `await requireAdmin()` on its
    first line.
 2. **`vitest` does not typecheck.** A green suite does not prove `tsc` is clean. Always
-   run `npm run typecheck` separately, and `npm run build` before claiming completion.
+   run `pnpm typecheck` separately, and `pnpm build` before claiming completion.
 3. **Parallel vitest is flaky on this Windows machine.** A failure under a parallel run
    is not a real failure until it repeats with `--maxWorkers=1`. Component tests use
    `fireEvent`, never `userEvent.type`.

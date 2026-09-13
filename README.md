@@ -93,12 +93,12 @@ Testing: Vitest (242 unit tests, 26 requiring a database) and Playwright (16 e2e
 
 ## Running
 
-Needs Node 20+ and npm.
+Needs Node 20+ and [pnpm](https://pnpm.io) 10 (`corepack enable pnpm`).
 
 ```bash
-npm install                # postinstall runs `prisma generate`
+pnpm install               # postinstall runs `prisma generate`
 cp .env.example .env       # PowerShell: Copy-Item .env.example .env
-npm run dev                # http://localhost:3000 → redirects to /vi
+pnpm dev                   # http://localhost:3000 → redirects to /vi
 ```
 
 Without `DATABASE_URL` the site still builds but has **no content**:
@@ -110,14 +110,14 @@ the database. To see real content, follow sections 1 and 5 of
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Next dev server |
-| `npm run build` | `prebuild` generates `src/i18n/locales.generated.ts` from the `Locale` table, then `next build` |
-| `npm start` | Serve the build |
-| `npm test` | Vitest in watch mode |
-| `npm run test:run` | Vitest once, `--maxWorkers=1` (parallel runs are flaky on Windows) |
-| `npm run typecheck` | `tsc --noEmit` — **vitest does not typecheck**, so always run this separately |
-| `npm run lint` | ESLint |
-| `npm run e2e` | Playwright. It starts its own server with `npm start`, so `npm run build` first |
+| `pnpm dev` | Next dev server |
+| `pnpm build` | `prebuild` generates `src/i18n/locales.generated.ts` from the `Locale` table, then `next build` |
+| `pnpm start` | Serve the build |
+| `pnpm test` | Vitest in watch mode |
+| `pnpm test:run` | Vitest once, `--maxWorkers=1` (parallel runs are flaky on Windows) |
+| `pnpm typecheck` | `tsc --noEmit` — **vitest does not typecheck**, so always run this separately |
+| `pnpm lint` | ESLint |
+| `pnpm e2e` | Playwright. It starts its own server with `pnpm start`, so `pnpm build` first |
 
 Four commands need no credentials at all: `test:run`, `typecheck`, `lint`,
 `build`. The tests that need Postgres live in `*.db.test.ts` and **skip
