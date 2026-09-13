@@ -83,6 +83,11 @@ next visit.
 
 ## US-04 · Sign in to administer
 
+> **Retired 2026-09-13.** The administration surface was removed; editing is now a
+> commit against `content/`. Kept in place because the ID is still referenced.
+> See [US-09](#us-09--add-or-change-a-catalogue-entry) and
+> [ADR-0019](../decisions/0019-no-administration-surface.md).
+
 **Context:** the owner wants to change content.
 
 **Steps:**
@@ -103,6 +108,11 @@ next visit.
 ---
 
 ## US-05 · Edit content and see it live
+
+> **Retired 2026-09-13.** The administration surface was removed; editing is now a
+> commit against `content/`. Kept in place because the ID is still referenced.
+> See [US-09](#us-09--add-or-change-a-catalogue-entry) and
+> [ADR-0019](../decisions/0019-no-administration-surface.md).
 
 **Context:** the owner spots a mistake on a public page.
 
@@ -129,6 +139,11 @@ the product's central promise and the one `e2e/content-roundtrip.spec.ts` proves
 
 ## US-06 · Reshape the navigation tree
 
+> **Retired 2026-09-13.** The administration surface was removed; editing is now a
+> commit against `content/`. Kept in place because the ID is still referenced.
+> See [US-09](#us-09--add-or-change-a-catalogue-entry) and
+> [ADR-0019](../decisions/0019-no-administration-surface.md).
+
 **Context:** the owner wants a new tab, or wants an app to sit under a different group.
 
 **Steps:**
@@ -154,6 +169,11 @@ the public site. URLs do **not** change: they stay flat.
 
 ## US-07 · Add an image
 
+> **Retired 2026-09-13.** The administration surface was removed; editing is now a
+> commit against `content/`. Kept in place because the ID is still referenced.
+> See [US-09](#us-09--add-or-change-a-catalogue-entry) and
+> [ADR-0019](../decisions/0019-no-administration-surface.md).
+
 **Context:** a page needs a diagram or screenshot.
 
 **Steps:** open the media library, upload, pick the image inside the editor.
@@ -174,6 +194,11 @@ its dimensions are recorded when they can be read.
 
 ## US-08 · Preview a draft
 
+> **Retired 2026-09-13.** The administration surface was removed; editing is now a
+> commit against `content/`. Kept in place because the ID is still referenced.
+> See [US-09](#us-09--add-or-change-a-catalogue-entry) and
+> [ADR-0019](../decisions/0019-no-administration-surface.md).
+
 **Context:** the owner wants to see an unpublished page as it will look.
 
 **Steps:** open the preview link carrying the preview secret.
@@ -186,3 +211,33 @@ its dimensions are recorded when they can be read.
   [`backlog.md`](../04-state/backlog.md) §Accepted long-term.
 
 **Related functions:** FR-13
+
+---
+
+## US-09 · Add or change a catalogue entry
+
+**Context:** a new repository exists in the workspace, or an existing one changed its
+description, and the registry should say so.
+
+**Steps:**
+1. Add or edit `content/apps/<slug>.vi.mdx` (or `content/games/…`), filling the
+   frontmatter: `name`, `slug`, `status`, `repo`, `tagline`, `order`.
+2. Add the sibling `*.en.mdx` if there is an English description. Omit it and the
+   locale fallback serves the default locale, with the "missing translation" badge.
+3. Commit on a branch, push. Vercel builds a preview URL for the branch.
+4. Merge. The production build regenerates the registry, the app page and the search
+   index from the files.
+
+**Expected result:** the entry appears in the right group with the right status swatch;
+the search index finds it.
+
+**What can go wrong:**
+- **A project with no description.** Three have none — their own `overview.md` is 🔴
+  empty. Leave `tagline` out and set `status: planned`; do **not** write a plausible
+  sentence. See [ADR-0009](../decisions/0009-the-page-states-current-reality.md).
+- **`slug` is the repository slug, `name` is the display name.** Putting the slug in
+  `name` breaks the naming rule in `design-system/ducker/MASTER.md` §5.
+- A `status` outside the five known values fails the build rather than rendering an
+  unstyled chip.
+
+**Related functions:** FR-22 · FR-23 · FR-24

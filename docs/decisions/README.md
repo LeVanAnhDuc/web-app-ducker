@@ -25,6 +25,8 @@
 | [ADR-0015](0015-generated-locale-list-costs-one-redeploy.md) | Accept one redeploy to add a language | 2026-08-17 | accepted |
 | [ADR-0016](0016-three-doors-enforced-by-test.md) | Three doors to the outside world, enforced by a test | 2026-08-17 | accepted |
 | [ADR-0017](0017-ink-and-state-design-direction.md) | Colour is reserved for status; the chrome has none | 2026-09-13 | accepted |
+| [ADR-0018](0018-content-is-files-not-rows.md) | Content is files in this repository, not rows in Postgres | 2026-09-13 | accepted |
+| [ADR-0019](0019-no-administration-surface.md) | There is no administration surface; editing is a commit | 2026-09-13 | accepted |
 <!-- END:auto -->
 
 Status values: `accepted` · `superseded by ADR-00xx` · `deprecated`
