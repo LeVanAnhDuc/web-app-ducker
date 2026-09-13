@@ -15,7 +15,7 @@ The cause is that `revalidateTag` only reaches the process that calls it, and
 - `prisma db seed` runs outside any Next request, so it cannot call `revalidateTag`.
   Worse, `next build` then reads that same stale cache and bakes the previous seed's
   content into the built pages.
-- `npm run e2e` starts its own server on port 3210. It writes and revalidates correctly
+- `pnpm e2e` starts its own server on port 3210. It writes and revalidates correctly
   — in *its* process. The dev server on 3000 never hears about it, and restarting does
   not help because the cache is on disk.
 

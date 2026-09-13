@@ -154,7 +154,7 @@ export function MarkdownEditor({
         <button
           className={styles.tool}
           type="button"
-          onClick={() => insert({ before: "```bash\n", after: "\n```", placeholder: "npm install" })}
+          onClick={() => insert({ before: "```bash\n", after: "\n```", placeholder: "pnpm install" })}
         >
           {t("admin.editor.insertCode")}
         </button>
