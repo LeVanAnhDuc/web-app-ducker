@@ -18,11 +18,27 @@ DOES NOT CONTAIN: out-of-scope features (-> 01-product/overview.md §Non-Goals).
 
 ## In progress
 
-**The design system was re-bootstrapped on 2026-09-13 and the code has not followed it
-yet.** `docs/design-system/ducker/MASTER.md` is the new token source of truth
-([ADR-0017](../decisions/0017-ink-and-state-design-direction.md)); `src/styles/tokens.css`
-still holds the old v3 palette. Until the token rewrite lands, the running app and the
-design system disagree — trust MASTER.md, not the screen.
+**Two branches planned, neither started. Specs and plan are written and merged.**
+
+1. **File-backed registry** — [`../specs/file-backed-registry/plan.md`](../specs/file-backed-registry/plan.md),
+   10 tasks. Deletes the admin surface (58 files), `src/server/` (24 files), `prisma/`
+   and 5 dependencies; content moves to `content/**.mdx`; the catalogue grows from 6
+   entries to 22 (10 apps + 12 duck games). Decisions:
+   [ADR-0018](../decisions/0018-content-is-files-not-rows.md),
+   [ADR-0019](../decisions/0019-no-administration-surface.md).
+2. **Ink and state repaint** — not yet specified. Applies
+   [`../design-system/ducker/MASTER.md`](../design-system/ducker/MASTER.md) to the ~25
+   CSS modules that survive branch 1. Approved mockup: 12 artboards, 4 screens × 375 /
+   768 / 1440. **Nothing about the mockup is in this repository** — it is an Artifact.
+
+Deliberately not merged into one branch: a diff that both deletes a subsystem and
+repaints every surface cannot be reviewed.
+
+**Known conflict, owed to branch 2:** `NFR-A11Y-06` blesses mono UPPERCASE labels
+(11px) and the code uses them in 20+ places; `MASTER.md` §7 forbids both the all-caps
+tracked eyebrow and mono for small labels. `I14` also pins `h1,h2,h3` to serif-400 with
+no tracking, while `MASTER.md` §2 makes headings tight heavy sans. Both must be resolved
+in branch 2, not silently.
 
 Last completed: migrating this project onto the workspace documentation tier
 (`scaffold-webapp-project`) and unifying both `CLAUDE.md` files on English —
