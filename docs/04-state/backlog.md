@@ -40,6 +40,15 @@ tracked eyebrow and mono for small labels. `I14` also pins `h1,h2,h3` to serif-4
 no tracking, while `MASTER.md` §2 makes headings tight heavy sans. Both must be resolved
 in branch 2, not silently.
 
+**next-themes migration — awaiting spec review.** Branch `feat/next-themes` in
+`.worktrees/next-themes/`, design committed at `docs/specs/next-themes/design.md`.
+Stopped at the spec review gate; `plan.md` is not written yet. Scope is deliberately
+narrow: swap the hand-rolled theme machinery for `next-themes`, which closes two
+verified gaps — nothing in `src/styles/` sets `color-scheme`, and a theme change never
+reaches a second tab. It touches **no CSS**, so it cannot collide with the token rewrite
+described above. The CSS-level `color-scheme` fallback for visitors without JavaScript
+is handed to that rewrite.
+
 Last completed: migrating this project onto the workspace documentation tier
 (`scaffold-webapp-project`) and unifying both `CLAUDE.md` files on English —
 2026-09-13. The old `docs/status.md`, `docs/session-log.md` and `docs/superpowers/`
