@@ -6,7 +6,7 @@
 // Đây là hai lỗi giao diện duy nhất trong bộ này **đo được bằng máy**. Phần còn lại
 // — tiêu đề có đúng serif không, dấu tiếng Việt có vỡ không, khối mã có màu không —
 // CSS không khớp thì trình duyệt im lặng, nên chỉ mắt người bắt được. Xem
-// `docs/status.md` mục 1.
+// `docs/02-requirements/nfr.md` NFR-A11Y-03.
 import { test, expect } from "@playwright/test";
 
 const PAGES = [

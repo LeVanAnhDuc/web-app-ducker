@@ -1,9 +1,8 @@
 # Ducker — the front door to an app ecosystem, editable without a deploy
 
 > The project's display name is **Ducker**, and the GitHub repository slug is
-> `web-app-ducker` to match it. Dated specs and plans under `docs/superpowers/`
-> still carry the original `app-store-doc` slug in their filenames and prose —
-> those are historical records and are left as written.
+> `web-app-ducker` to match it. The original slug was `app-store-doc`; it survives
+> only in git history and in migration names.
 
 The public entry point to [@LeVanAnhDuc](https://github.com/LeVanAnhDuc)'s app
 ecosystem: a landing page, a directory of every app, a detail page per app, and
@@ -22,7 +21,7 @@ is edited through the CMS, and the public pages change without a redeploy.
 > with no database. Migrations, seeding and the end-to-end content roundtrip have
 > all been run for real against local Postgres.
 > **Never deployed.** That needs Neon, Cloudflare R2 and Vercel credentials the
-> build never had. The steps are in [`docs/operations.md`](docs/operations.md).
+> build never had. The steps are in [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md).
 
 ## Features
 
@@ -105,7 +104,7 @@ npm run dev                # http://localhost:3000 → redirects to /vi
 Without `DATABASE_URL` the site still builds but has **no content**:
 `generateStaticParams` returns `[]` and every query throws at its first touch of
 the database. To see real content, follow sections 1 and 5 of
-[`docs/operations.md`](docs/operations.md), then set `DATABASE_URL` in `.env`.
+[`docs/05-operations/runbook.md`](docs/05-operations/runbook.md), then set `DATABASE_URL` in `.env`.
 
 ### Scripts
 
@@ -124,7 +123,7 @@ Four commands need no credentials at all: `test:run`, `typecheck`, `lint`,
 `build`. The tests that need Postgres live in `*.db.test.ts` and **skip
 themselves** when `DATABASE_URL_TEST` is missing — a green suite in that state
 proves nothing about the query layer. How to run them:
-[`docs/operations.md`](docs/operations.md), section 7.
+[`docs/05-operations/runbook.md`](docs/05-operations/runbook.md), section 7.
 
 ### Environment variables
 
@@ -136,7 +135,7 @@ proves nothing about the query layer. How to run them:
 - Without `PREVIEW_SECRET` the draft preview page is **closed**, not open.
 
 Each variable explained, the commands that generate values, and how to get them
-from Neon and R2: [`docs/operations.md`](docs/operations.md).
+from Neon and R2: [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md).
 
 ## Ecosystem
 
@@ -159,14 +158,20 @@ As of 17.08.2026, no satellite app is actually wired into IDMS yet.
 
 | Task | Document |
 |---|---|
-| **Coming back to the project — where it stands, what is owed** | **[`docs/status.md`](docs/status.md) — open this first** |
-| Why things are the way they are — decisions, working method, traps already paid for | [`docs/session-log.md`](docs/session-log.md) |
-| **Standing up infrastructure, deploying, running the DB-backed tests** | **[`docs/operations.md`](docs/operations.md)** |
+| **Coming back to the project — where it stands, what is owed** | **[`docs/04-state/backlog.md`](docs/04-state/backlog.md) — open this first** |
+| Why things are the way they are — 16 decisions, each with the alternatives rejected | [`docs/decisions/`](docs/decisions/README.md) |
+| What breaks **silently** if you change it | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) |
+| **Standing up infrastructure, deploying, running the DB-backed tests** | **[`docs/05-operations/runbook.md`](docs/05-operations/runbook.md)** |
 | **Building any interface** | **[`docs/design/design-rules.md`](docs/design/design-rules.md) — mandatory** |
 | The approved interface | [`docs/design/mockups/v3/index.html`](docs/design/mockups/v3/index.html) — **v3 is the one in use**; `mockups/index.html` and `v2/` are historical snapshots of older decisions |
-| Architecture, data model, i18n, auth, testing | [spec 17.08](docs/superpowers/specs/2026-08-17-app-store-doc-design.md) — the original · [spec 18.08](docs/superpowers/specs/2026-08-18-ducker-navigation-tree-design.md) — **supersedes §6, §7, §8 and §9.3** of the original |
-| The per-task execution plan | [`docs/superpowers/plans/2026-08-17-app-store-doc.md`](docs/superpowers/plans/2026-08-17-app-store-doc.md) |
+| Architecture, module boundaries, main data flow | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) |
+| What the product is for, and what it deliberately does not do | [`docs/01-product/overview.md`](docs/01-product/overview.md) |
+| The full documentation map | [`docs/README.md`](docs/README.md) |
 | Conventions for changing code in this repo | [`CLAUDE.md`](CLAUDE.md) |
+
+> The two dated design specs and the two execution plans that used to live under
+> `docs/superpowers/` were folded into the documents above on 2026-09-13 and deleted.
+> They remain in git history.
 
 ## Seed content is a draft
 

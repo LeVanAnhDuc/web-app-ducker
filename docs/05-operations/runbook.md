@@ -1,6 +1,13 @@
 # Ducker — vận hành và thiết lập môi trường
 
-Tài liệu này ghi lại **những bước chỉ người có thông tin đăng nhập mới làm được**. Mã ứng dụng đã hoàn thành: 108 test xanh, 6 test skip vì thiếu `DATABASE_URL_TEST`, `npx tsc --noEmit` sạch, `npm run build` chạy được ở chế độ không có DB. Nhưng **chưa có lần nào chạy migration thật, seed thật hay deploy thật**, vì quá trình xây dựng không có tài khoản Neon, Cloudflare R2 hay Vercel.
+> **Answers:** How do I stand this up, deploy it, and run the database-backed tests?
+> **Status:** 🟡 detailed, but **never actually run** — no Neon / R2 / Vercel credentials yet
+> **Updated:** 2026-09-13 · commit b2d70a8
+> **Update when:** a new environment variable · an infrastructure provider changes · a deploy step turns out wrong
+
+> ⚠️ The body below is still Vietnamese — see [`../README.md`](../README.md) §Language.
+
+Tài liệu này ghi lại **những bước chỉ người có thông tin đăng nhập mới làm được**. Mã ứng dụng đã hoàn thành — số liệu hiện tại ở [`../04-state/backlog.md`](../04-state/backlog.md), đừng tin con số chép lại trong file này. Nhưng **chưa có lần nào chạy migration thật, seed thật hay deploy thật**, vì quá trình xây dựng không có tài khoản Neon, Cloudflare R2 hay Vercel.
 
 Làm theo thứ tự 1 → 6. Mục 7 dành cho lúc chạy bộ test cần DB. Mục 8 và 9 là hai điều phải biết trước khi hứa với ai.
 

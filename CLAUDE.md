@@ -1,53 +1,106 @@
 # Ducker
 
-Trang tài liệu hệ sinh thái ứng dụng + CMS quản trị nội dung.
-Tên hiển thị: **Ducker**. Slug kho mã: `web-app-ducker` (đổi từ `app-store-doc` ngày 20.08.2026).
-Các spec/plan có ngày trong `docs/superpowers/` vẫn giữ slug cũ — bản ghi lịch sử, không sửa.
+Ecosystem documentation site + content management back office.
+Display name: **Ducker**. Repository slug: `web-app-ducker` (renamed from `app-store-doc` on 2026-08-20).
 Next.js 16 · Prisma 7 · PostgreSQL (Neon) · Auth.js · next-intl · Cloudflare R2 · Vercel
 
-## Đọc trước khi làm
+> This file is the **code-facing** half of the instructions. The process half —
+> documentation contract, feature workflow, hooks, skill routing — lives in
+> `.claude/CLAUDE.md`, which is gitignored and therefore absent from a fresh clone.
+> Where the two overlap: **this file decides what the code looks like, that one decides
+> how the work is done.**
 
-| Việc | Tài liệu |
-|---|---|
-| **Bắt đầu phiên mới — đang làm tới đâu, còn nợ gì** | **[`docs/status.md`](docs/status.md) — đọc trước tiên** |
-| **Trước khi lật một quyết định, hoặc khi thấy mã trông kỳ lạ** | **[`docs/session-log.md`](docs/session-log.md)** — quyết định và lý do, mười cái bẫy đã trả giá |
-| **Dựng bất kỳ giao diện nào** | **[`docs/design/design-rules.md`](docs/design/design-rules.md) — bắt buộc** |
-| Giao diện đã được duyệt | [`docs/design/mockups/v3/index.html`](docs/design/mockups/v3/index.html) — bản v3 là bản đang dùng; `mockups/index.html` và `v2/` là ảnh chụp lịch sử |
-| Kiến trúc, data model, i18n, auth | [spec 17.08](docs/superpowers/specs/2026-08-17-app-store-doc-design.md) và [spec 18.08](docs/superpowers/specs/2026-08-18-ducker-navigation-tree-design.md) — bản sau thay thế §6, §7, §8, §9.3 của bản trước |
+## Read before you start
 
-## Ba ranh giới không được vượt
+| Task | Document |
+| --- | --- |
+| **Starting a session — where things stand, what is owed** | **[`docs/04-state/backlog.md`](docs/04-state/backlog.md) — read this first** |
+| **Before reversing a decision, or when code looks strange** | [`docs/decisions/`](docs/decisions/README.md) — 16 ADRs, each with the alternatives that were rejected |
+| **Before changing any line of code** | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) — what breaks *silently* |
+| **Building any interface** | [`docs/design/design-rules.md`](docs/design/design-rules.md) — **required** |
+| Approved interface | [`docs/design/mockups/v3/index.html`](docs/design/mockups/v3/index.html) — v3 is current; `mockups/index.html` and `v2/` are historical snapshots. Where mockup and written rule disagree, **the mockup wins** |
+| Architecture, data model, module boundaries | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) |
+| Scope — is this in or out? | [`docs/01-product/overview.md`](docs/01-product/overview.md) §Non-Goals · [`docs/02-requirements/scope.md`](docs/02-requirements/scope.md) |
+| Naming a new concept | [`docs/01-product/glossary.md`](docs/01-product/glossary.md) — it locks names |
+| Deploy, environment variables, database-backed tests | [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md) |
 
-Component **không bao giờ** `import prisma`, `import` Auth.js, hay `import` SDK S3. Mọi truy cập đi qua đúng một cửa:
+The full map is [`docs/README.md`](docs/README.md).
 
-- `src/server/content/` — nơi duy nhất chạm Prisma
-- `src/server/auth/` — nơi duy nhất biết Auth.js. Chỉ lộ ra `getCurrentUser()`, `requireAdmin()`, `signOut()`
-- `src/server/media/` — nơi duy nhất biết Cloudflare R2
+## Commands
 
-Nhờ vậy đổi cache, đổi DB, đổi nhà cung cấp lưu trữ, đổi cơ chế auth — mỗi thứ chỉ chạm một tầng.
+```bash
+npm ci                 # install; postinstall runs `prisma generate`
+npm run dev            # http://localhost:3000 → redirects to /vi
+npm run test:run       # vitest, --maxWorkers=1
+npm run typecheck      # tsc --noEmit
+npm run lint
+npm run build          # prebuild generates the locale list
+npm run e2e            # Playwright, on its own port 3210
+```
 
-## Bốn cái bẫy đã biết
+⚠️ **The Prisma CLI does not read `.env`** — nor do vitest, tsx or Playwright's config
+loader by default. Only Next does. Pass the variable inline:
+`DATABASE_URL="…" npx prisma migrate deploy`. Without it Prisma falls back to the
+placeholder in `prisma.config.ts` and fails with `P1010`, which looks like a permissions
+problem and is actually the wrong database.
 
-1. **Server Action là endpoint HTTP riêng.** Bảo vệ `layout.tsx` của `/admin` *không* bảo vệ server action. Mọi action ghi dữ liệu phải gọi `requireAdmin()` ở dòng đầu.
-2. **`vitest` không typecheck.** Suite xanh không chứng minh `tsc` sạch. Luôn chạy `tsc --noEmit` riêng, và chạy `npm run build` trước khi báo hoàn thành.
-3. **Vitest song song hay flaky trên máy Windows này.** Test fail dưới lần chạy song song chưa được coi là fail thật cho tới khi lặp lại với `--maxWorkers=1`. Test component dùng `fireEvent`, không dùng `userEvent.type`.
-4. **Branch DB `test` chỉ có một** và `prisma migrate reset` xoá sạch. Không chạy hai suite cùng lúc.
+## Three boundaries that must not be crossed
 
-## Tên ứng dụng
+A component **never** imports Prisma, Auth.js, or the S3 SDK. Every access goes through
+exactly one door:
 
-Tên hiển thị viết hoa đầu từ, có khoảng trắng: **Manage Gym**, không phải `web-app-manage-gym`. Slug repo chỉ xuất hiện ở vai trò phụ, chữ mono, màu `--muted`. Bảng ánh xạ đầy đủ trong `docs/design/design-rules.md` §1.
+- `src/server/content/` — the only place that touches Prisma
+- `src/server/auth/` — the only place that knows Auth.js. Exposes only `getCurrentUser()`, `requireAdmin()`, `signOut()`
+- `src/server/media/` — the only place that knows Cloudflare R2
+
+`src/server/auth/boundary.test.ts` enforces this by scanning the source, so a violation
+fails the suite rather than waiting to be noticed. Reasoning: [ADR-0016](docs/decisions/0016-three-doors-enforced-by-test.md).
+
+## Four known traps
+
+1. **A server action is its own HTTP endpoint.** Guarding `/admin`'s `layout.tsx` does
+   *not* guard the action. Every writing action calls `await requireAdmin()` on its
+   first line.
+2. **`vitest` does not typecheck.** A green suite does not prove `tsc` is clean. Always
+   run `npm run typecheck` separately, and `npm run build` before claiming completion.
+3. **Parallel vitest is flaky on this Windows machine.** A failure under a parallel run
+   is not a real failure until it repeats with `--maxWorkers=1`. Component tests use
+   `fireEvent`, never `userEvent.type`.
+4. **There is only one `test` database branch** and `prisma migrate reset` empties it.
+   Never run two suites at once.
+
+The rest of the silent-failure list is in
+[`docs/03-design/invariants.md`](docs/03-design/invariants.md) — 17 entries, and it is
+the file to read before editing code.
+
+## Application names
+
+Display names are capitalised with spaces: **Manage Gym**, not `web-app-manage-gym`. The
+repository slug appears only in a secondary role, in mono type, coloured `--muted`. Full
+mapping table in `docs/design/design-rules.md` §1.
 
 ## README (REQUIRED — keep in sync with features)
 
-`README.md` describes what the app does for its users — it is not a boilerplate page. Every commit that adds or changes user-facing behaviour (`feat:`) MUST update the `## Features` section of `README.md` in the same branch, before merging — one short English bullet in the existing style.
+`README.md` describes what the app does for its users — it is not a boilerplate page.
+Every commit that adds or changes user-facing behaviour (`feat:`) MUST update the
+`## Features` section of `README.md` in the same branch, before merging — one short
+English bullet in the existing style.
 
-While touching README, refresh any stale numbers you notice (test counts, stack versions).
+While touching README, refresh any stale numbers you notice (test counts, stack
+versions).
 
 README-only documentation commits use a `docs:` prefix.
 
 ## Language
 
-Everything is written in English: product content, code comments, commit
-messages, documentation, and identifiers in code.
+Everything is written in English: product content, code comments, commit messages,
+documentation, and identifiers in code.
+
+Two documentation files are still Vietnamese in the body and carry an English header
+only — `docs/05-operations/runbook.md` and `docs/design/design-rules.md`. They are
+flagged in `docs/README.md` §Language, not silently mixed. So are the Vietnamese
+reminder strings emitted by the hooks in `.claude/scripts/`, which are addressed to the
+model mid-session and never appear in the repository's output.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
