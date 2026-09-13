@@ -14,8 +14,8 @@
 | [`03-design/invariants.md`](03-design/invariants.md) | What can I change that makes the system wrong **silently**… | 🟢 complete — reviewed against this project … | a new invariant is discovered — usually right after someon… |
 | [`04-state/backlog.md`](04-state/backlog.md) | What is being worked on, what comes next, and what is owed… | 🟢 complete | work starts or finishes · brainstorming produces new work … |
 | [`05-operations/runbook.md`](05-operations/runbook.md) | How do I stand this up, deploy it, and run the database-ba… | 🟡 detailed, but **never actually run** — no… | a new environment variable · an infrastructure provider ch… |
-| [`design/design-rules.md`](design/design-rules.md) | Which rules govern building UI for Ducker — tokens, type s… | 🟢 complete — v3, approved | a new mockup is approved · a token is added · an app is ad… |
-| [`decisions/`](decisions/README.md) | Why was it done this way? | 16 ADRs | every technical decision |
+| [`design-system/ducker/MASTER.md`](design-system/ducker/MASTER.md) | — | — | — |
+| [`decisions/`](decisions/README.md) | Why was it done this way? | 17 ADRs | every technical decision |
 | [`../.env.example`](../.env.example) | Which environment variables are needed to run? | 🟢 complete — mirrors what the code actually… | code starts reading a new variable, or stops reading one |
 <!-- END:auto -->
 
@@ -29,8 +29,8 @@ Not in the table, because they have no status header of their own:
 
 | Path | What it holds |
 | --- | --- |
-| [`design/design-rules.md`](design/design-rules.md) | The approved UI rules — tokens, type scale, naming. **Required reading before building any interface.** It occupies the slot the `design-bootstrap` skill would fill, so **do not run that skill**; it would create a second, competing design system |
-| [`design/mockups/v3/`](design/mockups/v3/index.html) | The approved mockup. **v3 is current**; `mockups/index.html` and `v2/` are historical snapshots. Where the mockup and the written rules disagree, **the mockup wins** |
+| [`design-system/ducker/MASTER.md`](design-system/ducker/MASTER.md) | The design system — tokens, type pairing, the signature element, measured contrast ratios. **Required reading before building any interface.** Produced by `design-bootstrap`; the reasoning is [ADR-0017](decisions/0017-ink-and-state-design-direction.md). `design-bootstrap` never runs again |
+| `design/` — **deleted** | The old v3 rules and all three mockups were removed in `d2f61bb`. They are still readable at `git show b2d70a8:docs/design/design-rules.md`. Nothing in the tree should link to them |
 
 ## ID conventions — trace with `grep`, not with memory
 
@@ -53,14 +53,13 @@ Not in the table, because they have no status header of their own:
 ## Language
 
 Documentation here is **English**, matching the rule in the root
-[`CLAUDE.md`](../CLAUDE.md). Two files are still Vietnamese in the body and carry an
+[`CLAUDE.md`](../CLAUDE.md). One file is still Vietnamese in the body and carries an
 English header only:
 
 - [`05-operations/runbook.md`](05-operations/runbook.md) — 533 lines of deploy steps and
   exact commands; translating it risks corrupting a command for no functional gain.
-- [`design/design-rules.md`](design/design-rules.md) — the approved design rules.
 
-Both are flagged rather than silently mixed. Translating them is an open choice, not an
+It is flagged rather than silently mixed. Translating it is an open choice, not an
 oversight.
 
 The automation under `.claude/scripts/` still speaks Vietnamese in its reminders. Those

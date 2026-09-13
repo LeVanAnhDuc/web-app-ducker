@@ -15,10 +15,10 @@ Next.js 16 · Prisma 7 · PostgreSQL (Neon) · Auth.js · next-intl · Cloudflar
 | Task | Document |
 | --- | --- |
 | **Starting a session — where things stand, what is owed** | **[`docs/04-state/backlog.md`](docs/04-state/backlog.md) — read this first** |
-| **Before reversing a decision, or when code looks strange** | [`docs/decisions/`](docs/decisions/README.md) — 16 ADRs, each with the alternatives that were rejected |
+| **Before reversing a decision, or when code looks strange** | [`docs/decisions/`](docs/decisions/README.md) — 17 ADRs, each with the alternatives that were rejected |
 | **Before changing any line of code** | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) — what breaks *silently* |
-| **Building any interface** | [`docs/design/design-rules.md`](docs/design/design-rules.md) — **required** |
-| Approved interface | [`docs/design/mockups/v3/index.html`](docs/design/mockups/v3/index.html) — v3 is current; `mockups/index.html` and `v2/` are historical snapshots. Where mockup and written rule disagree, **the mockup wins** |
+| **Building any interface** | [`docs/design-system/ducker/MASTER.md`](docs/design-system/ducker/MASTER.md) — **required**. The token source of truth |
+| Why the interface looks like that | [ADR-0017](docs/decisions/0017-ink-and-state-design-direction.md) — colour is reserved for status; the chrome has none |
 | Architecture, data model, module boundaries | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) |
 | Scope — is this in or out? | [`docs/01-product/overview.md`](docs/01-product/overview.md) §Non-Goals · [`docs/02-requirements/scope.md`](docs/02-requirements/scope.md) |
 | Naming a new concept | [`docs/01-product/glossary.md`](docs/01-product/glossary.md) — it locks names |
@@ -76,8 +76,8 @@ the file to read before editing code.
 ## Application names
 
 Display names are capitalised with spaces: **Manage Gym**, not `web-app-manage-gym`. The
-repository slug appears only in a secondary role, in mono type, coloured `--muted`. Full
-mapping table in `docs/design/design-rules.md` §1.
+repository slug appears only in a secondary role, in mono type, coloured `--ink-soft`. Full
+mapping table in `docs/design-system/ducker/MASTER.md` §5.
 
 ## README (REQUIRED — keep in sync with features)
 
@@ -96,8 +96,8 @@ README-only documentation commits use a `docs:` prefix.
 Everything is written in English: product content, code comments, commit messages,
 documentation, and identifiers in code.
 
-Two documentation files are still Vietnamese in the body and carry an English header
-only — `docs/05-operations/runbook.md` and `docs/design/design-rules.md`. They are
+One documentation file is still Vietnamese in the body and carries an English header
+only — `docs/05-operations/runbook.md`. It is
 flagged in `docs/README.md` §Language, not silently mixed. So are the Vietnamese
 reminder strings emitted by the hooks in `.claude/scripts/`, which are addressed to the
 model mid-session and never appear in the repository's output.

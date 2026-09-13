@@ -162,8 +162,8 @@ As of 17.08.2026, no satellite app is actually wired into IDMS yet.
 | Why things are the way they are — 16 decisions, each with the alternatives rejected | [`docs/decisions/`](docs/decisions/README.md) |
 | What breaks **silently** if you change it | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) |
 | **Standing up infrastructure, deploying, running the DB-backed tests** | **[`docs/05-operations/runbook.md`](docs/05-operations/runbook.md)** |
-| **Building any interface** | **[`docs/design/design-rules.md`](docs/design/design-rules.md) — mandatory** |
-| The approved interface | [`docs/design/mockups/v3/index.html`](docs/design/mockups/v3/index.html) — **v3 is the one in use**; `mockups/index.html` and `v2/` are historical snapshots of older decisions |
+| **Building any interface** | **[`docs/design-system/ducker/MASTER.md`](docs/design-system/ducker/MASTER.md) — mandatory** |
+| Why the interface looks like that | [ADR-0017](docs/decisions/0017-ink-and-state-design-direction.md) — colour is reserved for status; the chrome carries none |
 | Architecture, module boundaries, main data flow | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) |
 | What the product is for, and what it deliberately does not do | [`docs/01-product/overview.md`](docs/01-product/overview.md) |
 | The full documentation map | [`docs/README.md`](docs/README.md) |

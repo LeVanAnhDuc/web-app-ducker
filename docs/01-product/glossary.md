@@ -44,4 +44,4 @@ DOES NOT CONTAIN: long domain explanations (-> overview.md).
   reintroducing the word invites the model it replaced.
 - The product is **Ducker**. `app-store-doc` is the retired repository slug and must not
   appear in new prose. Display names are capitalised with spaces — **Match CV**, not
-  `web-app-match-cv`; see `design/design-rules.md` §1.
+  `web-app-match-cv`; see `design-system/ducker/MASTER.md` §5.
