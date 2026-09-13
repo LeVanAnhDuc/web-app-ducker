@@ -11,7 +11,7 @@
 | [ADR-0001](0001-nextjs-fullstack-single-repo.md) | Build as one full-stack Next.js app, not a client plus a separate API | 2026-08-17 | accepted |
 | [ADR-0002](0002-postgres-on-neon-with-prisma.md) | PostgreSQL on Neon with Prisma 7 | 2026-08-17 | accepted |
 | [ADR-0003](0003-locale-as-row-not-column.md) | Locale is a row in a translation table, not a column | 2026-08-17 | accepted |
-| [ADR-](0004-ssg-with-tag-revalidation.md) | Static generation with on-demand tag revalidation, not SSR | 2026-08-17 | accepted |
+| [ADR-0004](0004-ssg-with-tag-revalidation.md) | Static generation with on-demand tag revalidation, not SSR | 2026-08-17 | accepted |
 | [ADR-0005](0005-section-body-as-tagged-json.md) | `SectionTranslation.body` is JSON carrying a `type` discriminator | 2026-08-17 | accepted |
 | [ADR-0006](0006-auth-behind-a-three-function-abstraction.md) | Auth.js Credentials, hidden behind a three-function abstraction | 2026-08-17 | accepted |
 | [ADR-0007](0007-flat-urls-tree-controls-navigation-only.md) | URLs stay flat; the navigation tree controls display only | 2026-08-18 | accepted |
@@ -24,6 +24,7 @@
 | [ADR-0014](0014-one-nav-tree-three-node-kinds.md) | One self-referencing navigation tree with three node kinds | 2026-08-18 | accepted |
 | [ADR-0015](0015-generated-locale-list-costs-one-redeploy.md) | Accept one redeploy to add a language | 2026-08-17 | accepted |
 | [ADR-0016](0016-three-doors-enforced-by-test.md) | Three doors to the outside world, enforced by a test | 2026-08-17 | accepted |
+| [ADR-0017](0017-ink-and-state-design-direction.md) | Colour is reserved for status; the chrome has none | 2026-09-13 | accepted |
 <!-- END:auto -->
 
 Status values: `accepted` · `superseded by ADR-00xx` · `deprecated`

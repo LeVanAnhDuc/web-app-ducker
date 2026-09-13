@@ -18,7 +18,11 @@ DOES NOT CONTAIN: out-of-scope features (-> 01-product/overview.md §Non-Goals).
 
 ## In progress
 
-Nothing in flight.
+**The design system was re-bootstrapped on 2026-09-13 and the code has not followed it
+yet.** `docs/design-system/ducker/MASTER.md` is the new token source of truth
+([ADR-0017](../decisions/0017-ink-and-state-design-direction.md)); `src/styles/tokens.css`
+still holds the old v3 palette. Until the token rewrite lands, the running app and the
+design system disagree — trust MASTER.md, not the screen.
 
 Last completed: migrating this project onto the workspace documentation tier
 (`scaffold-webapp-project`) and unifying both `CLAUDE.md` files on English —
@@ -57,6 +61,7 @@ credentials.
 | Generate `ADMIN_PASSWORD_HASH`, `AUTH_SECRET`, `PREVIEW_SECRET` | FR-06 | high | escape every `$` as `\$` — see [`../05-operations/runbook.md`](../05-operations/runbook.md) §3.1 |
 | Declare the variables on Vercel (Production + Preview) | — | high | do **not** declare `ADMIN_PASSWORD` or `DATABASE_URL_TEST` there |
 | Deploy, then run the five manual checks in [`../05-operations/runbook.md`](../05-operations/runbook.md) §6.5 | — | high | the project has never been deployed |
+| Rewrite `src/styles/tokens.css` and `tokens.test.ts` against MASTER.md, and raise the `--tap` threshold in `e2e/a11y-tap-target.spec.ts` from 28px to 44px | ADR-0017 | high | the design system and the code currently describe two different products. The tap change alone will turn that e2e spec red until it is updated |
 | Review the seeded content through the CMS | — | medium | it was written from public READMEs and **never verified against source**; the "run it in 5 minutes" parts may have wrong ports or script names |
 | Write content for **Shorten Link** | — | medium | its repo is private, so nothing could be seeded; the record is empty and `DRAFT` |
 | Wire `pnpm audit` into CI | NFR-SEC-05 | medium | there is no `.github/workflows/` at all, so the threshold is manual today |
