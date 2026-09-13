@@ -32,3 +32,6 @@ superdesign/design_iterations/
 # Bo hook/skill cua Claude Code — phan phoi qua skill scaffold-webapp-project,
 # khong theo repo (xem .claude/CLAUDE.md).
 /.claude/
+
+# Feature worktrees live inside the repo (see the feature workflow).
+/.worktrees/

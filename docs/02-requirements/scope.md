@@ -29,7 +29,7 @@ was chosen (-> decisions/).
 | FR-05 | Language switch with fallback to the default locale plus a "missing translation" badge | US-03 | xong |
 | FR-11 | Navigation: top tab strip + left tree + mobile drawer, all from one `NavNode` tree | US-01 · US-06 | xong |
 | FR-14 | Table of contents on the right, built from section anchors | US-01 | xong |
-| FR-15 | Theme switch with three states: follow system · light · dark | US-01 | xong |
+| FR-15 | Theme switch with three states: follow system · light · dark. The choice persists, synchronises across open tabs, and drives `color-scheme` so native browser controls follow it. See [ADR-0020](../decisions/0020-next-themes-for-the-theme.md) | US-01 | xong |
 | FR-16 | SEO: `hreflang` for every enabled locale plus `x-default`, self-canonical | US-01 | xong |
 | FR-22 | Catalogue entries authored as files under `content/`, one file per record per locale | US-09 | đang |
 | FR-23 | Games group: the twelve duck games listed as their own section, flat, no IdP branch | US-01 | đang |

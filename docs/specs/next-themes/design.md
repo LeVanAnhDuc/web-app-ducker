@@ -1,6 +1,6 @@
 # Replace the hand-rolled theme machinery with next-themes
 
-> **Related:** FR-15 · I16 · NFR-A11Y-01 · NFR-A11Y-07 · NFR-SEC-05 · ADR-0018
+> **Related:** FR-15 · I16 · NFR-A11Y-01 · NFR-A11Y-07 · NFR-SEC-05 · ADR-0020
 
 ## 1. What exists today
 
@@ -124,7 +124,7 @@ src/app/[locale]/(public)/layout.tsx           ThemeProvider
 src/app/[locale]/(admin)/admin/layout.tsx      ThemeProvider
 src/components/ui/ThemeToggle.test.tsx         rewritten
 e2e/theme.spec.ts                              new
-docs/decisions/0018-next-themes-for-the-theme.md  new
+docs/decisions/0020-next-themes-for-the-theme.md  new
 docs/02-requirements/scope.md                  extend FR-15
 docs/04-state/backlog.md                       §In progress, and the Phase B hand-off
 README.md                                      one bullet under ## Features
@@ -145,4 +145,4 @@ README.md                                      one bullet under ## Features
 | --- | --- |
 | `tokens.css` rewritten underneath us mid-branch | this change touches no CSS at all |
 | next-themes' script lands later in `<body>` than ours did | it is still synchronous and pre-paint; the e2e flash test is what decides, not reasoning |
-| A dependency for ~40 lines of our own code | recorded in ADR-0018 §3 as the deliberate trade |
+| A dependency for ~40 lines of our own code | recorded in ADR-0020 §3 as the deliberate trade |

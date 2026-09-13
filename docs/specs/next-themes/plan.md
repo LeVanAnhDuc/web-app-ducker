@@ -722,13 +722,13 @@ git commit -m "test(theme): cover flash, persistence, color-scheme and cross-tab
 ### Task 6: Documentation
 
 **Files:**
-- Create: `docs/decisions/0018-next-themes-for-the-theme.md`
+- Create: `docs/decisions/0020-next-themes-for-the-theme.md`
 - Modify: `docs/02-requirements/scope.md`
 - Modify: `docs/04-state/backlog.md`
 - Modify: `README.md`
 - Modify: `.gitignore`
 
-- [ ] **Step 1: Write ADR-0018**
+- [ ] **Step 1: Write ADR-0020**
 
 Follow `docs/decisions/_template.md`, in English like ADR-0008, 15–40 lines. Contents:
 
@@ -740,7 +740,7 @@ Follow `docs/decisions/_template.md`, in English like ADR-0008, 15–40 lines. C
 
 - [ ] **Step 2: Extend FR-15 in `docs/02-requirements/scope.md`**
 
-The row currently reads *"Theme switch with three states: follow system · light · dark"*. Extend it so the two new behaviours belong to the same function, and reference ADR-0018. Do **not** add a new FR — this is one function, not two.
+The row currently reads *"Theme switch with three states: follow system · light · dark"*. Extend it so the two new behaviours belong to the same function, and reference ADR-0020. Do **not** add a new FR — this is one function, not two.
 
 - [ ] **Step 3: Add the README feature bullet**
 
@@ -776,5 +776,5 @@ pnpm audit
 
 ```bash
 git add -A docs README.md .gitignore
-git commit -m "docs(theme): record ADR-0018, extend FR-15 and note the CSS fallback hand-off"
+git commit -m "docs(theme): record ADR-0020, extend FR-15 and note the CSS fallback hand-off"
 ```
