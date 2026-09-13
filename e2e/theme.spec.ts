@@ -3,10 +3,12 @@
 // Four things only a real browser can answer, each one a regression that would
 // otherwise ship silently:
 //
-//   1. NFR-A11Y-07 — no colour flash. The theme script has to land before the
-//      first paint. Measured with the CPU throttled 20x, because at full speed
-//      even a late script usually wins the race and the test passes for the
-//      wrong reason.
+//   1. NFR-A11Y-07 — no colour flash. The theme attribute has to be set before
+//      the first contentful paint, which is what the test compares: the moment
+//      a MutationObserver sees data-theme appear against the paint entry from
+//      a PerformanceObserver. The CPU is throttled 20x, because at full speed
+//      even a late script wins the race and the test passes for the wrong
+//      reason.
 //   2. The choice survives a reload.
 //   3. color-scheme follows the theme, so scrollbars and native controls do too.
 //      Nothing in src/styles/ sets that property; the provider does.
@@ -30,19 +32,46 @@ async function throttle(page: Page, rate: number) {
   await client.send("Emulation.setCPUThrottlingRate", { rate });
 }
 
-test("no colour flash: the first painted frame is already dark", async ({ page }) => {
+test("no colour flash: the theme is set before the first contentful paint", async ({
+  page,
+}) => {
   await page.addInitScript(
     ([key]) => {
       localStorage.setItem(key, "dark");
-      // This runs before any of the page's own script. The first animation
-      // frame is the earliest moment the document can have been painted.
-      (window as unknown as Record<string, unknown>).__firstFrame = null;
-      requestAnimationFrame(() => {
-        (window as unknown as Record<string, unknown>).__firstFrame = {
-          attr: document.documentElement.getAttribute("data-theme"),
-          bg: getComputedStyle(document.body).backgroundColor,
-        };
-      });
+      const w = window as unknown as Record<string, unknown>;
+      w.__themeAt = null;
+      w.__themeError = null;
+
+      try {
+        // Observe `document`, not `document.documentElement`: an init script runs
+        // at document start, where documentElement can still be null, and
+        // observe(null) throws and kills the rest of this script silently.
+        // Subtree catches the attribute landing on <html> just the same.
+        //
+        // The observer is parked on `window` because one with no reference can
+        // be collected before it ever fires.
+        const observer = new MutationObserver((records) => {
+          for (const record of records) {
+            if (
+              record.attributeName === "data-theme" &&
+              (record.target as Element).getAttribute?.("data-theme")
+            ) {
+              if (w.__themeAt === null) w.__themeAt = performance.now();
+              observer.disconnect();
+              return;
+            }
+          }
+        });
+        w.__themeObserver = observer;
+        observer.observe(document, {
+          attributes: true,
+          subtree: true,
+          attributeFilter: ["data-theme"],
+        });
+      } catch (error) {
+        // Surfaced in the assertion message instead of failing as a bare null.
+        w.__themeError = String(error);
+      }
     },
     [STORAGE_KEY],
   );
@@ -52,14 +81,33 @@ test("no colour flash: the first painted frame is already dark", async ({ page }
   // Anti-self-deception: a 404 would satisfy every assertion below.
   expect(response?.status(), "/vi must answer 200").toBe(200);
 
-  const first = await page.evaluate(
-    () =>
-      (window as unknown as { __firstFrame: { attr: string; bg: string } | null })
-        .__firstFrame,
+  // Paint entries stay in the performance timeline, so they can simply be read
+  // once the page has loaded. An earlier draft used a PerformanceObserver inside
+  // the init script and it never delivered an entry, which cost a debugging pass
+  // and proved nothing about the theme.
+  const timing = await page.evaluate(() => {
+    const fcp = performance
+      .getEntriesByType("paint")
+      .find((entry) => entry.name === "first-contentful-paint");
+    return {
+      themeAt: (window as unknown as { __themeAt: number | null }).__themeAt,
+      themeError: (window as unknown as { __themeError: string | null }).__themeError,
+      fcpAt: fcp ? fcp.startTime : null,
+    };
+  });
+
+  expect(timing.fcpAt, "no first-contentful-paint entry was recorded").not.toBeNull();
+  expect(timing.themeError, "the instrumentation itself threw").toBeNull();
+  expect(timing.themeAt, "data-theme was never set").not.toBeNull();
+  expect(
+    timing.themeAt!,
+    `theme landed at ${timing.themeAt}ms, first contentful paint at ${timing.fcpAt}ms`,
+  ).toBeLessThanOrEqual(timing.fcpAt!);
+
+  // And the settled result is the dark ground, not merely some attribute.
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe(
+    DARK_BG,
   );
-  expect(first, "the first frame was never recorded").not.toBeNull();
-  expect(first!.attr).toBe("dark");
-  expect(first!.bg).toBe(DARK_BG);
 });
 
 test("the choice survives a reload", async ({ page }) => {
