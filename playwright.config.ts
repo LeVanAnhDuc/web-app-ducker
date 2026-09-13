@@ -49,7 +49,11 @@ export default defineConfig({
     { name: "chromium", use: { ...devices["Desktop Chrome"] } },
   ],
   webServer: {
-    command: `pnpm start -- --port ${port} --hostname 127.0.0.1`,
+    // No `--` before the flags: npm swallowed that separator, pnpm forwards it
+    // verbatim and `next start` then reads `--port` as the project directory,
+    // failing with "Invalid project directory provided". Fallout from the
+    // npm-to-pnpm migration in fff75d2, which left the whole suite unrunnable.
+    command: `pnpm start --port ${port} --hostname 127.0.0.1`,
     url: baseURL,
     // Không bao giờ mượn server có sẵn: xem khối chú thích trên.
     reuseExistingServer: false,

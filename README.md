@@ -71,6 +71,8 @@ is edited through the CMS, and the public pages change without a redeploy.
 
 - **Three-state theme toggle**
   - Light, dark, or follow the system — with no colour flash on first paint
+  - The choice is remembered, stays in step across open tabs, and themes the
+    browser's own controls — scrollbars, selects and autofill — not just the page
 
 - **Mobile layout**
   - A navigation drawer for small screens, and a responsive shell shared by the

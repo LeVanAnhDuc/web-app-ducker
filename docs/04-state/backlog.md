@@ -24,7 +24,7 @@ DOES NOT CONTAIN: out-of-scope features (-> 01-product/overview.md §Non-Goals).
    10 tasks. Deletes the admin surface (58 files), `src/server/` (24 files), `prisma/`
    and 5 dependencies; content moves to `content/**.mdx`; the catalogue grows from 6
    entries to 22 (10 apps + 12 duck games). Decisions:
-   [ADR-0018](../decisions/0018-content-is-files-not-rows.md),
+   [ADR-0020](../decisions/0018-content-is-files-not-rows.md),
    [ADR-0019](../decisions/0019-no-administration-surface.md).
 2. **Ink and state repaint** — not yet specified. Applies
    [`../design-system/ducker/MASTER.md`](../design-system/ducker/MASTER.md) to the ~25
@@ -39,6 +39,11 @@ repaints every surface cannot be reviewed.
 tracked eyebrow and mono for small labels. `I14` also pins `h1,h2,h3` to serif-400 with
 no tracking, while `MASTER.md` §2 makes headings tight heavy sans. Both must be resolved
 in branch 2, not silently.
+
+**next-themes migration — code complete on `feat/next-themes`, not merged.** Design and
+plan in [`../specs/next-themes/`](../specs/next-themes/), reasoning in
+[ADR-0020](../decisions/0020-next-themes-for-the-theme.md). It touches no CSS, so it does
+not collide with the token rewrite described above.
 
 Last completed: migrating this project onto the workspace documentation tier
 (`scaffold-webapp-project`) and unifying both `CLAUDE.md` files on English —
@@ -80,7 +85,8 @@ credentials.
 | Rewrite `src/styles/tokens.css` and `tokens.test.ts` against MASTER.md, and raise the `--tap` threshold in `e2e/a11y-tap-target.spec.ts` from 28px to 44px | ADR-0017 | high | the design system and the code currently describe two different products. The tap change alone will turn that e2e spec red until it is updated |
 | Review the seeded content through the CMS | — | medium | it was written from public READMEs and **never verified against source**; the "run it in 5 minutes" parts may have wrong ports or script names |
 | Write content for **Shorten Link** | — | medium | its repo is private, so nothing could be seeded; the record is empty and `DRAFT` |
-| Wire `pnpm audit` into CI | NFR-SEC-05 | medium | there is no `.github/workflows/` at all, so the threshold is manual today |
+| Add a CSS-level `color-scheme` to each theme block while rewriting `tokens.css` | FR-15 · [ADR-0020](../decisions/0020-next-themes-for-the-theme.md) | medium | next-themes sets the property at runtime, so visitors with JavaScript disabled get none. Three declarations, and the token rewrite already owns that file |
+| Wire `pnpm audit` into CI | NFR-SEC-05 | **high** | there is no `.github/workflows/` at all, so the threshold is manual today — and it is **already breached**. Measured 2026-09-13 on `feat/next-themes`: 15 advisories, 2 critical and 10 high, reached through `next`, `prisma`, `image-size`, `@eslint/eslintrc` and `vitest`. None of them is new; a CI gate is what would have caught them |
 | Arrange a database backup | NFR-DATA-03 | medium | once content is edited through the CMS, the database is the only copy |
 
 ## Open decisions

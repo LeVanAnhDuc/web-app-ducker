@@ -1,24 +1,24 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState, type ReactElement } from "react";
+import { useSyncExternalStore, type ReactElement } from "react";
+import { useTheme } from "next-themes";
 
-import { THEME_STORAGE_KEY } from "./ThemeScript";
 import styles from "./ThemeToggle.module.css";
 
 /**
- * Ba trạng thái, không phải hai. `tokens.css` có ba khối chủ đề, và "theo hệ
- * thống" là khối đông người dùng nhất — làm nút bật/tắt hai trạng thái là cắt
- * mất đường về mặc định.
+ * Three states, not two. `tokens.css` has three theme blocks, and "follow the
+ * system" is the one most visitors are in — a two-state toggle cuts off the
+ * route back to the default. Guarded by invariant I16.
  */
 export type ThemeChoice = "system" | "light" | "dark";
 
 /**
- * Nhãn truyền từ ngoài vào, **không** gọi `useTranslations` bên trong: component
- * phải render được trần, không có `NextIntlClientProvider`. Cùng lối với
- * `OrderControls`, `AppCard`, `AppHero`.
+ * Labels are passed in rather than read with `useTranslations` inside: the
+ * component has to render bare, with no `NextIntlClientProvider`. Same
+ * convention as `OrderControls`, `AppCard`, `AppHero`.
  */
 export type ThemeToggleLabels = Record<ThemeChoice, string> & {
-  /** Nhãn của cả nhóm ba nút, đọc cho trình đọc màn hình. */
+  /** Label for the group of three, read out by screen readers. */
   group: string;
 };
 
@@ -26,38 +26,7 @@ export type ThemeToggleProps = {
   labels: ThemeToggleLabels;
 };
 
-/** Đọc lựa chọn đã lưu. Giá trị lạ hoặc `localStorage` bị chặn đều về "system". */
-function readChoice(): ThemeChoice {
-  try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return stored === "dark" || stored === "light" ? stored : "system";
-  } catch {
-    return "system";
-  }
-}
-
-/**
- * "Theo hệ thống" là **xoá** thuộc tính, không phải đặt một giá trị thứ ba:
- * khối `@media` trong `tokens.css` bọc bằng `:root:not([data-theme="light"])`,
- * nên chỉ khi không có thuộc tính nào thì cả hai khối tối mới nhường quyền cho
- * chế độ của hệ điều hành.
- */
-function applyChoice(choice: ThemeChoice): void {
-  const root = document.documentElement;
-  if (choice === "system") root.removeAttribute("data-theme");
-  else root.setAttribute("data-theme", choice);
-}
-
-/**
- * `useLayoutEffect` chạy TRƯỚC khi trình duyệt vẽ, `useEffect` chạy sau. Chênh
- * lệch đó chính là một khung hình sai màu, nên ở đây phải là layout effect.
- *
- * Chọn theo `typeof window` ở tầng module — gọi thẳng `useLayoutEffect` trong
- * một client component được render trên máy chủ sẽ in cảnh báo của React.
- */
-const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-
-/** Ký hiệu vẽ tay bằng SVG — design-rules §5 cấm dùng emoji làm ký hiệu. */
+/** Symbols drawn as SVG — design-rules section 5 forbids emoji as symbols. */
 const ICONS: Record<ThemeChoice, ReactElement> = {
   system: (
     <>
@@ -77,39 +46,43 @@ const ICONS: Record<ThemeChoice, ReactElement> = {
 const CHOICES: ThemeChoice[] = ["system", "light", "dark"];
 
 /**
- * Nút chuyển chủ đề — ba nút dính nhau, cùng hình khối với nút chuyển ngôn ngữ
- * trong `TopBar`.
+ * "Has this component hydrated yet?", expressed as a store React already knows
+ * how to read differently on the server and on the client.
  *
- * Cặp đôi với `ThemeScript`: script đặt sẵn `data-theme` trước khi trang được
- * vẽ, còn component này (a) hiện đúng nút nào đang chọn sau khi hydrate, và
- * (b) **đặt lại** thuộc tính trong layout effect. Vế (b) là bảo hiểm cho cái
- * bẫy đã ghi trong nhật ký dự án: nếu React gỡ mất thuộc tính do script gán khi
- * hydrate `<html>`, thì layout effect gán lại ngay trong cùng một lượt commit,
- * tức vẫn trước khung hình đầu tiên.
+ * The obvious spelling is a boolean state set from an effect, but
+ * `react-hooks/set-state-in-effect` bans it, and rightly: it renders twice for
+ * something React can answer directly. Nothing here ever changes, so subscribing
+ * hands back a no-op unsubscribe. All three are module-level constants because a
+ * fresh `subscribe` identity on every render would resubscribe on every render.
+ */
+const subscribeToNothing = () => () => {};
+const isMountedOnClient = () => true;
+const isMountedOnServer = () => false;
+
+/**
+ * The theme switch — three joined buttons, the same shape as the language
+ * switch in `TopBar`.
+ *
+ * All state lives in the `ThemeProvider` above it: next-themes owns the
+ * pre-paint script, the `localStorage` write, the `storage` event that keeps
+ * other tabs in step, and `documentElement.style.colorScheme`. This component
+ * only reports which of the three is active and asks for a different one.
  */
 export function ThemeToggle({ labels }: ThemeToggleProps) {
-  // Máy chủ luôn render "system": nó không đọc được `localStorage`. Nói dối một
-  // giá trị khác chỉ đổi nháy màu thành nháy trạng thái nút.
-  const [choice, setChoice] = useState<ThemeChoice>("system");
+  const { theme, setTheme } = useTheme();
 
-  useIsomorphicLayoutEffect(() => {
-    const stored = readChoice();
-    setChoice(stored);
-    applyChoice(stored);
-  }, []);
+  // The server cannot read `localStorage`, and next-themes seeds its state from
+  // it on the client's very first render — so reading `theme` during hydration
+  // is a mismatch. Reporting "system" until mounted reproduces exactly what the
+  // hand-rolled version rendered, and the real choice lands immediately after.
+  const mounted = useSyncExternalStore(
+    subscribeToNothing,
+    isMountedOnClient,
+    isMountedOnServer,
+  );
 
-  function pick(next: ThemeChoice) {
-    setChoice(next);
-    applyChoice(next);
-    try {
-      // "Theo hệ thống" xoá khoá thay vì ghi chuỗi "system": khoá vắng mặt và
-      // người dùng chưa từng chọn là cùng một trạng thái, đừng để thành hai.
-      if (next === "system") localStorage.removeItem(THEME_STORAGE_KEY);
-      else localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      // Không lưu được thì lựa chọn chỉ sống hết phiên này. Vẫn hơn là văng lỗi.
-    }
-  }
+  const choice: ThemeChoice =
+    mounted && (theme === "dark" || theme === "light") ? theme : "system";
 
   return (
     <div className={styles.group} role="group" aria-label={labels.group}>
@@ -118,12 +91,12 @@ export function ThemeToggle({ labels }: ThemeToggleProps) {
           key={value}
           type="button"
           className={styles.button}
-          // `aria-pressed` chứ không phải `aria-current`: đây là ba nút bật/tắt
-          // loại trừ nhau, không phải ba liên kết điều hướng.
+          // `aria-pressed`, not `aria-current`: these are three mutually
+          // exclusive toggles, not three navigation links.
           aria-pressed={choice === value}
           aria-label={labels[value]}
           title={labels[value]}
-          onClick={() => pick(value)}
+          onClick={() => setTheme(value)}
         >
           <svg
             className={styles.icon}
