@@ -116,6 +116,7 @@ now living in `content/**.mdx` was authored directly, not seeded.
 
 | Where | What was traded | Why it was acceptable | When it must be paid |
 | --- | --- | --- | --- |
+| `docs/03-design/architecture.md` and `docs/05-operations/runbook.md` | Downgraded to 🔴/🟡 without rewriting bodies | Substantial rewrite work; post-migration status update takes priority. Architecture has 17 stale references to deleted systems (Prisma, Auth.js, R2, Neon, src/server/*). Runbook has ~84. | Pair of ADRs (ADR-0018, ADR-0019) explain what was removed; new documents needed to describe current file-backed system and Vercel deployment with no datastore |
 | No CI at all | `pnpm audit`, tests, typecheck and build run only on a developer machine | Single contributor, every gate is run manually before commit | as soon as a second person commits, or NFR-SEC-05 must be automatic |
 
 The three rows this table used to carry — the Credentials-provider auth abstraction,

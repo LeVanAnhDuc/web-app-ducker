@@ -1,9 +1,11 @@
 # Architecture
 
 > **Answers:** How does the system fit together, and where are the boundaries between its parts?
-> **Status:** 🟢 complete
-> **Updated:** 2026-09-13 · commit b2d70a8
+> **Status:** 🔴 empty — predates the file-backed migration
+> **Updated:** 2026-09-14 · file-backed-registry
 > **Update when:** a module or service is added or removed · two modules change how they talk
+
+⚠️ **This document describes the pre-migration system** (Prisma, Auth.js, Cloudflare R2) that was deleted in [ADR-0018](../decisions/0018-content-is-files-not-rows.md) and [ADR-0019](../decisions/0019-no-administration-surface.md). The C4 diagrams, module boundaries, and data flow are no longer accurate. Do not use this document to understand the current architecture.
 
 <!-- HOW TO FILL
 Level: C4 level 1 (context) and level 2 (container). Do NOT descend to classes or

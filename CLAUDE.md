@@ -21,7 +21,7 @@ store — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 | **Before changing any line of code** | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) — what breaks *silently* |
 | **Building any interface** | [`docs/design-system/ducker/MASTER.md`](docs/design-system/ducker/MASTER.md) — **required**. The token source of truth |
 | Why the interface looks like that | [ADR-0017](docs/decisions/0017-ink-and-state-design-direction.md) — colour is reserved for status; the chrome has none |
-| Architecture, data model, module boundaries | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) |
+| Architecture, data model, module boundaries | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) — ⚠️ predates the file-backed migration; describes deleted systems (Prisma/Auth.js/R2) |
 | Scope — is this in or out? | [`docs/01-product/overview.md`](docs/01-product/overview.md) §Non-Goals · [`docs/02-requirements/scope.md`](docs/02-requirements/scope.md) |
 | Naming a new concept | [`docs/01-product/glossary.md`](docs/01-product/glossary.md) — it locks names |
 | Deploy, environment variables | [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md) — ⚠️ largely pre-migration; the deploy steps for Neon/R2/Vercel it describes no longer apply |
