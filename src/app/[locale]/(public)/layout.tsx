@@ -6,7 +6,7 @@ import { setRequestLocale } from "next-intl/server";
 import { TopBar } from "@/components/docs/TopBar";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { locales } from "@/i18n/locales.generated";
-import { getNavTree } from "@/server/content/queries";
+import { getNavTree } from "@/content";
 import styles from "./layout.module.css";
 
 /**
@@ -35,12 +35,13 @@ export default async function PublicLayout({
   setRequestLocale(locale);
 
   /**
-   * Điều hướng đến từ **một** nguồn duy nhất: cây `NavNode` do CMS quản.
+   * Điều hướng đến từ **một** nguồn duy nhất: cây dựng từ `content/` (ADR-0018).
    *
-   * Nút gốc là dải tab trên cùng (spec §3.2). Không còn mục nào viết cứng ở đây:
-   * bản trước ghép một truy vấn nhóm trang tài liệu với hai mục cố định, nên thứ tự
-   * tab không ai sửa được từ CMS. `getNavTree` trả mảng rỗng khi chưa có DB, và khi
-   * đó `TopBar` đơn giản không dựng dải tab.
+   * Nút gốc là dải tab trên cùng (spec §3.2): ba nhóm cố định (`content/nav.ts`)
+   * — ứng dụng, trò chơi, tài liệu — với con cháu của apps/docs suy ra từ chính
+   * các file trong `content/`, nên thêm một app/game/doc không bao giờ cần sửa
+   * cây bằng tay. `getNavTree` (`@/content`) không có gì để trả rỗng nữa — không
+   * còn `DATABASE_URL` để thiếu.
    */
   const tree = await getNavTree(locale);
 

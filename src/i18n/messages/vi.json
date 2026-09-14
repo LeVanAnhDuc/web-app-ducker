@@ -60,6 +60,14 @@
     "emptyTitle": "Chưa có ứng dụng nào ở đây",
     "emptyBody": "Thêm ứng dụng đầu tiên trong trang quản trị, nó hiện ra ngay trên trang này."
   },
+  "games": {
+    "eyebrow": "{count, plural, =0 {Chưa có trò chơi nào} other {# trò chơi}}",
+    "title": "Trò chơi",
+    "lede": "Những trò chơi nhỏ, chạy thẳng trên trình duyệt — không tài khoản, không cài đặt.",
+    "description": "Danh sách trò chơi trong hệ sinh thái, mỗi trò dẫn thẳng ra kho mã của nó.",
+    "emptyTitle": "Chưa có trò chơi nào ở đây",
+    "emptyBody": "Trò chơi đầu tiên sẽ hiện ra ngay trên trang này khi được thêm vào."
+  },
   "app": {
     "features": "Tính năng",
     "techStack": "Công nghệ sử dụng",

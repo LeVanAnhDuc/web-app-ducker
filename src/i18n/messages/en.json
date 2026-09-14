@@ -60,6 +60,14 @@
     "emptyTitle": "No apps here yet",
     "emptyBody": "Add the first app in the admin area and it shows up on this page right away."
   },
+  "games": {
+    "eyebrow": "{count, plural, =0 {No games yet} one {# game} other {# games}}",
+    "title": "Games",
+    "lede": "Small games that run straight in the browser — no account, nothing to install.",
+    "description": "The games in the ecosystem, each linking straight out to its repository.",
+    "emptyTitle": "No games here yet",
+    "emptyBody": "The first game shows up on this page as soon as it is added."
+  },
   "app": {
     "features": "Features",
     "techStack": "Tech stack",
