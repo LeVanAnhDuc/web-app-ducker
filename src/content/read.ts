@@ -53,5 +53,5 @@ export async function readGroup(group: Group, locale: string, root = CONTENT_ROO
 
 export async function readOne(group: Group, slug: string, locale: string, root = CONTENT_ROOT): Promise<ReadEntry | null> {
   const all = await readGroup(group, locale, root);
-  return all.find((e) => e.data.slug === slug || e.file.startsWith(`${slug}.`)) ?? null;
+  return all.find((e) => e.data.slug === slug) ?? null;
 }
