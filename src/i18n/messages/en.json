@@ -47,7 +47,6 @@
     "title": "One account, every app.",
     "lede": "IDMS issues the identity for the whole ecosystem. This site records what each app does, how to run it, and how it plugs into IDMS.",
     "core": "IDMS",
-    "appsLabel": "Where to start",
     "emptyTitle": "No apps here yet",
     "emptyBody": "The first app shows up on this page as soon as it is added.",
     "description": "Public documentation for the app ecosystem around the IDMS identity server."
@@ -73,8 +72,6 @@
     "techStack": "Tech stack",
     "viewRepo": "Interface repo",
     "viewRepoOnGithub": "View on GitHub",
-    "viewApiRepo": "Server repo",
-    "viewDemo": "Open the demo",
     "privateRepo": "Private repo"
   },
   "doc": {
@@ -82,9 +79,6 @@
   },
   "sidebar": {
     "label": "Documentation navigation"
-  },
-  "section": {
-    "permalink": "Link to section {title}"
   },
   "a11y": {
     "codeBlock": "Code block, scrolls horizontally",

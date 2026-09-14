@@ -47,7 +47,6 @@
     "title": "Một tài khoản, mọi ứng dụng.",
     "lede": "IDMS cấp danh tính cho toàn bộ hệ sinh thái. Trang này ghi lại từng ứng dụng làm gì, chạy thế nào, và nối vào IDMS ra sao.",
     "core": "IDMS",
-    "appsLabel": "Bắt đầu từ đâu",
     "emptyTitle": "Chưa có ứng dụng nào ở đây",
     "emptyBody": "Ứng dụng đầu tiên sẽ hiện ra ngay trên trang này khi được thêm vào.",
     "description": "Tài liệu công khai cho hệ sinh thái ứng dụng quanh máy chủ định danh IDMS."
@@ -73,8 +72,6 @@
     "techStack": "Công nghệ sử dụng",
     "viewRepo": "Repo giao diện",
     "viewRepoOnGithub": "Xem trên GitHub",
-    "viewApiRepo": "Repo máy chủ",
-    "viewDemo": "Mở bản chạy thử",
     "privateRepo": "Repo riêng tư"
   },
   "doc": {
@@ -82,9 +79,6 @@
   },
   "sidebar": {
     "label": "Điều hướng tài liệu"
-  },
-  "section": {
-    "permalink": "Liên kết tới mục {title}"
   },
   "a11y": {
     "codeBlock": "Khối mã, cuộn ngang được",
