@@ -16,6 +16,9 @@ export const entryFrontmatter = z.object({
   techStack: z.array(z.string()).default([]),
   /** Only "connected" entries carry this; it draws the branch under Ducker ID. */
   parent: z.string().optional(),
+  /** Authored, not derived: the repository exists but is not public.
+      Independent of `status: "private"`, which is about ecosystem integration. */
+  repoPrivate: z.boolean().default(false),
   features: z
     .array(
       z.object({

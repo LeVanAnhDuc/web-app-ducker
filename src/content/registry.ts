@@ -30,22 +30,22 @@ function toCard(e: ReadEntry): AppCard {
     integration: e.data.status,
     techStack: e.data.techStack,
     repoUrl: e.data.repo ?? null,
-    isRepoPrivate: e.data.repo === undefined && e.data.status !== "planned",
+    isRepoPrivate: e.data.repoPrivate,
     parent: e.data.parent ?? null,
   };
 }
 
-export async function listApps(locale: string): Promise<AppCard[]> {
-  return (await readGroup("apps", locale)).map(toCard);
+export async function listApps(locale: string, root?: string): Promise<AppCard[]> {
+  return (await readGroup("apps", locale, root)).map(toCard);
 }
 
-export async function listGames(locale: string): Promise<AppCard[]> {
-  return (await readGroup("games", locale)).map(toCard);
+export async function listGames(locale: string, root?: string): Promise<AppCard[]> {
+  return (await readGroup("games", locale, root)).map(toCard);
 }
 
-export async function getApp(slug: string, locale: string): Promise<AppDetail | null> {
+export async function getApp(slug: string, locale: string, root?: string): Promise<AppDetail | null> {
   // Apps only — games have no detail page in this design; `/games` links outward.
-  const entry = await readOne("apps", slug, locale);
+  const entry = await readOne("apps", slug, locale, root);
   if (!entry) return null;
   return {
     ...toCard(entry),

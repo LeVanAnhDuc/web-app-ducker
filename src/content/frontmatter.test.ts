@@ -68,4 +68,56 @@ order: 1
     const { data } = parseEntry(raw, "apps/simple.vi.mdx");
     expect(data.features).toEqual([]);
   });
+
+  it("defaults repoPrivate to false when not provided", () => {
+    const raw = `---
+name: Public Repo App
+status: core
+order: 1
+repo: https://github.com/example/repo
+---
+`;
+    const { data } = parseEntry(raw, "apps/public.vi.mdx");
+    expect(data.repoPrivate).toBe(false);
+  });
+
+  it("allows repoPrivate to be set to true for private repositories", () => {
+    const raw = `---
+name: Private Repo App
+status: core
+order: 1
+repo: https://github.com/example/private-repo
+repoPrivate: true
+---
+`;
+    const { data } = parseEntry(raw, "apps/private.vi.mdx");
+    expect(data.repoPrivate).toBe(true);
+  });
+
+  it("allows status: 'private' with a repo URL and repoPrivate: true", () => {
+    const raw = `---
+name: Private Integration
+status: private
+order: 1
+repo: https://github.com/example/private-app
+repoPrivate: true
+---
+`;
+    const { data } = parseEntry(raw, "apps/private-integration.vi.mdx");
+    expect(data.status).toBe("private");
+    expect(data.repo).toBe("https://github.com/example/private-app");
+    expect(data.repoPrivate).toBe(true);
+  });
+
+  it("allows a non-planned status without a repo and defaults repoPrivate to false", () => {
+    const raw = `---
+name: App Without Repo
+status: planned
+order: 1
+---
+`;
+    const { data } = parseEntry(raw, "apps/no-repo.vi.mdx");
+    expect(data.repo).toBeUndefined();
+    expect(data.repoPrivate).toBe(false);
+  });
 });
