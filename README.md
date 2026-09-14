@@ -27,9 +27,13 @@ push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 ## Features
 
 - **Public ecosystem pages**
-  - A page per app and per game — hero, feature grid, and body rendered from
-    Markdown
-  - An ecosystem overview, per-entry detail pages, and standalone doc pages
+  - A detail page per app — hero and body rendered from Markdown. The page
+    also renders a feature grid, but no content file currently authors
+    `features`, so it renders on no page yet
+  - An ecosystem overview and standalone doc pages, each with its own
+    detail page. Games have no detail page of their own — `/games` lists
+    them with the same card treatment as an app, and each card links
+    straight to its repository
   - A table of contents, a search dialog, and a sidebar navigation tree
 
 - **A games section**

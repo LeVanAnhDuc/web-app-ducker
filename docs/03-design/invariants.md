@@ -32,8 +32,16 @@ DOES NOT CONTAIN: format/naming conventions (-> lint config), architecture
 | I7 | `kind` and the pointer columns agree: `APP ⟺ appId != null`, `DOC ⟺ docPageId != null`, `CONTAINER ⟺ both null` | A node claiming to be one kind while wired like another |
 
 I1–I7 were partly database-enforced; there is no database now. `content/nav.ts` builds
-every row once per app/doc/game group, so I1, I4, I7 hold by construction. I2, I3, I5, I6
-are still checked in code — `buildNavTree` / `assertNavInvariants` (`src/content/nav-tree.ts`).
+every row once per app/doc/game group, so I1, I4, I7 hold by construction. Only I3 is
+still enforced in code: `assertNoCycle`, called from `buildNavTree`
+(`src/content/nav-tree.ts`), throws before a cycle can reach a rendered tree. I2, I5 and
+I6 live only inside `assertNavInvariants` in the same file, and nothing in `src/` or
+`e2e/` calls it — its only caller was the deleted `src/server/content/mutations.ts`.
+`wouldCreateCycle` is in the same state, exercised only by `nav-tree.test.ts`. Do not
+wire `assertNavInvariants` into `listNavRows` to close this gap: I2 ("a published
+CONTAINER must have a published child") would then throw on an empty content directory —
+turning the silent-empty-page failure mode of a missing `content/` bundle into a hard
+crash instead.
 
 ## Retired
 

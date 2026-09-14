@@ -1,11 +1,15 @@
 /**
- * Cây điều hướng: dựng cây từ danh sách phẳng, tìm đường, và kiểm sáu bất biến.
+ * Cây điều hướng: dựng cây từ danh sách phẳng, tìm đường, và kiểm bất biến.
  *
- * Thuần như `resolve.ts`: không chạm Prisma, không chạm Next.js. `queries.ts` đọc
- * `NavNode` ra một mảng phẳng rồi giao cho các hàm ở đây; `mutations.ts` gọi
- * `assertNavInvariants` và `wouldCreateCycle` trước khi ghi. Nhờ vậy toàn bộ quy
- * tắc của cây kiểm được bằng test không cần cơ sở dữ liệu — mà cây tự tham chiếu
- * chính là chỗ dễ sinh dữ liệu vô nghĩa nhất trong cả hệ thống (spec §4).
+ * Thuần: không chạm hệ thống tệp, không chạm Next.js. Đây là module sống sót
+ * duy nhất của tầng server cũ (Prisma) sau khi chuyển sang nội dung dựa trên
+ * tệp — `src/content/nav.ts` (`listNavRows`) nay dựng mảng phẳng thẳng từ
+ * `content/nav.ts` cùng các reader app/doc, rồi giao cho các hàm ở đây, thay
+ * vì đọc `NavNode` ra từ Prisma như trước (ADR-0018). Không còn `mutations.ts`
+ * để gọi `assertNavInvariants` / `wouldCreateCycle` trước khi ghi — không còn
+ * đường ghi nào nữa, nên hai hàm đó hiện không có nơi gọi trong production; chỉ
+ * `assertNoCycle` (I3) còn được gọi, từ `buildNavTree` bên dưới. Chi tiết:
+ * `docs/03-design/invariants.md`.
  *
  * Nút gốc (`parentId = null`) là dải tab trên cùng; con cháu của tab đang mở là
  * sidebar trái. URL giữ phẳng — cây chỉ điều khiển cách hiển thị điều hướng.
@@ -61,15 +65,16 @@ export function resolveTranslation<T extends { locale: string }>(
   return null;
 }
 
-/** Một dòng phẳng đọc từ DB, đã kèm mọi bản dịch cần để chọn nhãn. */
+/** Một dòng phẳng, đã kèm mọi bản dịch cần để chọn nhãn — dựng bởi `listNavRows` (`src/content/nav.ts`) từ `content/nav.ts` và các reader app/doc, không còn đọc từ DB. */
 export type NavRow = {
   id: string;
   parentId: string | null;
   order: number;
   status: Status;
   kind: NavKind;
-  /** Nhãn ứng viên theo locale: CONTAINER lấy từ NavNodeTranslation,
-   *  APP từ AppTranslation.name, DOC từ DocPageTranslation.title. */
+  /** Nhãn ứng viên theo locale: CONTAINER lấy từ `content/nav.ts`, APP/DOC lấy
+   *  từ frontmatter `name`/`title` của file `.mdx` tương ứng — không còn
+   *  `NavNodeTranslation` / `AppTranslation.name` / `DocPageTranslation.title`. */
   labels: { locale: string; value: string }[];
   /** null với CONTAINER. */
   href: string | null;
@@ -221,8 +226,14 @@ export function firstLeafHref(node: NavTreeNode): string | null {
 /**
  * Kiểm bốn bất biến kiểm được từ danh sách phẳng: I1, I2, I5, I6 (spec §4).
  *
- * I3 là `wouldCreateCycle`, gọi riêng khi đổi cha. I4 (một App/DocPage chỉ gắn
- * vào đúng một nút) do `@unique` trong DB ép.
+ * Không còn nơi nào trong production gọi hàm này nữa — nơi gọi duy nhất trước
+ * đây là `src/server/content/mutations.ts`, đã xoá cùng tầng ghi (ADR-0019); giờ
+ * chỉ `nav-tree.test.ts` còn gọi trực tiếp. I1, I4, I7 nay đúng do cách
+ * `listNavRows` dựng dữ liệu, không cần kiểm nữa; xem `docs/03-design/invariants.md`.
+ * `wouldCreateCycle` (I3, bên dưới) ở cùng tình trạng — không có nơi gọi trong
+ * production, chỉ được kiểm bởi test. Đừng nối lại hàm này vào `listNavRows` để
+ * "khôi phục" việc kiểm: I2 sẽ ném lỗi ngay khi một thư mục nội dung rỗng, biến
+ * một trang trống lặng lẽ thành một lần sập ứng dụng.
  *
  * Chỉ xét nút đã publish: bản nháp được phép dở dang: đó là ý nghĩa của nháp.
  */
