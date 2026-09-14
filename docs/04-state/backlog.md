@@ -59,7 +59,7 @@ Real run on 2026-09-14, on this branch, with **no environment variables set at a
 
 | Check | Result |
 | --- | --- |
-| `pnpm test:run` | **199 passed**, 0 skipped (29 files) |
+| `pnpm test:run` | **192 passed**, 0 skipped (28 files) |
 | `pnpm typecheck` · `pnpm lint` | clean |
 | `pnpm build` | succeeds with no environment configured — `NFR-REL-04`, strengthened |
 | `pnpm e2e` | **16 passed**, 0 skipped |

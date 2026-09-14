@@ -18,7 +18,7 @@ description, or publishing a guide is an edit to a file under `content/` and a
 push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 [ADR-0019](docs/decisions/0019-no-administration-surface.md).
 
-> **Status:** the application code is complete — **199 unit tests** pass
+> **Status:** the application code is complete — **192 unit tests** pass
 > (`pnpm test:run`), `tsc --noEmit` is clean, and `pnpm build` succeeds with
 > **no environment variables at all**. `pnpm e2e` passes **16/16**.
 > **Never deployed to Vercel**, but nothing blocks it any more — the deploy
@@ -83,7 +83,7 @@ push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 
 Next.js 16 · next-intl · Vercel. No database, no auth layer, no object store.
 
-Testing: Vitest (199 unit tests) and Playwright (16 e2e).
+Testing: Vitest (192 unit tests) and Playwright (16 e2e).
 
 ## Running
 
