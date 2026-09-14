@@ -1,7 +1,7 @@
 // src/lib/markdown.test.ts
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
-import { renderMarkdown } from "./markdown";
+import { attachHeadingIds, renderMarkdown } from "./markdown";
 
 describe("renderMarkdown", () => {
   it("dựng tiêu đề và đoạn văn", async () => {
@@ -60,5 +60,28 @@ describe("hợp đồng với globals.css", () => {
     const css = readFileSync("src/styles/globals.css", "utf8");
     expect(css).toContain("code[data-theme]");
     expect(css).not.toMatch(/^\s*\.shiki[\s,{]/m);
+  });
+});
+
+describe("attachHeadingIds", () => {
+  it("stamps each h2 with the matching TOC anchor, in document order", async () => {
+    const html = await renderMarkdown("## First\n\nA.\n\n## Second\n\nB.");
+    const stamped = attachHeadingIds(html, [{ anchor: "first" }, { anchor: "second" }]);
+    expect(stamped).toContain('<h2 id="first">');
+    expect(stamped).toContain('<h2 id="second">');
+  });
+
+  it("leaves the html untouched when there is no TOC", async () => {
+    const html = await renderMarkdown("Nội dung không có tiêu đề.");
+    expect(attachHeadingIds(html, [])).toBe(html);
+  });
+
+  it("leaves an unmatched heading alone rather than guess an anchor", async () => {
+    const html = await renderMarkdown("## First\n\nA.\n\n## Second\n\nB.");
+    // Fewer TOC entries than headings should not happen in practice, but the
+    // second heading must stay as-is rather than receive a wrong id.
+    const stamped = attachHeadingIds(html, [{ anchor: "first" }]);
+    expect(stamped).toContain('<h2 id="first">');
+    expect(stamped).toContain("<h2>Second</h2>");
   });
 });

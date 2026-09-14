@@ -1,7 +1,8 @@
 import { navGroups } from "../../content/nav";
+import { defaultLocale } from "@/i18n/locales.generated";
 import { listApps } from "./registry";
 import { listDocs } from "./docs";
-import type { NavRow } from "./nav-tree";
+import { buildNavTree, type NavRow, type NavTreeNode } from "./nav-tree";
 
 /** A pushed child's source: enough to build one `NavRow` under a container. */
 type NavChildSource = { slug: string; name: string };
@@ -80,4 +81,18 @@ export async function listNavRows(locale: string): Promise<NavRow[]> {
   );
 
   return rows;
+}
+
+/**
+ * The public navigation tree for one locale: root nodes are the top tab strip,
+ * descendants of the open tab are the left sidebar.
+ *
+ * The file-backed replacement for `getNavTree` in `@/server/content/queries` —
+ * same shape, built from `listNavRows` instead of Prisma. There is no draft
+ * state to filter here (every row from `listNavRows` is already `PUBLISHED`,
+ * per R14), but `buildNavTree` still does that filtering from its Prisma-era
+ * contract, so it is harmless to route through it unchanged.
+ */
+export async function getNavTree(locale: string): Promise<NavTreeNode[]> {
+  return buildNavTree(await listNavRows(locale), locale, defaultLocale);
 }
