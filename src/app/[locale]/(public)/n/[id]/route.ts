@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { locales } from "@/i18n/locales.generated";
 import { firstLeafHref, type NavTreeNode } from "@/content/nav-tree";
-import { getNavTree } from "@/server/content/queries";
+import { getNavTree } from "@/content";
 
 /**
  * `/[locale]/n/[id]` — địa chỉ của một nút chứa.

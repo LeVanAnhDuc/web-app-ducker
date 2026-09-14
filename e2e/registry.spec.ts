@@ -16,6 +16,11 @@ test("the home registry lists both groups", async ({ page }) => {
   // card grid, so the plain text appears twice on this page.
   await expect(page.getByText("Ducker ID").first()).toBeVisible();
   await expect(page.getByText("Duck Solitaire").first()).toBeVisible();
+
+  // Ducker ID has a tagline in its frontmatter, so it should render the data-testid attribute.
+  await expect(
+    page.getByRole("listitem").filter({ hasText: "Ducker ID" }).getByTestId("tagline"),
+  ).toBeVisible();
 });
 
 test("a planned entry shows no invented description", async ({ page }) => {
@@ -30,4 +35,7 @@ test("a planned entry shows no invented description", async ({ page }) => {
   // to a reader is exactly what `AppCard` is built to avoid. So this asserts
   // the thing the case is actually named for: no tagline paragraph renders.
   await expect(row.getByTestId("tagline")).toHaveCount(0);
+
+  // The status badge should display the translated label for planned status.
+  await expect(row).toContainText("Dự kiến nối");
 });
