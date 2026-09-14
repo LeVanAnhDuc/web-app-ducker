@@ -48,7 +48,7 @@ describe("listNavRows", () => {
     const appsNode = tree.find((n) => n.id === "apps")!;
     expect(appsNode.children).toHaveLength(2);
     expect(appsNode.children.every((c) => c.kind === "APP")).toBe(true);
-    expect(appsNode.children.map((c) => c.href)).toEqual(["/apps/ducker-id", "/apps/match-cv"]);
+    expect(appsNode.children.map((c) => c.href)).toEqual(["/vi/apps/ducker-id", "/vi/apps/match-cv"]);
   });
 
   it("puts every doc under the docs container, with kind DOC (R4/I7)", async () => {
@@ -56,14 +56,14 @@ describe("listNavRows", () => {
     const docChildren = rows.filter((r) => r.parentId === "docs");
     expect(docChildren).toHaveLength(2);
     expect(docChildren.every((r) => r.kind === "DOC")).toBe(true);
-    expect(docChildren.map((r) => r.href)).toEqual(["/docs/getting-started", "/docs/faq"]);
+    expect(docChildren.map((r) => r.href)).toEqual(["/vi/docs/getting-started", "/vi/docs/faq"]);
   });
 
   it("makes the games row a leaf pointing at /games, with no children (R5)", async () => {
     const rows = await listNavRows("vi");
     const games = rows.find((r) => r.id === "games")!;
     expect(games.kind).toBe("APP");
-    expect(games.href).toBe("/games");
+    expect(games.href).toBe("/vi/games");
     expect(rows.some((r) => r.parentId === "games")).toBe(false);
   });
 

@@ -76,6 +76,24 @@ export async function listDocs(locale: string, root?: string): Promise<{ slug: s
   return (await readGroup("docs", locale, contentRoot)).map((e) => ({ slug: e.data.slug!, title: e.data.name }));
 }
 
+export type DocSearchEntry = { slug: string; title: string; body: string };
+
+/**
+ * Every doc's slug, title and body for one locale, in a single `readGroup` pass.
+ *
+ * Exists for the search index (I-1/I-3): `readGroup` already resolves per-locale
+ * fallback correctly (unlike `listDocSlugs`, which is hardcoded to `defaultLocale`
+ * and so drops an English-only document from the English index), and this avoids
+ * one `readOne` — a full extra directory scan — per document.
+ */
+export async function listDocsWithBody(locale: string, root?: string): Promise<DocSearchEntry[]> {
+  return (await readGroup("docs", locale, root)).map((e) => ({
+    slug: e.data.slug!,
+    title: e.data.name,
+    body: e.body,
+  }));
+}
+
 export async function getDocPage(slug: string, locale: string): Promise<DocPageDetail | null> {
   const entry = await readOne("docs", slug, locale);
   if (!entry) return null;

@@ -63,7 +63,7 @@ export async function listNavRows(locale: string): Promise<NavRow[]> {
         order,
         status: "PUBLISHED",
         kind: "APP",
-        href: "/games",
+        href: `/${locale}/games`,
         labels: Object.entries(group.labels).map(([loc, value]) => ({ locale: loc, value })),
       });
       return;
@@ -72,11 +72,11 @@ export async function listNavRows(locale: string): Promise<NavRow[]> {
   });
 
   const apps = await listApps(locale);
-  apps.forEach((app, order) => rows.push(childRow(app, order, "apps", "/apps", "APP", locale)));
+  apps.forEach((app, order) => rows.push(childRow(app, order, "apps", `/${locale}/apps`, "APP", locale)));
 
   const docs = await listDocs(locale);
   docs.forEach((doc, order) =>
-    rows.push(childRow({ slug: doc.slug, name: doc.title }, order, "docs", "/docs", "DOC", locale)),
+    rows.push(childRow({ slug: doc.slug, name: doc.title }, order, "docs", `/${locale}/docs`, "DOC", locale)),
   );
 
   return rows;
