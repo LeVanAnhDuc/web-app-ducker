@@ -46,6 +46,35 @@ resolved by this migration — both must be resolved when the repaint lands, not
 [`../specs/next-themes/`](../specs/next-themes/), reasoning in
 [ADR-0020](../decisions/0020-next-themes-for-the-theme.md).
 
+**Release automation — installed, awaiting its first run.** The repository had no
+release mechanism and no tag at all; it now derives both the version and the notes from
+commit subjects via git-cliff, on every push to `main`. Reasoning in
+[ADR-0021](../decisions/0021-versions-and-notes-derive-from-commits.md). Installed from
+the two workspace skills `commit-rule` (with `design` declared at slot 04 — this
+repository has used that type 5 times) and `release-note`. **The first release will be
+`v0.1.0` and will cover all 50 commits in one note.** Preview it without pushing:
+`pnpm release:next` · `pnpm release:notes`.
+
+Owed on the next clone, on every machine: `git config core.hooksPath .githooks`. It is
+local configuration and cannot be committed — the CI check in
+`.github/workflows/commit-lint.yml` exists precisely because of that, and must not be
+dropped as redundant.
+
+**Two traps found while installing it, both from the same cause — a stale worktree.**
+`.worktrees/next-themes/` still holds a pre-migration checkout with its own
+`node_modules`, and two tools were walking into it:
+
+- `pnpm test:run` did not finish. `vitest.config.mts` declared
+  `exclude: ["node_modules/**", ...]`, and declaring `exclude` **replaces** vitest's
+  default `**/node_modules/**` — so only the root `node_modules` was skipped and vitest
+  silently ran thousands of dependency test files. Fixed to `**/node_modules/**` plus
+  `.worktrees/**`; the suite now finishes in ~44s. The symptom was a hang, never a red
+  test, which is why nobody read it as a config bug.
+- The `.env.example` hook warned about 10 variables "the code reads" — `DATABASE_URL`,
+  the `R2_*` set, `ADMIN_*`. **All ten come from that worktree**, not from this tree;
+  the deleted `src/server/` is what read them. `docs-regen.sh` now excludes
+  `.worktrees`. Nothing is missing from `.env.example`.
+
 Last completed: documenting the file-backed-registry migration — this entry, plus
 `invariants.md`, `nfr.md`, `CLAUDE.md`, `README.md` and ADR-0015's mechanism — and two
 small code follow-ups that belonged with the story: renaming
