@@ -1,0 +1,115 @@
+# Publish a GitHub Release on every push to `main` — both the version and the notes
+# are derived from commit history, so nobody has to remember anything.
+#
+# Merging a PR into `main` IS a push to `main`, so one trigger covers both flows.
+# git-cliff reads COMMITS, not pull requests, so the notes are never empty just
+# because the work did not go through a PR.
+#
+# The version rules live in `cliff.toml`, not here. Preview locally:
+#   pnpm release:next     -> the next version
+#   pnpm release:notes    -> what the notes will say
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  # Pinned: a behaviour change in git-cliff must not silently change how this repo
+  # is versioned.
+  GIT_CLIFF_VERSION: "2.13.1"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # REQUIRED. The anchor for computing the version is the latest git tag,
+          # and a shallow clone has no tags - git-cliff would count from the very
+          # first commit instead.
+          fetch-depth: 0
+
+      # Only here to provide `pnpm dlx`. The version comes from `packageManager`
+      # in package.json, so this job and the local command run the same git-cliff.
+      - uses: pnpm/action-setup@v4
+
+      - name: Work out the version
+        id: v
+        run: |
+          set -euo pipefail
+          latest=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          range="${latest:+$latest..}HEAD"
+
+          # Markers are read across the WHOLE RANGE, not from HEAD's subject. In a
+          # PR flow HEAD is always the "Merge pull request #N from ..." commit
+          # GitHub generates, so reading HEAD means a marker in the real commit
+          # never arrives.
+          subjects=$(git log --no-merges --pretty=%s "$range")
+
+          force=""
+          case "$subjects" in
+            *"[skip release]"*)
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+              echo "Skipping: [skip release] found in $range"
+              exit 0
+              ;;
+            *"[release major]"*) force="--bump major" ;;
+            *"[release minor]"*) force="--bump minor" ;;
+          esac
+
+          next=$(pnpm dlx "git-cliff@${GIT_CLIFF_VERSION}" --bumped-version $force)
+
+          # git-cliff reprints the current version when there is nothing to bump.
+          if [ "$next" = "$latest" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping: no new commits since $latest"
+            exit 0
+          fi
+
+          echo "skip=false"        >> "$GITHUB_OUTPUT"
+          echo "next=$next"        >> "$GITHUB_OUTPUT"
+          echo "latest=$latest"    >> "$GITHUB_OUTPUT"
+          echo "$latest -> $next${force:+  (forced by $force)}"
+
+      - name: Compose the notes
+        if: steps.v.outputs.skip == 'false'
+        env:
+          NEXT: ${{ steps.v.outputs.next }}
+          LATEST: ${{ steps.v.outputs.latest }}
+        run: |
+          set -euo pipefail
+          pnpm dlx "git-cliff@${GIT_CLIFF_VERSION}" --unreleased --tag "$NEXT" --strip all > NOTES.md
+
+          # The compare link is assembled here rather than in the template: this is
+          # the place that knows GITHUB_REPOSITORY, and cliff.toml should not have to.
+          if [ -n "$LATEST" ]; then
+            printf '\n**Full changelog**: %s/%s/compare/%s...%s\n' \
+              "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$LATEST" "$NEXT" >> NOTES.md
+          else
+            printf '\n**Full changelog**: %s/%s/commits/%s\n' \
+              "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$NEXT" >> NOTES.md
+          fi
+          cat NOTES.md
+
+      - name: Publish
+        if: steps.v.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEXT: ${{ steps.v.outputs.next }}
+        run: |
+          set -euo pipefail
+          # `gh release create` creates the tag at this commit. That tag is the
+          # anchor for next time, so the loop closes itself: no manual step exists.
+          gh release create "$NEXT" \
+            --target "$GITHUB_SHA" \
+            --title "$NEXT" \
+            --notes-file NOTES.md

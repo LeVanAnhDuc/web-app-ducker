@@ -1,0 +1,5 @@
+# Types specific to web-app-ducker. Syntax: [NN ]<type>[ = <Release note bucket>]
+# Full reference: <skills>/commit-rule/templates/commit-types.example
+# After editing this file, if the repo has cliff.toml you must regenerate it:
+#   bash <skills>/release-note/scripts/install.sh web-app-ducker --force
+04 design

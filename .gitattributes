@@ -1,0 +1,13 @@
+# Shell scripts MUST keep LF, on every platform.
+#
+# `core.autocrlf=true` is the default on Windows, and without this rule a fresh
+# clone there checks these files out with CRLF. `bash` then reads the shebang as
+# `/usr/bin/env bash\r` and fails with `bad interpreter` — so the commit hook stops
+# running and nothing says so. The CI check is the only thing that would catch it,
+# one push later.
+*.sh text eol=lf
+.githooks/* text eol=lf
+
+# Read by bash in CI (the release and commit-lint workflows).
+*.yml text eol=lf
+*.yaml text eol=lf
