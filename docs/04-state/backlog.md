@@ -60,6 +60,22 @@ local configuration and cannot be committed — the CI check in
 `.github/workflows/commit-lint.yml` exists precisely because of that, and must not be
 dropped as redundant.
 
+**CI and deploy — written, and deploy is one manual step away from working.**
+`.github/workflows/ci.yml` runs typecheck · lint · unit tests · build · e2e on every PR
+and every push to `main`, and a `deploy` job behind `needs: [static, e2e]` ships to
+Vercel with `vercel build` + `vercel deploy --prebuilt`. Reasoning in
+[ADR-0022](../decisions/0022-deploy-from-actions-not-vercel-git.md), steps in
+[`../05-operations/runbook.md`](../05-operations/runbook.md) §6 (rewritten — §1–5 and §7
+of that file are still pre-migration and must not be followed).
+
+**Blocked on credentials only, and only the deploy job.** `VERCEL_TOKEN`,
+`VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are not set, and the last two do not exist until
+someone runs `vercel link` once — the repository has still never been deployed. Until
+then the deploy job fails at its first step naming the missing secret; the checks above
+it run normally. **If the Vercel Git integration is ever connected, turn its
+auto-deploy off** (runbook §6.3) or every push deploys twice, ungated copy possibly
+last.
+
 **Two traps found while installing it, both from the same cause — a stale worktree.**
 `.worktrees/next-themes/` still holds a pre-migration checkout with its own
 `node_modules`, and two tools were walking into it:

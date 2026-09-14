@@ -1,0 +1,183 @@
+# The pipeline: everything that decides whether a commit is fit to ship, plus the
+# shipping itself.
+#
+# ── Why deploy lives HERE and not in its own file ──────────────────────────────
+# `needs:` only reaches jobs inside one workflow. Splitting deploy into its own file
+# means gating it with `workflow_run`, which fires on FAILURE too unless you remember
+# to test `conclusion == 'success'` — and forgetting that reads exactly like a green
+# pipeline while shipping code no check ever passed. One file, one `needs:`, no way
+# to get it wrong.
+#
+# `release.yml` stays separate on purpose: it writes a GitHub Release, it does not
+# decide whether anything is fit to ship, and it must run even when this file is
+# being changed.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A second push to the same branch makes the first one irrelevant — except on `main`,
+# where cancelling could kill a deploy half-way.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  # Local development is on 22.x. Pinning the major here means CI cannot start
+  # failing because GitHub moved its default runner image forward.
+  NODE_VERSION: "22"
+  # Pinned exactly, for the same reason release.yml pins git-cliff: a behaviour
+  # change upstream must not silently change what gets shipped.
+  VERCEL_CLI_VERSION: "59.16.0"
+
+jobs:
+  # ── Everything that needs no browser and no build ──────────────────────────
+  static:
+    name: typecheck · lint · unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Run all three even when an earlier one fails: three separate answers are
+      # worth more than the first one, and none of them can corrupt the next.
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        if: '!cancelled()'
+        run: pnpm lint
+      - name: Unit tests
+        if: '!cancelled()'
+        run: pnpm test:run
+
+  # ── The build, and the tests that need a real server ───────────────────────
+  # `pnpm build` is here rather than in `static` because e2e cannot run without it:
+  # playwright.config.ts starts `pnpm start` on port 3210 and refuses to borrow an
+  # existing server. Building twice in two jobs would just cost a second build.
+  e2e:
+    name: build · e2e
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Chromium only — playwright.config.ts declares exactly one project.
+      - name: Install Playwright's chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # No environment variables are set anywhere in this job, deliberately: the
+      # build is supposed to need none (NFR-REL-04), and the only way to keep that
+      # true is to never hand it any.
+      - name: Build
+        run: pnpm build
+
+      - name: E2E
+        run: pnpm e2e
+
+      - name: Upload the trace of anything that failed
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # ── Ship it ────────────────────────────────────────────────────────────────
+  # Only from `main`, only on a real push (never on a PR, which would deploy code
+  # that has not been reviewed), and only behind both jobs above.
+  deploy:
+    name: deploy to Vercel
+    needs: [static, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      # Say which secret is missing, in one line, instead of letting the Vercel CLI
+      # fail several steps later with something that reads like a network problem.
+      # The three values are NOT interchangeable and none of them has a default.
+      - name: Check the deploy credentials exist
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          missing=""
+          [ -n "${VERCEL_TOKEN:-}" ]      || missing="$missing VERCEL_TOKEN"
+          [ -n "${VERCEL_ORG_ID:-}" ]     || missing="$missing VERCEL_ORG_ID"
+          [ -n "${VERCEL_PROJECT_ID:-}" ] || missing="$missing VERCEL_PROJECT_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Missing repository secret(s):$missing"
+            echo "ORG_ID and PROJECT_ID come from .vercel/project.json after running"
+            echo "\`vercel link\` once against this repository."
+            exit 1
+          fi
+
+      # ⚠️ `vercel build`, NEVER `next build` + a hand-rolled upload.
+      #
+      # next.config.ts declares `outputFileTracingIncludes` to force `content/**`
+      # into two route handlers' bundles, because src/content/read.ts builds its
+      # root from `process.cwd()` and readdir's it at REQUEST time — which Vercel's
+      # file tracer cannot see by static analysis. Only Vercel's own build applies
+      # that config. Skip it and both handlers deploy green and then return empty
+      # results in production, because read.ts's ENOENT fallback cannot tell a
+      # missing bundle from an empty content group.
+      - name: Pull the project settings
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: pnpm dlx "vercel@$VERCEL_CLI_VERSION" pull --yes --environment=production --token "$VERCEL_TOKEN"
+
+      - name: Build with Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: pnpm dlx "vercel@$VERCEL_CLI_VERSION" build --prod --token "$VERCEL_TOKEN"
+
+      - name: Deploy
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          # Take the last https:// line rather than the whole of stdout: the CLI is
+          # free to add a progress line, and a URL with a stray line in front of it
+          # fails as a deployment URL in a way that is tedious to read.
+          url=$(pnpm dlx "vercel@$VERCEL_CLI_VERSION" deploy --prebuilt --prod --token "$VERCEL_TOKEN" | grep -Eo 'https://[^[:space:]]+' | tail -1)
+          [ -n "$url" ] || { echo "::error::the Vercel CLI printed no deployment URL"; exit 1; }
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $url"
+          echo "### Deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "$url"         >> "$GITHUB_STEP_SUMMARY"

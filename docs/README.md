@@ -15,7 +15,7 @@
 | [`04-state/backlog.md`](04-state/backlog.md) | What is being worked on, what comes next, and what is owed… | 🟢 complete | work starts or finishes · brainstorming produces new work … |
 | [`05-operations/runbook.md`](05-operations/runbook.md) | How do I stand this up, deploy it, and run the database-ba… | 🟡 detailed, but **predates the file-backed … | a new environment variable · an infrastructure provider ch… |
 | [`design-system/ducker/MASTER.md`](design-system/ducker/MASTER.md) | — | — | — |
-| [`decisions/`](decisions/README.md) | Why was it done this way? | 21 ADRs | every technical decision |
+| [`decisions/`](decisions/README.md) | Why was it done this way? | 22 ADRs | every technical decision |
 | [`../.env.example`](../.env.example) | Which environment variables are needed to run? | 🟢 complete — mirrors what the code actually… | code starts reading a new variable, or stops reading one |
 <!-- END:auto -->
 
