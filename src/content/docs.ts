@@ -14,17 +14,54 @@ export type DocPageDetail = {
   isFallback: boolean;
 };
 
+/** Matches the fence delimiter line itself; the info string (e.g. `bash`) is ignored. */
+const FENCE_DELIMITER = /^\s*([`~]{3,})/;
+
 export function buildToc(markdown: string): TocItem[] {
+  // Disambiguation state: `seen` counts occurrences per slug base (so repeats of the
+  // same heading keep counting up), `emitted` is every anchor already handed out —
+  // checked so a base's own count never collides with an anchor a *different* base
+  // happened to produce (e.g. "Cài đặt" (2nd) vs. "Cài đặt 2").
   const seen = new Map<string, number>();
+  const emitted = new Set<string>();
   const out: TocItem[] = [];
+
+  // Fenced code blocks (``` or ~~~, 3+ chars, ignoring the info string) must not have
+  // their contents read as headings. A fence closes only on a delimiter of the same
+  // character as the one that opened it.
+  let fenceChar: string | null = null;
+
   for (const line of markdown.split("\n")) {
+    const fenceMatch = FENCE_DELIMITER.exec(line);
+    if (fenceMatch) {
+      const char = fenceMatch[1]![0]!;
+      if (fenceChar === null) {
+        fenceChar = char;
+      } else if (char === fenceChar) {
+        fenceChar = null;
+      }
+      continue;
+    }
+    if (fenceChar !== null) continue;
+
     const m = /^##\s+(.+?)\s*$/.exec(line);
     if (!m) continue;
-    const title = m[1];
-    const base = slugify(title);
-    const n = (seen.get(base) ?? 0) + 1;
+    const title = m[1]!;
+    // An emoji-only or symbol-only title slugifies to "", which would render as
+    // `href="#"` and jump to the top of the page — fall back to a stable per-position
+    // anchor instead, still run through the same collision-avoidance below.
+    const base = slugify(title) || `section-${out.length + 1}`;
+
+    let n = (seen.get(base) ?? 0) + 1;
+    let candidate = n === 1 ? base : `${base}-${n}`;
+    while (emitted.has(candidate)) {
+      n++;
+      candidate = `${base}-${n}`;
+    }
     seen.set(base, n);
-    out.push({ anchor: n === 1 ? base : `${base}-${n}`, title });
+    emitted.add(candidate);
+
+    out.push({ anchor: candidate, title });
   }
   return out;
 }
