@@ -91,11 +91,11 @@ credentials.
 
 ## Open decisions
 
-- **`DocPage("home")` is `DRAFT` and `/docs/home` 404s on purpose.** Its nav node is
-  draft too, so it never appears in the sidebar. The home page is currently built from
-  interface strings rather than rendering that record. Publishing it would put a dead
-  link into the search index. Decide: make the home page render the real record
-  (FR-20), or delete the record.
+- ~~**`DocPage("home")` is `DRAFT` and `/docs/home` 404s on purpose.**~~ **Resolved
+  2026-09-14, dropped.** The move to file-backed content (this migration) closed FR-20
+  by deleting the record instead of building a renderer for it: `content/docs/` has no
+  `home.vi.mdx`, so there is nothing left to publish and no dead link to worry about.
+  The home page keeps rendering from interface strings, as it always did.
 - **Raw HTML in markdown is not rendered** (FR-19) — no `<kbd>`, `<details>`, `<br>`.
   Opening it means `rehype-raw` + `allowDangerousHtml: true` and dropping the
   hand-written filter in `src/lib/markdown.ts`; sanitisation already has

@@ -1,0 +1,19 @@
+---
+name: Manage Gym
+status: standalone
+order: 50
+repo: https://github.com/LeVanAnhDuc/web-app-manage-gym
+tagline: Nhật ký tập luyện cá nhân, dựng quanh đúng tuần bạn thực sự tập
+techStack:
+  - Next.js
+  - Prisma
+  - Auth.js
+---
+
+Một sổ theo dõi tập gym cho một người: định nghĩa lịch tập trong tuần một lần, và mỗi ngày
+ứng dụng mở ra đúng bài bạn phải tập hôm đó, món nên ăn cho loại ngày đó, và buổi tập bạn
+đang bỏ dở.
+
+Ứng dụng cố tình chỉ dành cho một người: đăng nhập kiểm tra một cặp `APP_EMAIL` /
+`APP_PASSWORD` duy nhất từ biến môi trường, nên không có đăng ký, không có bảng người dùng,
+và không có gì để chia sẻ.

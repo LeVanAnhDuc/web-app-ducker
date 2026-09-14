@@ -1,0 +1,61 @@
+---
+name: Hướng dẫn tích hợp OAuth
+status: core
+order: 20
+tagline: Năm bước nối một ứng dụng vào IDMS bằng Authorization Code kèm PKCE.
+---
+
+## Cần có trước
+
+Đăng ký ứng dụng trong bảng quản trị của IDMS để lấy `client_id` và khai địa chỉ chuyển
+hướng. Địa chỉ khai sai một ký tự là bước 3 trả lỗi `redirect_uri_mismatch`.
+
+**Không** cần `client_secret`: ứng dụng chạy trong trình duyệt dùng PKCE thay cho bí mật.
+
+## Luồng năm bước
+
+1. Sinh `code_verifier` ngẫu nhiên, băm SHA-256 thành `code_challenge`.
+2. Lưu `code_verifier` vào `sessionStorage` — nó phải sống qua lần chuyển trang.
+3. Chuyển người dùng sang IDMS kèm `client_id`, `redirect_uri`, `code_challenge`, `state`.
+4. Người dùng đăng nhập và đồng ý quyền; IDMS chuyển họ về `redirect_uri` kèm `code`.
+5. Gửi `code` cùng `code_verifier` lên máy chủ, nhận access token và ID token.
+
+## Bước 3 — chuyển người dùng
+
+```
+GET /oauth/authorize
+  ?response_type=code
+  &client_id=<client_id>
+  &redirect_uri=<đúng địa chỉ đã khai>
+  &code_challenge=<băm SHA-256 của code_verifier>
+  &code_challenge_method=S256
+  &state=<chuỗi ngẫu nhiên, kiểm lại ở bước 4>
+```
+
+`state` không phải thủ tục cho đủ: thiếu nó thì kẻ khác gửi được một `code` của họ vào
+phiên của người dùng.
+
+## Bước 5 — đổi mã lấy token
+
+Bước này chạy ở **máy chủ của ứng dụng**, không chạy trong trình duyệt.
+
+```bash
+curl -X POST https://<idms>/oauth/token \
+  -d grant_type=authorization_code \
+  -d code=<code> \
+  -d code_verifier=<code_verifier> \
+  -d client_id=<client_id> \
+  -d redirect_uri=<redirect_uri>
+```
+
+Đặt token vào cookie `HttpOnly`. Để trong `localStorage` là mở đường cho mọi đoạn script
+trên trang đọc được nó.
+
+## Ba lỗi hay gặp
+
+- `redirect_uri_mismatch`: địa chỉ gửi lên khác địa chỉ đã khai, thường vì thiếu hoặc thừa
+  dấu `/` ở cuối.
+- `invalid_grant` ở bước 5: `code_verifier` không khớp — hay xảy ra khi trang được tải lại
+  giữa bước 2 và bước 5, làm mất `sessionStorage`.
+- Người dùng quay lại mà vẫn chưa đăng nhập: ứng dụng đọc access token từ `localStorage`
+  thay vì đọc cookie do máy chủ đặt.

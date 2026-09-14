@@ -1,0 +1,18 @@
+---
+name: Ducker Flow Grid
+status: standalone
+order: 40
+repo: https://github.com/LeVanAnhDuc/web-app-AI-workflow-automation-platform
+tagline: Vẽ một đồ thị các node, nối chúng lại, và nền tảng sẽ chạy nó
+techStack:
+  - Go
+---
+
+Một nền tảng tự động hoá quy trình dạng trực quan: vẽ một đồ thị gồm các node, nối chúng
+lại, và nền tảng sẽ chạy nó — kích hoạt bằng tay, qua một webhook đến, hoặc theo lịch cron.
+Mỗi lần chạy được ghi lại từng node một, nên có thể xem lại, phát lại, và tiếp tục từ đúng
+node đã lỗi thay vì chạy lại từ đầu.
+
+Ba pha đầu đã được cài đặt: bộ dựng đồ thị dạng canvas, engine thực thi, lịch sử thực thi,
+các node AI — kể cả một agent gọi những node khác trong đồ thị như công cụ — và một kho lưu
+thông tin xác thực với OAuth2 cùng các connector ứng dụng thật.
