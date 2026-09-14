@@ -1,39 +1,28 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
-import type { AppDetail } from "@/server/content/queries";
+import type { AppDetail } from "@/content";
 import { AppHero } from "./AppHero";
 import { FeatureGrid } from "./FeatureGrid";
 
 const app: AppDetail = {
-  id: "a1",
   slug: "ducker-id",
-  kind: "CORE",
-  status: "PUBLISHED",
-  order: 0,
-  logoUrl: null,
-  repoUrl: "https://github.com/LeVanAnhDuc/web-app-ducker-id",
-  apiRepoUrl: null,
-  demoUrl: null,
-  isRepoPrivate: false,
-  isStandalone: false,
-  techStack: ["Next.js 16"],
-  integration: "core",
   name: "Ducker ID",
   tagline: "Cổng đăng nhập và bảng khởi chạy ứng dụng",
-  summary: "Giao diện của IDMS.",
+  integration: "core",
+  techStack: ["Next.js 16"],
+  repoUrl: "https://github.com/LeVanAnhDuc/web-app-ducker-id",
+  isRepoPrivate: false,
+  parent: null,
+  body: "Nội dung.",
+  features: [],
   locale: "vi",
   isFallback: false,
-  features: [],
-  sections: [],
-  toc: [],
 };
 
 const labels = {
   status: "Lõi",
   privateRepo: "Repo riêng tư",
   repo: "Xem repo",
-  apiRepo: "Xem repo máy chủ",
-  demo: "Mở bản chạy thử",
   fallback: "Chưa có bản dịch",
 };
 
@@ -73,41 +62,22 @@ describe("AppHero", () => {
 });
 
 describe("FeatureGrid", () => {
-  it("mỗi ô mang cờ fallback riêng — bản dịch hoàn thiện không đều", () => {
+  it("dựng tiêu đề và mô tả tính năng từ frontmatter", () => {
     render(
       <FeatureGrid
         title="Tính năng"
-        locale="vi"
-        fallbackLabel="Chưa có bản dịch"
         features={[
-          {
-            id: "f1",
-            order: 0,
-            icon: null,
-            title: "Đăng nhập OTP",
-            description: null,
-            locale: "vi",
-            isFallback: false,
-          },
-          {
-            id: "f2",
-            order: 1,
-            icon: null,
-            title: "Consent screen",
-            description: null,
-            locale: "en",
-            isFallback: true,
-          },
+          { title: "Đăng nhập OTP", description: null, icon: null },
+          { title: "Consent screen", description: "Màn hình xin quyền OAuth.", icon: null },
         ]}
       />,
     );
-    expect(screen.getAllByText("Chưa có bản dịch")).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "Đăng nhập OTP" })).toBeInTheDocument();
+    expect(screen.getByText("Màn hình xin quyền OAuth.")).toBeInTheDocument();
   });
 
   it("không tính năng nào thì không dựng tiêu đề cho khối trống", () => {
-    const { container } = render(
-      <FeatureGrid features={[]} title="Tính năng" locale="vi" fallbackLabel="x" />,
-    );
+    const { container } = render(<FeatureGrid features={[]} title="Tính năng" />);
     expect(container).toBeEmptyDOMElement();
   });
 });

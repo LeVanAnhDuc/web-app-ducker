@@ -4,8 +4,8 @@ import { AppCard } from "./AppCard";
 
 const base = {
   slug: "app-manage-gym", name: "Manage Gym", tagline: "Nhật ký tập luyện",
-  kind: "SATELLITE" as const, techStack: ["Next.js 16"], integration: "planned" as const,
-  isRepoPrivate: false,
+  techStack: ["Next.js 16"], integration: "planned" as const,
+  isRepoPrivate: false, repoUrl: null, parent: null,
 };
 
 describe("AppCard", () => {
