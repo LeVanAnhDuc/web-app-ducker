@@ -354,54 +354,85 @@ Sau lần deploy đầu, **nguồn sự thật là DB**. Sửa nội dung qua CM
 
 ---
 
-## 6. Deploy lên Vercel
+## 6. Deploy lên Vercel — bằng GitHub Actions
 
-### 6.1 Import project
+> Mục này đã được viết lại 2026-09-14 và **đúng với mã hiện tại**. Các mục 1–5 và 7
+> phía trên/dưới vẫn là tài liệu tiền-migration: chúng nói về Neon, R2, Prisma và
+> đăng nhập admin, tất cả đã bị xoá (ADR-0018, ADR-0019). Đừng làm theo chúng.
 
-1. [vercel.com](https://vercel.com) → **Add New** → **Project** → import repo `web-app-ducker`.
-2. Framework Preset: Vercel tự nhận **Next.js**. Build Command để mặc định — `prebuild` tự chạy trước nó. Vercel nhận trình quản lý gói từ lockfile: repo commit `pnpm-lock.yaml` nên nó chạy `pnpm install` rồi `pnpm build`. Đừng ghi đè Install Command bằng `npm ci`.
+Deploy do `.github/workflows/ci.yml` chạy, job `deploy`, **chỉ** khi push vào `main`
+và **chỉ** sau khi cả job `static` lẫn `e2e` xanh. Lý do chọn Actions thay vì để
+Vercel tự deploy theo Git: ADR-0022.
 
-### 6.2 Khai biến môi trường
+### 6.1 Link project một lần — để lấy hai ID
 
-Vào **Settings → Environment Variables**, khai cho cả **Production** và **Preview**:
+Hai trong ba secret không tồn tại cho tới khi project được tạo trên Vercel. Chạy ở
+máy bạn, một lần:
 
-| Biến | Giá trị |
-|---|---|
-| `DATABASE_URL` | chuỗi **pooled** (có `-pooler`) của branch chính |
-| `AUTH_SECRET` | mục 4 |
-| `ADMIN_EMAIL` | email đăng nhập admin |
-| `ADMIN_PASSWORD_HASH` | mục 3 — **hash**, không phải mật khẩu |
-| `PREVIEW_SECRET` | mục 4 |
-| `R2_ACCOUNT_ID` · `R2_ACCESS_KEY_ID` · `R2_SECRET_ACCESS_KEY` · `R2_BUCKET` · `R2_PUBLIC_BASE_URL` | mục 2 |
-| `NEXT_PUBLIC_SITE_URL` | URL thật, ví dụ `https://web-app-ducker.vercel.app` |
-
-**Không** khai `ADMIN_PASSWORD` và `DATABASE_URL_TEST` trên Vercel. Cái đầu là mật khẩu thô chỉ dùng cho e2e cục bộ; cái sau trỏ vào branch mà `prisma migrate reset` xoá định kỳ.
-
-Dùng chuỗi **pooled** ở đây là chủ đích: Vercel chạy serverless, mỗi function một kết nối, đi trực tiếp sẽ cạn connection của Neon.
-
-### 6.3 `postinstall: prisma generate` là bắt buộc
-
-`package.json` có:
-
-```json
-"postinstall": "prisma generate"
+```bash
+pnpm dlx vercel@59.16.0 login
+pnpm dlx vercel@59.16.0 link       # chọn/tạo project cho repo này
+cat .vercel/project.json           # -> { "orgId": "...", "projectId": "..." }
 ```
 
-**Đừng bỏ dòng này.** Prisma Client sinh mã vào `node_modules/.prisma`, và `node_modules` không nằm trong git. Vercel cài dependencies vào một môi trường sạch mỗi lần build; không có `postinstall`, `next build` sẽ đổ ở ngay câu `import { PrismaClient }` với lỗi kiểu "did you forget to run prisma generate". Vercel còn có thể tái dùng cache dependencies giữa các lần build, khiến lỗi này xuất hiện *không đều* — build được lần này, đỏ lần sau, khó truy hơn nhiều.
+`.vercel/` đã nằm trong `.gitignore` — **đừng commit nó**.
 
-### 6.4 `DATABASE_URL` phải có mặt lúc **build**, không chỉ lúc chạy
+Token lấy ở [vercel.com/account/tokens](https://vercel.com/account/tokens). Nó deploy
+được *mọi* project trong tài khoản, nên hãy đặt thời hạn và coi như mật khẩu.
 
-`prebuild` chạy `scripts/generate-locales.ts`, script này **đọc bảng `Locale`** để sinh `src/i18n/locales.generated.ts`. Nên `DATABASE_URL` cần có ở cả build time — khai biến trong Vercel Environment Variables là đủ, Vercel cấp nó cho cả hai pha.
+### 6.2 Ba secret của repo
 
-Script được viết để không làm sập deploy: thiếu `DATABASE_URL` hoặc DB không với tới được thì nó **giữ nguyên** `locales.generated.ts` đã commit và in cảnh báo. Nó chỉ dừng build khi *đọc được* DB mà dữ liệu sai — không locale nào bật, hoặc số locale mặc định khác 1. Hai lỗi đó sửa được ở CMS.
+GitHub → **Settings → Secrets and variables → Actions → New repository secret**:
 
-### 6.5 Sau deploy đầu tiên — kiểm bằng tay
+| Secret | Lấy từ |
+|---|---|
+| `VERCEL_TOKEN` | trang Account Tokens ở trên |
+| `VERCEL_ORG_ID` | `orgId` trong `.vercel/project.json` |
+| `VERCEL_PROJECT_ID` | `projectId` trong `.vercel/project.json` |
 
-1. Mở `/vi` → thấy danh sách 6 ứng dụng, tên hiển thị dạng **Ducker ID** (không phải `ducker-id`).
-2. Mở `/en` → giao diện tiếng Anh, nội dung chưa dịch thì fallback về `vi` kèm badge.
-3. Mở `/vi/admin` → bị đá sang `/vi/admin/login`. Đăng nhập bằng `ADMIN_EMAIL` + mật khẩu thô.
-4. Sửa một tagline → lưu → mở lại trang công khai tương ứng → thấy nội dung mới **mà không deploy lại**. Đây là lời hứa trung tâm của hệ thống; hỏng chỗ này thì revalidate sai.
-5. Tải một ảnh lên trong CMS → ảnh hiện được → chứng minh `R2_PUBLIC_BASE_URL` và quyền công khai của bucket đúng.
+Thiếu cái nào thì job `deploy` dừng ngay ở bước đầu và **nói rõ thiếu cái nào** —
+bước đó tồn tại chỉ để tránh việc Vercel CLI đổ ở mấy bước sau bằng một thông báo
+trông như lỗi mạng.
+
+### 6.3 Tắt auto-deploy của Vercel Git integration
+
+Nếu bạn đã nối repo với Vercel qua GitHub App, **mỗi push sẽ deploy hai lần** — một
+lần do Vercel, một lần do Actions — và bản không qua kiểm thử có thể về đích sau,
+tức là đè lên bản đã kiểm. Vào **Project Settings → Git** và tắt Production Branch
+auto-deploy, hoặc đặt Ignored Build Step thành `exit 0`.
+
+Đây là cái bẫy dễ nhất để dính, vì cả hai đường đều "hoạt động".
+
+### 6.4 `vercel build`, tuyệt đối không phải `next build`
+
+Job deploy chạy `vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt`.
+Đừng thay bằng `next build` rồi tự upload.
+
+`next.config.ts` khai `outputFileTracingIncludes` để ép `content/**` vào bundle của
+hai route handler, vì `src/content/read.ts` dựng thư mục gốc từ `process.cwd()` rồi
+`readdir` lúc **request** — thứ mà file tracer của Vercel không thấy được bằng phân
+tích tĩnh. Chỉ bản build của chính Vercel mới áp dụng cấu hình đó. Bỏ qua nó thì cả
+hai handler vẫn deploy xanh rồi **trả về rỗng trong production**, vì nhánh dự phòng
+ENOENT trong `read.ts` không phân biệt được "bundle thiếu file" với "nhóm nội dung
+rỗng".
+
+### 6.5 Không có biến môi trường nào phải khai
+
+Build không cần biến nào — không DB, không secret, không object store. `.env.example`
+chỉ còn hai biến tuỳ chọn và không phải secret. Job `e2e` cố tình **không** đặt biến
+nào, để tính chất đó không âm thầm mất đi (NFR-REL-04).
+
+### 6.6 Sau lần deploy đầu — kiểm bằng mắt
+
+Ứng dụng không còn khu admin, nên danh sách ngắn hơn trước:
+
+1. Mở `/` → chuyển hướng sang `/vi`.
+2. `/vi` → thấy đăng ký ứng dụng, tên hiển thị dạng **Ducker ID** chứ không phải
+   `ducker-id`.
+3. `/en` → giao diện tiếng Anh; phần chưa dịch fallback về `vi` kèm badge.
+4. `/api/search-index/vi` → trả về JSON **không rỗng**. Đây là phép thử trực tiếp cho
+   mục 6.4: rỗng nghĩa là `content/` không lên được bundle.
+5. Đổi chủ đề sáng/tối → tải lại → lựa chọn còn nguyên.
 
 ---
 

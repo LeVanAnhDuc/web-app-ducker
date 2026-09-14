@@ -48,6 +48,13 @@ Commit subjects are enforced — Conventional Commits, the 11 shared types plus 
 those subjects, so the two preview commands above reproduce exactly what CI publishes
 ([ADR-0021](docs/decisions/0021-versions-and-notes-derive-from-commits.md)).
 
+`.github/workflows/ci.yml` runs all five commands above on every pull request, and
+deploys to Vercel from `main` only once they pass
+([ADR-0022](docs/decisions/0022-deploy-from-actions-not-vercel-git.md)). The deploy step
+uses `vercel build`, never `next build` — only Vercel's own build honours
+`outputFileTracingIncludes`, and without it two route handlers ship green and return
+empty.
+
 The build needs no environment at all: there is no database, no secret, and no object
 store to configure. `.env.example` lists only two optional, non-secret variables.
 
