@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Git hook: reject a commit whose subject fails Conventional Commits.
+#
+# This hook lives in .githooks/ AND IS COMMITTED, not in .git/hooks/ - that
+# directory does not survive `git clone`. Enable it with:
+#
+#     git config core.hooksPath .githooks
+#
+# Because that `git config` has to be re-run on every clone, this hook is only
+# fast feedback, not real enforcement. Real enforcement is the job in
+# .github/workflows/commit-lint.yml - that one cannot be skipped with --no-verify.
+set -uo pipefail
+
+dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if ! bash "$dir/commit-lint.sh" --file "$1"; then
+  printf '\n  Commit rejected. Fix the message and commit again.\n' >&2
+  printf '  See accepted types    : bash .githooks/commit-lint.sh --types\n' >&2
+  printf '  Add a project type    : edit .githooks/commit-types\n' >&2
+  printf '  Skip deliberately (rare): git commit --no-verify\n\n' >&2
+  exit 1
+fi

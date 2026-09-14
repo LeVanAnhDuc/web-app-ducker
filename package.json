@@ -12,7 +12,9 @@
     "test:run": "vitest run --maxWorkers=1",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "release:next": "pnpm dlx git-cliff@2.13.1 --bumped-version",
+    "release:notes": "pnpm dlx git-cliff@2.13.1 --unreleased --tag $(pnpm dlx git-cliff@2.13.1 --bumped-version) --strip all"
   },
   "repository": {
     "type": "git",

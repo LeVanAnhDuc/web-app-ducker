@@ -38,7 +38,15 @@ pnpm typecheck         # tsc --noEmit
 pnpm lint
 pnpm build             # no environment variables required — content is read from `content/`
 pnpm e2e               # Playwright, on its own port 3210
+pnpm release:next      # the version the next push to main would publish
+pnpm release:notes     # what that release's notes would say
 ```
+
+Commit subjects are enforced — Conventional Commits, the 11 shared types plus `design`
+(`.githooks/commit-types`). After a fresh clone, once:
+`git config core.hooksPath .githooks`. The version and the notes are both derived from
+those subjects, so the two preview commands above reproduce exactly what CI publishes
+([ADR-0021](docs/decisions/0021-versions-and-notes-derive-from-commits.md)).
 
 The build needs no environment at all: there is no database, no secret, and no object
 store to configure. `.env.example` lists only two optional, non-secret variables.

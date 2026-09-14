@@ -1,0 +1,98 @@
+# git-cliff — version rules + release-note grouping. GENERATED, DO NOT HAND-EDIT.
+#
+# The `commit_parsers` block below is generated from THIS repo's own commit rule:
+#
+#     .githooks/commit-lint.sh --groups   (the commit-rule skill)
+#         |
+#         '--> commit_parsers in this file
+#
+# So the type list exists in exactly one place. To add a type:
+#
+#   1. add it to .githooks/commit-types  (the project's own types)
+#   2. bash <skills>/release-note/scripts/install.sh <repo> --force
+#   3. bash .githooks/commit-lint.sh --doctor      -> must report "agree"
+#
+# Hand-editing the parser block means the hook still rejects the new type while the
+# new bucket stays empty forever. Everything else here (bump rules, note template)
+# IS safe to edit by hand - regeneration preserves it, because it comes from the
+# template rather than from the commit rule.
+#
+# Preview locally, no push needed:
+#   pnpm dlx git-cliff --bumped-version          -> the next version
+#   pnpm dlx git-cliff --unreleased --tag vX.Y.Z -> what the notes will say
+
+[bump]
+# feat always bumps minor, even while below 1.0.
+features_always_bump_minor = true
+# A breaking change bumps MINOR while major is still 0. Nothing is stable before
+# 1.0, and 1.0.0 is a claim about completeness - so crossing it must be deliberate,
+# via the [release major] marker, rather than something that just happens.
+breaking_always_bump_major = false
+# The FIRST release in a repo that has no tag yet. Without this git-cliff proposes a
+# bare `0.1.0`, which does not match `tag_pattern` below (`v[0-9].*`) - so it aborts
+# with "Next version (0.1.0) does not match the tag pattern" and the very first
+# release of a brand-new repo can never be published. Every later version is derived
+# from the previous tag and ignores this value.
+initial_tag = "v0.1.0"
+
+[git]
+conventional_commits = true
+# false = commits that do not follow the convention are STILL listed (they land in
+# the Other bucket) rather than dropped. A release note that quietly swallows
+# commits is a release note that has started lying.
+# This matters more in a repo that adopted the commit rule late: its old history
+# does not meet the convention and must still show up in the notes.
+filter_unconventional = false
+# A breaking change can never be hidden by a later parser.
+protect_breaking_commits = true
+tag_pattern = "v[0-9].*"
+topo_order = false
+sort_commits = "oldest"
+
+# The order here is the order in the notes, taken from the first column of
+# --groups: what users see first, then what the people writing the code care
+# about. The <!--N--> prefix only exists to sort; `striptags` removes it on render.
+commit_parsers = [
+  # A merge commit restates what its branch already said -> drop it. What counts is
+  # the commits the branch BRINGS IN.
+  { message = "^Merge pull request", skip = true },
+  { message = "^Merge branch",       skip = true },
+  { message = "^feat",     group = "<!--01-->Features" },
+  { message = "^fix",      group = "<!--02-->Fixes" },
+  { message = "^perf",     group = "<!--03-->Performance" },
+  { message = "^design",   group = "<!--04-->Design" },
+  { message = "^refactor", group = "<!--20-->Refactoring" },
+  { message = "^style",    group = "<!--21-->Styling" },
+  { message = "^docs",     group = "<!--22-->Documentation" },
+  { message = "^test",     group = "<!--23-->Tests" },
+  { message = "^build",    group = "<!--24-->Build" },
+  { message = "^ci",       group = "<!--25-->CI" },
+  { message = "^chore",    group = "<!--26-->Chores" },
+  { message = "^revert",   group = "<!--27-->Reverts" },
+  # Catch-all. Must be the LAST parser.
+  { message = ".*",        group = "<!--99-->Other" },
+]
+
+[changelog]
+header = ""
+# The compare link is not built here: the workflow knows GITHUB_REPOSITORY and
+# appends it. This template only handles grouping.
+footer = ""
+trim = true
+body = """
+{%- set breaking = commits | filter(attribute="breaking", value=true) -%}
+{%- if breaking | length > 0 %}
+### ⚠ Breaking changes
+{% for commit in breaking %}
+- {% if commit.scope %}**{{ commit.scope }}**: {% endif %}\
+{{ commit.message | upper_first }} (`{{ commit.id | truncate(length=7, end="") }}`)
+{%- endfor %}
+{% endif -%}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim }}
+{% for commit in commits %}
+- {% if commit.breaking %}**BREAKING** {% endif %}\
+{% if commit.scope %}**{{ commit.scope }}**: {% endif %}\
+{{ commit.message | upper_first }} (`{{ commit.id | truncate(length=7, end="") }}`)
+{%- endfor %}
+{% endfor %}"""

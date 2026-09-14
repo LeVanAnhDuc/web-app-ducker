@@ -1,0 +1,53 @@
+# Validate every commit in a pull request against Conventional Commits 1.0.0.
+#
+# Why this job is needed when .githooks/commit-msg already exists: that hook is
+# bypassed by `--no-verify`, and on a fresh clone `core.hooksPath` has not been set
+# so it does not exist at all. This job is the real enforcement.
+#
+# The job needs no node, no python, no package.json and no cliff.toml - only bash
+# and git. That is deliberate: the commit rule has to run in a freshly initialised
+# repo, before the project has any library at all.
+name: Commit lint
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: commit-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  subjects:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history is needed for `git log base..head`.
+          fetch-depth: 0
+
+      - name: Check every commit subject in the pull request
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -uo pipefail
+          if [ -z "${BASE:-}" ]; then
+            echo "Not a pull request - no range to check."
+            exit 0
+          fi
+          bash .githooks/commit-lint.sh --range "$BASE..$HEAD"
+
+      # Reports, does NOT block. If the repo installed release-note, this step says
+      # whether the commit rule and cliff.toml still agree: a release-note bucket
+      # nothing can land in, or a type that falls through to "Other".
+      #
+      # No `exit 1` here, because config drift is not the fault of whoever opened
+      # the PR, and blocking their PR over a file they never touched is the wrong
+      # place to complain. Fix drift by re-running release-note/scripts/install.sh --force.
+      - name: Report rule/cliff.toml drift (informational)
+        if: always()
+        run: bash .githooks/commit-lint.sh --doctor || true
