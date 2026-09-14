@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { locales } from "@/i18n/locales.generated";
-import { findTrail, firstLeafHref, type NavTreeNode } from "@/server/content/nav";
+import { findTrail, firstLeafHref, type NavTreeNode } from "@/content/nav-tree";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { SearchDialog } from "./SearchDialog";
 import styles from "./TopBar.module.css";

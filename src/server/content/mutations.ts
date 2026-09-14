@@ -3,7 +3,7 @@ import { revalidateTag } from "next/cache";
 import { ensureUniqueAnchors } from "@/lib/slug";
 import type { AppInput, DocPageInput, FeatureInput, SectionInput } from "@/lib/schemas";
 import { prisma } from "@/server/db";
-import { assertNavInvariants, wouldCreateCycle, type NavKind, type NavRow } from "./nav";
+import { assertNavInvariants, wouldCreateCycle, type NavKind, type NavRow } from "@/content/nav-tree";
 import { loadDefaultLocale, readNavRows, type Status } from "./queries";
 import { assertSingleDefaultLocale, planContentSave, resolveTranslation } from "./resolve";
 import { tags } from "./tags";

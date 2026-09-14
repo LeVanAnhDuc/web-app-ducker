@@ -13,7 +13,7 @@ import { Toc } from "@/components/docs/Toc";
 import { Callout } from "@/components/ui/Callout";
 import { locales } from "@/i18n/locales.generated";
 import { requireAdmin } from "@/server/auth";
-import { findTrail } from "@/server/content/nav";
+import { findTrail } from "@/content/nav-tree";
 import { getApp, getNavTree } from "@/server/content/queries";
 import styles from "./page.module.css";
 

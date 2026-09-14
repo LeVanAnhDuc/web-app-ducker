@@ -5,8 +5,9 @@ import {
   firstLeafHref,
   wouldCreateCycle,
   assertNavInvariants,
+  resolveTranslation,
   type NavRow,
-} from "./nav";
+} from "./nav-tree";
 
 const row = (o: Partial<NavRow> & { id: string }): NavRow => ({
   parentId: null, order: 0, status: "PUBLISHED", kind: "CONTAINER",
@@ -119,5 +120,36 @@ describe("findTrail", () => {
       row({ id: "leaf", parentId: "m", kind: "APP", href: "/vi/apps/x" }),
     ], "vi", "vi");
     expect(findTrail(t, "/vi/apps/x").map(n => n.id)).toEqual(["r", "m", "leaf"]);
+  });
+});
+
+// Carried over from `src/server/content/resolve.test.ts` (R13): `resolveTranslation`
+// moved into this file with `buildNavTree`, its only surviving consumer, so this
+// coverage must not be lost when `src/server/` is deleted.
+describe("resolveTranslation", () => {
+  const rows = [
+    { locale: "vi", title: "Tính năng" },
+    { locale: "en", title: "Features" },
+  ];
+
+  it("trả đúng bản dịch khi có", () => {
+    expect(resolveTranslation(rows, "en", "vi")).toEqual({
+      value: rows[1], locale: "en", isFallback: false,
+    });
+  });
+
+  it("thiếu bản dịch thì lùi về locale mặc định và đánh dấu isFallback", () => {
+    expect(resolveTranslation(rows, "ja", "vi")).toEqual({
+      value: rows[0], locale: "vi", isFallback: true,
+    });
+  });
+
+  it("không có cả bản mặc định thì trả null, để trang gọi notFound()", () => {
+    expect(resolveTranslation([], "vi", "vi")).toBeNull();
+  });
+
+  it("không bao giờ trả slug làm nhãn thay thế", () => {
+    const r = resolveTranslation(rows, "ja", "vi");
+    expect(r!.value.title).not.toMatch(/-/);
   });
 });

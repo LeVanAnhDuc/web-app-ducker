@@ -4,7 +4,7 @@ import { defaultLocale as fallbackLocaleOfLastResort, locales } from "@/i18n/loc
 import { appKindValues, sectionBodySchema, statusValues, type SectionBody } from "@/lib/schemas";
 import { buildSearchIndex, type SearchDoc, type SearchIndexInput } from "@/lib/search-index";
 import { hasDatabase, prisma } from "@/server/db";
-import { buildNavTree, type NavKind, type NavRow, type NavTreeNode } from "./nav";
+import { buildNavTree, type NavKind, type NavRow, type NavTreeNode } from "@/content/nav-tree";
 import { assertSingleDefaultLocale, buildToc, resolveTranslation } from "./resolve";
 import { tags } from "./tags";
 

@@ -12,8 +12,6 @@
  */
 import { statusValues } from "@/lib/schemas";
 
-import { resolveTranslation } from "./resolve";
-
 /**
  * Ba loại nút (spec §3.1). Viết thẳng chứ không import từ `@prisma/client`, cùng
  * lối với `statusValues` trong `@/lib/schemas`: module này phải chạy được trong
@@ -23,6 +21,45 @@ export const navKindValues = ["CONTAINER", "APP", "DOC"] as const;
 export type NavKind = (typeof navKindValues)[number];
 
 type Status = (typeof statusValues)[number];
+
+/**
+ * Một giá trị đã chọn xong ngôn ngữ.
+ *
+ * `locale` là ngôn ngữ thực sự của `value`, không phải ngôn ngữ người dùng yêu
+ * cầu. `isFallback` để trang hiện badge "Chưa có bản <ngôn ngữ>" (spec §7.1) —
+ * badge này vừa trung thực với người đọc, vừa tự thành danh sách việc cần dịch.
+ *
+ * Carried over from `src/server/content/resolve.ts` (R13): the only consumer
+ * of `resolveTranslation` left after the file-backed move is `buildNavTree`
+ * below, so the helper moves with it instead of `resolve.ts` moving whole.
+ */
+export type Translated<T> = {
+  value: T;
+  locale: string;
+  isFallback: boolean;
+};
+
+/**
+ * Chọn bản dịch cho locale `want`, lùi về `fallback` khi thiếu.
+ *
+ * Trả `null` khi không có cả bản mặc định, để trang gọi `notFound()`. Tuyệt đối
+ * không bịa nhãn thay thế từ slug: "ducker-id" hiện ra chỗ đáng lẽ là
+ * "Ducker ID" trông như dữ liệu thật nên sẽ lọt qua mọi vòng kiểm tra,
+ * còn 404 thì lộ ngay.
+ */
+export function resolveTranslation<T extends { locale: string }>(
+  rows: T[],
+  want: string,
+  fallback: string,
+): Translated<T> | null {
+  const wanted = rows.find((row) => row.locale === want);
+  if (wanted) return { value: wanted, locale: want, isFallback: false };
+
+  const defaulted = rows.find((row) => row.locale === fallback);
+  if (defaulted) return { value: defaulted, locale: fallback, isFallback: true };
+
+  return null;
+}
 
 /** Một dòng phẳng đọc từ DB, đã kèm mọi bản dịch cần để chọn nhãn. */
 export type NavRow = {

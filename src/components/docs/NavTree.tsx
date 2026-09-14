@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 
-import { findTrail, type NavTreeNode } from "@/server/content/nav";
+import { findTrail, type NavTreeNode } from "@/content/nav-tree";
 import styles from "./NavTree.module.css";
 
 export type NavTreeProps = {

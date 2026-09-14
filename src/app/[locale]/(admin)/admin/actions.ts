@@ -12,7 +12,7 @@ import {
 } from "@/lib/schemas";
 import { renderMarkdown } from "@/lib/markdown";
 import { requireAdmin, signOut } from "@/server/auth";
-import { navKindValues } from "@/server/content/nav";
+import { navKindValues } from "@/content/nav-tree";
 import * as content from "@/server/content/mutations";
 import { MAX_IMAGE_BYTES, deleteImage, listImages, uploadImage } from "@/server/media";
 

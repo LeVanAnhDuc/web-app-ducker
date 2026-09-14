@@ -12,7 +12,7 @@
 // phải là xanh: coi như chưa chạy.
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 
-import type { NavRow, NavTreeNode } from "./nav";
+import type { NavRow, NavTreeNode } from "@/content/nav-tree";
 
 /**
  * `next/cache` đòi "store" của một lượt render Next.

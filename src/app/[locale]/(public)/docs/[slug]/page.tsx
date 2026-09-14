@@ -9,7 +9,7 @@ import { SectionBody } from "@/components/docs/SectionBody";
 import { Sidebar } from "@/components/docs/Sidebar";
 import { Toc } from "@/components/docs/Toc";
 import { defaultLocale, locales } from "@/i18n/locales.generated";
-import { findTrail } from "@/server/content/nav";
+import { findTrail } from "@/content/nav-tree";
 import { LANDING_DOC_SLUG, getDocPage, getNavTree, getStaticSlugs } from "@/server/content/queries";
 import styles from "./page.module.css";
 
