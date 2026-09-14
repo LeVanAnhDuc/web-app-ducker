@@ -27,8 +27,13 @@ export async function readGroup(group: Group, locale: string, root = CONTENT_ROO
   let files: string[];
   try {
     files = await readdir(join(root, group));
-  } catch {
-    return []; // a group with no directory is empty, not an error
+  } catch (err) {
+    // A missing directory is a legitimately empty group. Anything else — a
+    // permissions error, a corrupt path, `content/` absent from the deployed
+    // bundle entirely — must not read as "this group is empty"; it needs to
+    // surface as a request failure, not a silent empty search result.
+    if ((err as NodeJS.ErrnoException)?.code === "ENOENT") return [];
+    throw err;
   }
 
   const bySlug = new Map<string, Map<string, string>>();
