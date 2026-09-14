@@ -68,7 +68,22 @@ Vercel with `vercel build` + `vercel deploy --prebuilt`. Reasoning in
 [`../05-operations/runbook.md`](../05-operations/runbook.md) §6 (rewritten — §1–5 and §7
 of that file are still pre-migration and must not be followed).
 
-**Blocked on credentials only, and only the deploy job.** `VERCEL_TOKEN`,
+**Deploy is deferred by decision, not blocked by accident (2026-09-14).** The host is
+still undecided: Vercel as `ci.yml` configures it, or GitHub Pages — which would need
+`output: 'export'`, delete `src/middleware.ts`, turn `/api/search-index/[locale]` into a
+build-time file (**contradicting NFR-PERF-05**, so it needs its own ADR) and turn
+`/[locale]/n/[id]` into static pages. The one real user-facing cost of Pages is that `/`
+would always land on `/vi`: locale can no longer be negotiated from `Accept-Language`
+without a server. `next/image` is used nowhere, so the usual worst blocker is absent.
+Next 16.3.1 also now warns that the `middleware` file convention is deprecated in favour
+of `proxy`, so that file needs attention either way.
+
+Until the host is chosen, a missing secret makes the `deploy` job **skip loudly** — a
+`::notice::` and a job-summary heading saying nothing was deployed — rather than fail.
+Failing painted every push to `main` red for a reason nobody intended to fix that day,
+and a permanently red pipeline is one people stop reading.
+
+**Original state, kept for when the decision lands.** `VERCEL_TOKEN`,
 `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are not set, and the last two do not exist until
 someone runs `vercel link` once — the repository has still never been deployed. Until
 then the deploy job fails at its first step naming the missing secret; the checks above

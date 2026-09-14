@@ -123,7 +123,20 @@ jobs:
       # Say which secret is missing, in one line, instead of letting the Vercel CLI
       # fail several steps later with something that reads like a network problem.
       # The three values are NOT interchangeable and none of them has a default.
-      - name: Check the deploy credentials exist
+      # Deploy is DEFERRED, not abandoned: the target host is still being decided
+      # (Vercel as configured here, or GitHub Pages — which would need the app to
+      # become a static export and would delete this job entirely).
+      #
+      # So a missing secret is not treated as a failure. Failing here would paint
+      # every push to `main` red for a reason nobody intends to fix today, and a
+      # pipeline that is always red is a pipeline people stop reading — the exact
+      # habit this workflow exists to prevent.
+      #
+      # It does NOT pass quietly either. A skipped deploy that looks like a normal
+      # green run is its own trap, so this writes a notice and a job summary line
+      # saying, in as many words, that nothing was deployed.
+      - name: Are the deploy credentials configured?
+        id: creds
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -135,10 +148,19 @@ jobs:
           [ -n "${VERCEL_ORG_ID:-}" ]     || missing="$missing VERCEL_ORG_ID"
           [ -n "${VERCEL_PROJECT_ID:-}" ] || missing="$missing VERCEL_PROJECT_ID"
           if [ -n "$missing" ]; then
-            echo "::error::Missing repository secret(s):$missing"
-            echo "ORG_ID and PROJECT_ID come from .vercel/project.json after running"
-            echo "\`vercel link\` once against this repository."
-            exit 1
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::NOTHING WAS DEPLOYED — missing repository secret(s):$missing"
+            {
+              echo "### ⚠️ Nothing was deployed"
+              echo
+              echo "Missing repository secret(s):\`$missing\`"
+              echo
+              echo "\`VERCEL_ORG_ID\` and \`VERCEL_PROJECT_ID\` come from"
+              echo "\`.vercel/project.json\`, which only exists after running"
+              echo "\`vercel link\` once against this repository. See runbook §6."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
       # ⚠️ `vercel build`, NEVER `next build` + a hand-rolled upload.
@@ -151,6 +173,7 @@ jobs:
       # results in production, because read.ts's ENOENT fallback cannot tell a
       # missing bundle from an empty content group.
       - name: Pull the project settings
+        if: steps.creds.outputs.ready == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -158,6 +181,7 @@ jobs:
         run: pnpm dlx "vercel@$VERCEL_CLI_VERSION" pull --yes --environment=production --token "$VERCEL_TOKEN"
 
       - name: Build with Vercel
+        if: steps.creds.outputs.ready == 'true'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -165,6 +189,7 @@ jobs:
         run: pnpm dlx "vercel@$VERCEL_CLI_VERSION" build --prod --token "$VERCEL_TOKEN"
 
       - name: Deploy
+        if: steps.creds.outputs.ready == 'true'
         id: deploy
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
