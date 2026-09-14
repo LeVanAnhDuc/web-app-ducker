@@ -2,17 +2,18 @@ import { readFileSync, existsSync } from "node:fs";
 import { describe, it, expect } from "vitest";
 
 /**
- * Both root layouts must mount the provider. Nothing else catches a layout that
+ * The root layout must mount the provider. Nothing else catches a layout that
  * forgot it — a component test mounts its own provider and passes happily while
  * the real document renders unthemed.
  *
  * Scanning source is the technique `src/server/auth/boundary.test.ts` already
  * uses for the three doors.
+ *
+ * There used to be a second entry here for the admin route group's root
+ * layout; it was deleted along with the rest of the administration surface
+ * (ADR-0019).
  */
-const LAYOUTS = [
-  "src/app/[locale]/(public)/layout.tsx",
-  "src/app/[locale]/(admin)/admin/layout.tsx",
-];
+const LAYOUTS = ["src/app/[locale]/(public)/layout.tsx"];
 
 describe("theme wiring", () => {
   it.each(LAYOUTS)("%s mounts ThemeProvider", (file) => {
