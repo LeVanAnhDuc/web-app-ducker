@@ -1,4 +1,4 @@
-import { defaultLocale } from "@/i18n/locales.generated";
+import { defaultLocale } from "@/i18n/locales";
 import messages from "@/i18n/messages/vi.json";
 
 import styles from "./[locale]/status.module.css";

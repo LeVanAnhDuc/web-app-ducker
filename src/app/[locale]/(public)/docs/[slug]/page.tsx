@@ -4,13 +4,14 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { DocsShell } from "@/components/docs/DocsShell";
 import { FallbackNotice } from "@/components/docs/FallbackNotice";
+import { MarkdownBody } from "@/components/docs/MarkdownBody";
 import { NavDrawer } from "@/components/docs/NavDrawer";
-import { SectionBody } from "@/components/docs/SectionBody";
 import { Sidebar } from "@/components/docs/Sidebar";
 import { Toc } from "@/components/docs/Toc";
-import { defaultLocale, locales } from "@/i18n/locales.generated";
-import { findTrail } from "@/server/content/nav";
-import { LANDING_DOC_SLUG, getDocPage, getNavTree, getStaticSlugs } from "@/server/content/queries";
+import { defaultLocale, locales } from "@/i18n/locales";
+import { findTrail } from "@/content/nav-tree";
+import { getDocPage, getNavTree, listDocSlugs } from "@/content";
+import { attachHeadingIds, renderMarkdown } from "@/lib/markdown";
 import styles from "./page.module.css";
 
 /**
@@ -19,29 +20,24 @@ import styles from "./page.module.css";
  * Cùng khung với trang ứng dụng, khác ở chỗ không có khối tính năng. Cột trái
  * dựng từ đúng cây điều hướng đó, nên một bài hướng dẫn nằm cạnh ứng dụng trong
  * cùng một nhánh vẫn hiện đúng chỗ.
+ *
+ * ADR-0018: `home` không còn là một slug dành riêng nữa — Task 6 cố tình không
+ * viết `content/docs/home.*.mdx`, và FR-20 đã bị gỡ bỏ. Một slug không có file
+ * thì `getDocPage` trả `null` và trang này 404 tự nhiên, không cần canh riêng.
  */
 
 type PageParams = { params: Promise<{ locale: string; slug: string }> };
 
-/**
- * `getStaticSlugs()` đã loại `home` (trang chủ render bằng chính `DocPage` đó),
- * và trả rỗng khi chưa có `DATABASE_URL` để `next build` vẫn chạy.
- * `dynamicParams` để mặc định `true`: trang mới tạo trong CMS có ngay.
- */
+/** `listDocSlugs()` liệt kê `content/docs/` qua locale mặc định. */
 export async function generateStaticParams() {
-  const { docs } = await getStaticSlugs();
+  const docs = await listDocSlugs();
   return locales.flatMap((locale) => docs.map((slug) => ({ locale, slug })));
-}
-
-/** Trang chủ đã dùng `DocPage(slug="home")`; mở nó lần nữa ở đây là trùng nội dung. */
-function isReservedSlug(slug: string): boolean {
-  return slug === LANDING_DOC_SLUG;
 }
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { locale, slug } = await params;
   const t = await getTranslations({ locale });
-  const page = isReservedSlug(slug) ? null : await getDocPage(slug, locale);
+  const page = await getDocPage(slug, locale);
 
   if (!page) return { title: `${t("notFound.title")} — ${t("brand.name")}` };
 
@@ -67,8 +63,6 @@ export default async function DocPage({ params }: PageParams) {
 
   const t = await getTranslations({ locale });
 
-  if (isReservedSlug(slug)) notFound();
-
   const page = await getDocPage(slug, locale);
   if (!page) notFound();
 
@@ -89,6 +83,10 @@ export default async function DocPage({ params }: PageParams) {
       : t("doc.guides");
 
   const fallbackLabel = t("fallback.notice");
+
+  // R3: `page.toc` đã có sẵn (`getDocPage` gọi `buildToc` giúp); chỉ còn phải tự
+  // kết xuất HTML và gắn cùng anchor vào từng `<h2>` đã kết xuất.
+  const html = attachHeadingIds(await renderMarkdown(page.body), page.toc);
 
   return (
     <DocsShell
@@ -123,19 +121,7 @@ export default async function DocPage({ params }: PageParams) {
             labels={{ open: t("sidebar.label"), close: t("search.close") }}
           />
 
-          {page.sections.map((section) => (
-            <SectionBody
-              key={section.id}
-              section={section}
-              locale={locale}
-              labels={{
-                fallback: fallbackLabel,
-                code: t("a11y.codeBlock"),
-                table: t("a11y.table"),
-                permalink: t("section.permalink", { title: section.title }),
-              }}
-            />
-          ))}
+          <MarkdownBody html={html} labels={{ code: t("a11y.codeBlock"), table: t("a11y.table") }} />
         </article>
       }
     />

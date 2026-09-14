@@ -1,4 +1,4 @@
-import type { TocItem } from "@/server/content/queries";
+import type { TocItem } from "@/content";
 import styles from "./Toc.module.css";
 
 export type TocProps = {

@@ -2,23 +2,23 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { AppCard } from "@/components/docs/AppCard";
+import { GameCard } from "@/components/docs/GameCard";
 import { WireDiagram, type WireItem } from "@/components/ui";
-import { defaultLocale, locales } from "@/i18n/locales.generated";
-import { listApps } from "@/server/content/queries";
+import { defaultLocale, locales } from "@/i18n/locales";
+import { listApps, listGames } from "@/content";
 import styles from "./page.module.css";
 
 /**
  * Trang chủ dựng tĩnh cho từng ngôn ngữ (mockup màn 01).
  *
- * Danh sách ứng dụng lấy từ DB; chưa cấu hình `DATABASE_URL` thì `listApps` trả
- * mảng rỗng và trang hiện trạng thái trống — lời mời thêm ứng dụng, không phải
- * lỗi. Trang tuyệt đối không được đổ vỡ vì chuyện đó.
+ * Danh sách ứng dụng và trò chơi đọc thẳng từ `content/` (ADR-0018): registry của
+ * hệ sinh thái — ứng dụng trước (với nhánh IdP trong sơ đồ đấu nối), trò chơi sau.
  */
 
 type PageParams = { params: Promise<{ locale: string }> };
 
 export async function generateStaticParams() {
-  const { locales } = await import("@/i18n/locales.generated");
+  const { locales } = await import("@/i18n/locales");
   return locales.map((locale) => ({ locale }));
 }
 
@@ -44,10 +44,11 @@ export default async function HomePage({ params }: PageParams) {
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale });
-  const apps = await listApps(locale);
+  const [apps, games] = await Promise.all([listApps(locale), listGames(locale)]);
 
-  // Nhãn trạng thái dịch một lần rồi truyền xuống: `WireDiagram` và `AppCard`
-  // không được tự bịa chữ, chúng chỉ biết `integration` là khoá kỹ thuật nào.
+  // Nhãn trạng thái dịch một lần rồi truyền xuống: `WireDiagram`, `AppCard` và
+  // `GameCard` không được tự bịa chữ, chúng chỉ biết `integration` là khoá kỹ
+  // thuật nào.
   const statusLabels = {
     core: t("status.core"),
     connected: t("status.connected"),
@@ -97,14 +98,30 @@ export default async function HomePage({ params }: PageParams) {
 
       {apps.length > 0 ? (
         <section className={styles.apps}>
-          <p className={styles.sectionLabel}>{t("home.appsLabel")}</p>
-          <div className={styles.cards}>
+          <h2 className={styles.sectionLabel}>{t("apps.title")}</h2>
+          <div className={styles.cards} role="list">
             {apps.map((app) => (
               <AppCard
                 key={app.slug}
                 app={app}
                 locale={locale}
                 statusLabel={statusLabels[app.integration]}
+                repoLabel={t("app.viewRepoOnGithub")}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {games.length > 0 ? (
+        <section className={styles.apps}>
+          <h2 className={styles.sectionLabel}>{t("games.title")}</h2>
+          <div className={styles.cards} role="list">
+            {games.map((game) => (
+              <GameCard
+                key={game.slug}
+                game={game}
+                statusLabel={statusLabels[game.integration]}
                 repoLabel={t("app.viewRepoOnGithub")}
               />
             ))}

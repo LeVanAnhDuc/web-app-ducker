@@ -1,4 +1,4 @@
-import type { NavTreeNode } from "@/server/content/nav";
+import type { NavTreeNode } from "@/content/nav-tree";
 import { NavTree } from "./NavTree";
 import styles from "./Sidebar.module.css";
 

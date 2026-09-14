@@ -1,6 +1,6 @@
 import { getRequestConfig } from "next-intl/server";
 
-import { defaultLocale, locales } from "./locales.generated";
+import { defaultLocale, locales } from "./locales";
 import en from "./messages/en.json";
 import vi from "./messages/vi.json";
 

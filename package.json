@@ -1,20 +1,18 @@
 {
   "name": "web-app-ducker",
   "version": "1.0.0",
-  "description": "Trang tài liệu cho hệ sinh thái ứng dụng của [@LeVanAnhDuc](https://github.com/LeVanAnhDuc), kèm trang quản trị nội dung.",
+  "description": "Trang tài liệu cho hệ sinh thái ứng dụng của [@LeVanAnhDuc](https://github.com/LeVanAnhDuc), nội dung là file trong repo, không có trang quản trị.",
   "private": true,
   "packageManager": "pnpm@10.32.1",
   "scripts": {
     "dev": "next dev",
-    "prebuild": "tsx scripts/generate-locales.ts",
     "build": "next build",
     "start": "next start",
     "test": "vitest",
     "test:run": "vitest run --maxWorkers=1",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "e2e": "playwright test",
-    "postinstall": "prisma generate"
+    "e2e": "playwright test"
   },
   "repository": {
     "type": "git",
@@ -30,24 +28,16 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@parcel/watcher",
-      "@prisma/engines",
       "@swc/core",
       "esbuild",
-      "prisma",
       "unrs-resolver"
     ]
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1111.0",
-    "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
-    "bcryptjs": "^3.0.3",
-    "image-size": "^2.0.2",
+    "gray-matter": "^4.0.3",
     "next": "^16.3.1",
-    "next-auth": "^5.0.0-beta.32",
     "next-intl": "^4.13.6",
     "next-themes": "^0.4.6",
-    "pg": "^8.23.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "rehype-pretty-code": "^0.14.5",
@@ -62,14 +52,11 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.6",
-    "@next/env": "^16.3.1",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.2",
-    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^26.2.0",
-    "@types/pg": "^8.21.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.0.5",
@@ -77,9 +64,7 @@
     "eslint-config-next": "^16.3.1",
     "jsdom": "^29.1.1",
     "postcss": "^8.5.26",
-    "prisma": "^7.9.1",
     "tailwindcss": "^4.3.3",
-    "tsx": "^4.23.12",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   }

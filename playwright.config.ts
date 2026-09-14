@@ -1,16 +1,4 @@
 import { defineConfig, devices } from "@playwright/test";
-import { loadEnvConfig } from "@next/env";
-
-/**
- * Playwright **không** nạp `.env` — chỉ Next nạp (cùng cái bẫy với Prisma CLI, vitest
- * và tsx, xem CLAUDE.md). Không có dòng dưới đây thì `process.env.ADMIN_EMAIL` trong
- * `e2e/content-roundtrip.spec.ts` là `undefined`, và `page.fill(..., undefined!)` ném
- * một lỗi không nhắc gì tới biến môi trường.
- *
- * `@next/env` là cùng bộ nạp mà chính Next dùng, nên nó xử lý đúng quy tắc expand
- * biến (`$` phải escape thành `\$`) thay vì đoán lại một lần nữa.
- */
-loadEnvConfig(process.cwd());
 
 /**
  * E2E chạy trên **cổng riêng**, không dùng 3000.

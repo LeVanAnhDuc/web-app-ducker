@@ -5,32 +5,37 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AppHero } from "@/components/docs/AppHero";
 import { DocsShell } from "@/components/docs/DocsShell";
 import { FeatureGrid } from "@/components/docs/FeatureGrid";
+import { MarkdownBody } from "@/components/docs/MarkdownBody";
 import { NavDrawer } from "@/components/docs/NavDrawer";
-import { SectionBody } from "@/components/docs/SectionBody";
 import { Sidebar } from "@/components/docs/Sidebar";
 import { Toc } from "@/components/docs/Toc";
-import { defaultLocale, locales } from "@/i18n/locales.generated";
-import { findTrail } from "@/server/content/nav";
-import { getApp, getNavTree, getStaticSlugs } from "@/server/content/queries";
+import { defaultLocale, locales } from "@/i18n/locales";
+import { findTrail } from "@/content/nav-tree";
+import { buildToc, getApp, getNavTree, listApps } from "@/content";
+import { attachHeadingIds, renderMarkdown } from "@/lib/markdown";
 import styles from "./page.module.css";
 
 /**
  * Trang một ứng dụng — ba cột theo mockup màn 02.
  *
- * Nội dung (tính năng, các mục) do CMS sinh; thứ tự trong trang là thứ tự đã
- * kéo thả trong trang quản trị, nên ở đây chỉ đổ ra chứ không sắp lại.
+ * ADR-0018: nội dung (tính năng, thân bài) đọc thẳng từ frontmatter/markdown
+ * trong `content/apps/<slug>.<locale>.mdx`, không còn qua CMS. `AppDetail.body`
+ * là markdown thô — trang này tự dựng mục lục (`buildToc`) và tự kết xuất HTML
+ * (`renderMarkdown`), việc mà bản CMS cũ giao cho `SectionBody` làm theo từng
+ * mục đã publish sẵn (ADR-0005, giờ đã bị ADR-0018 thay thế).
  */
 
 type PageParams = { params: Promise<{ locale: string; slug: string }> };
 
 /**
- * `getStaticSlugs()` trả `{apps:[],docs:[]}` khi chưa có `DATABASE_URL`, nên
- * `next build` vẫn chạy. **`dynamicParams` để mặc định `true`**: ứng dụng mới
- * tạo trong CMS có trang ngay mà không cần deploy lại.
+ * Danh sách slug lấy từ `content/apps/` qua ngôn ngữ mặc định: file-backed
+ * content không có "chưa cấu hình DATABASE_URL" nữa, nên không còn nhánh rỗng
+ * nào để giữ `next build` chạy được — trừ khi chính `content/apps/` rỗng, và
+ * khi đó danh sách rỗng vẫn là câu trả lời đúng.
  */
 export async function generateStaticParams() {
-  const { apps } = await getStaticSlugs();
-  return locales.flatMap((locale) => apps.map((slug) => ({ locale, slug })));
+  const apps = await listApps(defaultLocale);
+  return locales.flatMap((locale) => apps.map((app) => ({ locale, slug: app.slug })));
 }
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
@@ -41,7 +46,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 
   return {
     title: `${app.name} — ${t("brand.name")}`,
-    description: app.tagline ?? app.summary ?? undefined,
+    description: app.tagline ?? undefined,
     alternates: {
       // Canonical trỏ chính nó; `languages` phát đủ locale đang bật cộng
       // `x-default` trỏ locale mặc định.
@@ -61,7 +66,7 @@ export default async function AppPage({ params }: PageParams) {
 
   const t = await getTranslations({ locale });
 
-  // Không có, chưa publish, hoặc không có bản dịch nào — cả ba đều là 404.
+  // Không có, hoặc không có bản dịch nào — cả hai đều là 404.
   const app = await getApp(slug, locale);
   if (!app) notFound();
 
@@ -69,14 +74,11 @@ export default async function AppPage({ params }: PageParams) {
 
   /**
    * Cột trái là **con cháu của tab đang mở**, không phải một danh sách tự gộp.
-   *
-   * Trước đây trang này tự dựng hai nhóm "Lõi" và "Ứng dụng vệ tinh" từ
-   * `App.kind`, cộng thêm các nhóm tài liệu — tức là cấu trúc điều hướng nằm
-   * trong mã chứ không trong CMS. Giờ `findTrail` cho biết trang này nằm ở nhánh
-   * nào, và sidebar chỉ là nhánh đó.
+   * `findTrail` cho biết trang này nằm ở nhánh nào (nhánh "apps"), và sidebar
+   * chỉ là nhánh đó — cùng cây mà `TopBar` dùng để dựng dải tab.
    *
    * Trang chưa được gắn vào cây thì `trail` rỗng: không có sidebar, nhưng trang
-   * vẫn mở được bằng URL (spec §5).
+   * vẫn mở được bằng URL.
    */
   const trail = findTrail(await getNavTree(locale), currentHref);
   const sidebarNodes = trail[0]?.children ?? [];
@@ -105,6 +107,13 @@ export default async function AppPage({ params }: PageParams) {
 
   const fallbackLabel = t("fallback.notice");
 
+  // R3: `AppDetail.body` is raw markdown with no `toc`/`bodyHtml` of its own —
+  // this page composes both. `attachHeadingIds` stamps the rendered `<h2>`s
+  // with the same anchors `buildToc` just derived, so `Toc`'s links actually
+  // land somewhere.
+  const toc = buildToc(app.body);
+  const html = attachHeadingIds(await renderMarkdown(app.body), toc);
+
   return (
     <DocsShell
       sidebar={
@@ -115,9 +124,7 @@ export default async function AppPage({ params }: PageParams) {
           <Sidebar nodes={sidebarNodes} activeHref={currentHref} label={t("sidebar.label")} />
         ) : undefined
       }
-      toc={
-        app.toc.length > 0 ? <Toc items={app.toc} title={t("toc.title")} /> : undefined
-      }
+      toc={toc.length > 0 ? <Toc items={toc} title={t("toc.title")} /> : undefined}
       main={
         <article className={styles.main}>
           <AppHero
@@ -128,8 +135,6 @@ export default async function AppPage({ params }: PageParams) {
               status: statusLabels[app.integration],
               privateRepo: t("app.privateRepo"),
               repo: t("app.viewRepo"),
-              apiRepo: t("app.viewApiRepo"),
-              demo: t("app.viewDemo"),
               fallback: fallbackLabel,
             }}
             drawer={
@@ -145,26 +150,9 @@ export default async function AppPage({ params }: PageParams) {
             }
           />
 
-          <FeatureGrid
-            features={app.features}
-            title={t("app.features")}
-            locale={locale}
-            fallbackLabel={fallbackLabel}
-          />
+          <FeatureGrid features={app.features} title={t("app.features")} />
 
-          {app.sections.map((section) => (
-            <SectionBody
-              key={section.id}
-              section={section}
-              locale={locale}
-              labels={{
-                fallback: fallbackLabel,
-                code: t("a11y.codeBlock"),
-                table: t("a11y.table"),
-                permalink: t("section.permalink", { title: section.title }),
-              }}
-            />
-          ))}
+          <MarkdownBody html={html} labels={{ code: t("a11y.codeBlock"), table: t("a11y.table") }} />
         </article>
       }
     />

@@ -180,3 +180,37 @@ export async function renderMarkdown(md: string): Promise<string> {
   const file = await processor.process(md);
   return String(file);
 }
+
+// ---------------------------------------------------------------------------
+// 4. TOC anchors
+// ---------------------------------------------------------------------------
+
+/**
+ * Stamps every rendered `<h2>` with the matching table-of-contents anchor, in
+ * document order.
+ *
+ * The file-backed content model (ADR-0018) has one flat markdown body per app
+ * or doc page, and `buildToc` (`src/content/docs.ts`) derives the TOC by
+ * scanning that same markdown for the same "## " lines, in the same order —
+ * skipping anything inside a fenced code block, exactly as a markdown parser
+ * would. That makes the Nth `<h2>` produced by `renderMarkdown` always the Nth
+ * TOC entry, so this only needs to write the id in order; it never re-derives
+ * the slug itself; that stays `buildToc`'s job so the two never disagree.
+ *
+ * Without this, the anchors `Toc` links to (`#<anchor>`) exist only in the
+ * sidebar, not in the rendered page — every TOC link would jump nowhere.
+ */
+export function attachHeadingIds(html: string, toc: { anchor: string }[]): string {
+  if (toc.length === 0) return html;
+
+  let index = 0;
+  return html.replace(/<h2(\s[^>]*)?>/g, (match, attrs: string | undefined) => {
+    const item = toc[index];
+    index += 1;
+    // More `<h2>` tags than TOC entries should not happen — `buildToc` scans the
+    // very same document — but leave an unmatched heading alone rather than
+    // stamp it with the wrong anchor.
+    if (!item) return match;
+    return `<h2 id="${item.anchor}"${attrs ?? ""}>`;
+  });
+}

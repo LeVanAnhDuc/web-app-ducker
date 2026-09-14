@@ -10,10 +10,10 @@
 | [`01-product/glossary.md`](01-product/glossary.md) | What is this concept called in code, and how does it appea… | 🟢 complete | a new domain concept shows up in code or in the UI |
 | [`02-requirements/scope.md`](02-requirements/scope.md) | Which functions does the system have, and what state is ea… | 🟢 complete | brainstorming produces a new function (assign a new FR) · … |
 | [`02-requirements/nfr.md`](02-requirements/nfr.md) | Which thresholds apply to **every** feature, so they need … | 🟢 complete — reviewed against this project … | a new resource type appears · a new user group appears · a… |
-| [`03-design/architecture.md`](03-design/architecture.md) | How does the system fit together, and where are the bounda… | 🟢 complete | a module or service is added or removed · two modules chan… |
+| [`03-design/architecture.md`](03-design/architecture.md) | How does the system fit together, and where are the bounda… | 🔴 empty — predates the file-backed migratio… | a module or service is added or removed · two modules chan… |
 | [`03-design/invariants.md`](03-design/invariants.md) | What can I change that makes the system wrong **silently**… | 🟢 complete — reviewed against this project … | a new invariant is discovered — usually right after someon… |
 | [`04-state/backlog.md`](04-state/backlog.md) | What is being worked on, what comes next, and what is owed… | 🟢 complete | work starts or finishes · brainstorming produces new work … |
-| [`05-operations/runbook.md`](05-operations/runbook.md) | How do I stand this up, deploy it, and run the database-ba… | 🟡 detailed, but **never actually run** — no… | a new environment variable · an infrastructure provider ch… |
+| [`05-operations/runbook.md`](05-operations/runbook.md) | How do I stand this up, deploy it, and run the database-ba… | 🟡 detailed, but **predates the file-backed … | a new environment variable · an infrastructure provider ch… |
 | [`design-system/ducker/MASTER.md`](design-system/ducker/MASTER.md) | — | — | — |
 | [`decisions/`](decisions/README.md) | Why was it done this way? | 20 ADRs | every technical decision |
 | [`../.env.example`](../.env.example) | Which environment variables are needed to run? | 🟢 complete — mirrors what the code actually… | code starts reading a new variable, or stops reading one |

@@ -1,0 +1,23 @@
+---
+name: Ducker ID
+status: core
+order: 10
+repo: https://github.com/LeVanAnhDuc/web-app-ducker-id
+tagline: Một tài khoản, một bảng khởi chạy cho cả một chòm ứng dụng web
+techStack:
+  - Next.js 15
+  - shadcn/ui
+  - Express 4
+  - MongoDB
+  - Redis
+  - BullMQ
+---
+
+Ducker ID (Identity Management System) là cổng đăng nhập và cổng ứng dụng cho nhóm sản
+phẩm web của chủ sở hữu. Người dùng đăng ký một lần, đăng nhập bằng mật khẩu, mã OTP qua
+email hoặc magic link, rồi vào một bảng điều khiển liệt kê các ứng dụng họ có thể mở,
+cùng lịch sử đăng nhập, thông báo và các yêu cầu hỗ trợ của chính họ. Quản trị viên dùng
+cùng trang này để đăng ký ứng dụng, quản lý tài khoản và xử lý hộp hỗ trợ.
+
+Kho mã này là một monorepo: `client/` là giao diện Next.js, `server/` là API REST bằng
+Express. Nó được lắp từ hai kho cũ `web-store-apps` (client) và `api-web-store-apps` (api).

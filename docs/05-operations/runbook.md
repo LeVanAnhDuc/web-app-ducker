@@ -1,11 +1,11 @@
 # Ducker — vận hành và thiết lập môi trường
 
 > **Answers:** How do I stand this up, deploy it, and run the database-backed tests?
-> **Status:** 🟡 detailed, but **never actually run** — no Neon / R2 / Vercel credentials yet
-> **Updated:** 2026-09-13 · commit b2d70a8
+> **Status:** 🟡 detailed, but **predates the file-backed migration** — describes Neon/R2/Vercel infrastructure that no longer exists
+> **Updated:** 2026-09-14 · file-backed-registry
 > **Update when:** a new environment variable · an infrastructure provider changes · a deploy step turns out wrong
 
-> ⚠️ The body below is still Vietnamese — see [`../README.md`](../README.md) §Language.
+> ⚠️ The body below is still Vietnamese — see [`../README.md`](../README.md) §Language. **The migration to file-backed content (2026-09-14, ADR-0018, ADR-0019) removed the database, auth layer and object store, so sections on Neon, R2, Auth.js and database-backed tests no longer apply.**
 
 Tài liệu này ghi lại **những bước chỉ người có thông tin đăng nhập mới làm được**. Mã ứng dụng đã hoàn thành — số liệu hiện tại ở [`../04-state/backlog.md`](../04-state/backlog.md), đừng tin con số chép lại trong file này. Nhưng **chưa có lần nào chạy migration thật, seed thật hay deploy thật**, vì quá trình xây dựng không có tài khoản Neon, Cloudflare R2 hay Vercel.
 

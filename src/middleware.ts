@@ -1,6 +1,6 @@
 import createMiddleware from "next-intl/middleware";
 
-import { defaultLocale, locales } from "@/i18n/locales.generated";
+import { defaultLocale, locales } from "@/i18n/locales";
 
 /**
  * `localePrefix: "always"` là cố ý: `/vi/apps/…`, `/en/apps/…`.

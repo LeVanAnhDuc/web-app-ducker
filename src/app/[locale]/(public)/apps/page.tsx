@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { AppCard } from "@/components/docs/AppCard";
-import { defaultLocale, locales } from "@/i18n/locales.generated";
-import { listApps } from "@/server/content/queries";
+import { defaultLocale, locales } from "@/i18n/locales";
+import { listApps } from "@/content";
 import styles from "./page.module.css";
 
 /**
@@ -61,7 +61,7 @@ export default async function AppsPage({ params }: PageParams) {
       </header>
 
       {apps.length > 0 ? (
-        <div className={styles.cards}>
+        <div className={styles.cards} role="list">
           {apps.map((app) => (
             <AppCard
               key={app.slug}

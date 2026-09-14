@@ -2,7 +2,7 @@
 
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 
-import type { NavTreeNode } from "@/server/content/nav";
+import type { NavTreeNode } from "@/content/nav-tree";
 import { NavTree } from "./NavTree";
 import styles from "./NavDrawer.module.css";
 

@@ -1,119 +1,110 @@
-# Ducker — the front door to an app ecosystem, editable without a deploy
+# Ducker — the front door to an app ecosystem, edited by committing a file
 
 > The project's display name is **Ducker**, and the GitHub repository slug is
 > `web-app-ducker` to match it. The original slug was `app-store-doc`; it survives
 > only in git history and in migration names.
 
 The public entry point to [@LeVanAnhDuc](https://github.com/LeVanAnhDuc)'s app
-ecosystem: a landing page, a directory of every app, a detail page per app, and
-the documentation — all driven by an admin CMS.
+ecosystem: a landing page, a directory of every app and game, a detail page per
+entry, and standalone documentation guides — a static site rendered from MDX
+files in this repository.
 
-Docs are one content type here, not the whole product. `App`, `Feature`,
-`DocPage`, `Section` and `NavNode` are peers in the schema, which is why the
-ecosystem showcase lives on this site rather than in a separate app.
+Docs are one content type here, not the whole product. Apps, games and guides
+are peers under `content/`, which is why the ecosystem showcase lives on this
+site rather than in a separate app.
 
-Every app gets its own section — what it is, how to try it, how to use it, what
-it does — plus ecosystem overview pages and an OAuth integration guide. Content
-is edited through the CMS, and the public pages change without a redeploy.
+There is no database and no administration surface. Adding an app, editing a
+description, or publishing a guide is an edit to a file under `content/` and a
+push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
+[ADR-0019](docs/decisions/0019-no-administration-surface.md).
 
-> **Status:** the application code is complete — 242 tests pass (26 skip without
-> `DATABASE_URL_TEST`), `tsc --noEmit` is clean, and `next build` succeeds even
-> with no database. Migrations, seeding and the end-to-end content roundtrip have
-> all been run for real against local Postgres.
-> **Never deployed.** That needs Neon, Cloudflare R2 and Vercel credentials the
-> build never had. The steps are in [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md).
+> **Status:** the application code is complete — **192 unit tests** pass
+> (`pnpm test:run`), `tsc --noEmit` is clean, and `pnpm build` succeeds with
+> **no environment variables at all**. `pnpm e2e` passes **16/16**.
+> **Never deployed to Vercel**, but nothing blocks it any more — the deploy
+> chain that used to wait on Neon/R2 credentials is gone with the CMS.
 
 ## Features
 
 - **Public ecosystem pages**
-  - A page per app — hero, feature grid, and body sections rendered from Markdown
-  - An ecosystem overview, per-app detail pages, and standalone doc pages
+  - A detail page per app — hero and body rendered from Markdown. The page
+    also renders a feature grid, but no content file currently authors
+    `features`, so it renders on no page yet
+  - An ecosystem overview and standalone doc pages, each with its own
+    detail page. Games have no detail page of their own — `/games` lists
+    them with the same card treatment as an app, and each card links
+    straight to its repository
   - A table of contents, a search dialog, and a sidebar navigation tree
-  - A draft preview route, gated by `PREVIEW_SECRET` — without the secret the
-    preview is closed, not open
 
-- **Navigation the CMS owns**
-  - The whole navigation tree is content, not code: nodes are created, nested,
-    reordered and translated in the admin, and the public sidebar follows
-  - Reordering uses explicit order controls rather than only drag, so it works
-    on a phone and with a keyboard
+- **A games section**
+  - Duck-themed games are their own top-level group alongside apps and docs,
+    listed on `/games` with the same card treatment as an app
+
+- **Content is files, not an admin area**
+  - No sign-in, no editor UI, no database. Every app, game and doc is one MDX
+    file with frontmatter under `content/apps`, `content/games` or
+    `content/docs` — a commit is the whole publishing flow
+  - A sixth `status` value outside the five closed ones (`core` / `connected`
+    / `standalone` / `planned` / `private`) fails the build instead of
+    rendering an unstyled chip
+  - A draft is a branch: Vercel's per-branch preview URL replaces the old
+    secret-gated preview route
+
+- **Navigation derived from content**
+  - The nav tree's top level is hand-written (`content/nav.ts`); its children
+    are derived from the app/game/doc files, so adding an entry never means
+    editing the nav tree by hand
 
 - **Multiple languages, honestly labelled**
-  - Locales live in the database; `prebuild` generates
-    `src/i18n/locales.generated.ts` from the `Locale` table, so adding a language
-    is a content change
-  - Locales carry an explicit order, which drives the switcher rather than
-    whatever order the database returns
+  - Locale is a filename suffix (`<slug>.<locale>.mdx`), not a database row;
+    the routing list lives in `src/i18n/locales.ts`, a hand-maintained
+    constant the edge middleware imports directly
+  - **Untranslated content falls back and says so** — a notice sits beside
+    each entry that is showing another language, not once at the top of the
+    page
   - Switching language and navigating both preserve the locale in the URL
-  - **Untranslated content falls back and says so** — a notice sits beside *each*
-    section and feature that is showing another language, not once at the top of
-    the page. Translation coverage is uneven, so a page-level notice would
-    describe most of the page wrongly. Content in the requested language renders
-    no notice at all
-  - A translation meter in the admin shows how complete each language is
-
-- **Admin CMS**
-  - Sign in with a single administrator account. `ADMIN_PASSWORD_HASH` is a
-    **bcrypt hash**, not a plaintext password
-  - **Login is rate limited** — 5 attempts per 15 minutes per IP, on a sliding
-    window
-  - Edit apps, features, doc pages and sections, each with its own translations,
-    through a Markdown editor
-  - Reorder features and sections; manage locales and the navigation tree
-
-- **Media library on Cloudflare R2**
-  - Upload by dropping files, browse the library, and pick an image from an
-    editor
-  - **Dimensions are measured at upload time** by reading the image header. The
-    reader never throws: an unusual but valid image must not break the upload, so
-    `Media.width`/`height` are nullable on purpose and a size that cannot be read
-    is simply absent
 
 - **Three-state theme toggle**
   - Light, dark, or follow the system — with no colour flash on first paint
   - The choice is remembered, stays in step across open tabs, and themes the
-    browser's own controls — scrollbars, selects and autofill — not just the page
+    browser's own controls — scrollbars, selects and autofill — not just the
+    page
 
 - **Mobile layout**
-  - A navigation drawer for small screens, and a responsive shell shared by the
-    public site and the admin
+  - A navigation drawer for small screens, and a responsive shell shared by
+    every public page
 
-- **One door per external concern**
-  - A component never imports Prisma, Auth.js or the S3 SDK. `src/server/content`
-    is the only place that touches Prisma, `src/server/auth` the only place that
-    knows Auth.js, `src/server/media` the only place that knows R2 — so swapping
-    cache, database, storage provider or auth mechanism each touches one layer
-  - **Every server action calls `requireAdmin()` on its first line.** A Server
-    Action is its own HTTP endpoint, so protecting the `/admin` layout does not
-    protect it
+- **One door to the filesystem**
+  - A component never reads `content/` directly. `src/content/` is the only
+    place that touches the filesystem, parses frontmatter, and resolves
+    locale fallback
 
 ## Tech Stack
 
-Next.js 16 · Prisma 7 · PostgreSQL (Neon) · Auth.js · next-intl · Cloudflare R2 · Vercel
+Next.js 16 · next-intl · Vercel. No database, no auth layer, no object store.
 
-Testing: Vitest (242 unit tests, 26 requiring a database) and Playwright (16 e2e).
+Testing: Vitest (192 unit tests) and Playwright (16 e2e).
 
 ## Running
 
 Needs Node 20+ and [pnpm](https://pnpm.io) 10 (`corepack enable pnpm`).
 
 ```bash
-pnpm install               # postinstall runs `prisma generate`
+pnpm install               # install; nothing to generate, no environment needed
 cp .env.example .env       # PowerShell: Copy-Item .env.example .env
 pnpm dev                   # http://localhost:3000 → redirects to /vi
 ```
 
-Without `DATABASE_URL` the site still builds but has **no content**:
-`generateStaticParams` returns `[]` and every query throws at its first touch of
-the database. To see real content, follow sections 1 and 5 of
-[`docs/05-operations/runbook.md`](docs/05-operations/runbook.md), then set `DATABASE_URL` in `.env`.
+`pnpm build` succeeds with **no environment variables at all** — there is
+nothing left to configure. `.env.example` lists two optional, non-secret
+variables (an e2e port override, and a site URL nothing currently reads).
 
 ### Scripts
 
 | Command | What it does |
 |---|---|
 | `pnpm dev` | Next dev server |
-| `pnpm build` | `prebuild` generates `src/i18n/locales.generated.ts` from the `Locale` table, then `next build` |
+| `pnpm build` | `next build` — reads content straight from `content/`, no prebuild step |
 | `pnpm start` | Serve the build |
 | `pnpm test` | Vitest in watch mode |
 | `pnpm test:run` | Vitest once, `--maxWorkers=1` (parallel runs are flaky on Windows) |
@@ -121,23 +112,7 @@ the database. To see real content, follow sections 1 and 5 of
 | `pnpm lint` | ESLint |
 | `pnpm e2e` | Playwright. It starts its own server with `pnpm start`, so `pnpm build` first |
 
-Four commands need no credentials at all: `test:run`, `typecheck`, `lint`,
-`build`. The tests that need Postgres live in `*.db.test.ts` and **skip
-themselves** when `DATABASE_URL_TEST` is missing — a green suite in that state
-proves nothing about the query layer. How to run them:
-[`docs/05-operations/runbook.md`](docs/05-operations/runbook.md), section 7.
-
-### Environment variables
-
-`.env.example` lists them all. The three easiest to get wrong:
-
-- `ADMIN_PASSWORD_HASH` is a **bcrypt hash**, not the raw password.
-- Only Next loads `.env` automatically. **Prisma CLI 7 and vitest do not read
-  `.env`** — for those, set the variable in the shell session itself.
-- Without `PREVIEW_SECRET` the draft preview page is **closed**, not open.
-
-Each variable explained, the commands that generate values, and how to get them
-from Neon and R2: [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md).
+Every command needs no credentials at all — there are none left to need.
 
 ## Ecosystem
 
@@ -161,9 +136,9 @@ As of 17.08.2026, no satellite app is actually wired into IDMS yet.
 | Task | Document |
 |---|---|
 | **Coming back to the project — where it stands, what is owed** | **[`docs/04-state/backlog.md`](docs/04-state/backlog.md) — open this first** |
-| Why things are the way they are — 16 decisions, each with the alternatives rejected | [`docs/decisions/`](docs/decisions/README.md) |
+| Why things are the way they are — 20 decisions, each with the alternatives rejected | [`docs/decisions/`](docs/decisions/README.md) |
 | What breaks **silently** if you change it | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) |
-| **Standing up infrastructure, deploying, running the DB-backed tests** | **[`docs/05-operations/runbook.md`](docs/05-operations/runbook.md)** |
+| Deploying, environment variables | [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md) — ⚠️ largely pre-migration; its Neon/R2/Vercel deploy steps no longer apply |
 | **Building any interface** | **[`docs/design-system/ducker/MASTER.md`](docs/design-system/ducker/MASTER.md) — mandatory** |
 | Why the interface looks like that | [ADR-0017](docs/decisions/0017-ink-and-state-design-direction.md) — colour is reserved for status; the chrome carries none |
 | Architecture, module boundaries, main data flow | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) |
@@ -175,9 +150,11 @@ As of 17.08.2026, no satellite app is actually wired into IDMS yet.
 > `docs/superpowers/` were folded into the documents above on 2026-09-13 and deleted.
 > They remain in git history.
 
-## Seed content is a draft
+## Content is authored in this repository
 
-`prisma/seed.ts` was written from the public READMEs of those repos, not from
-their source. The "try it in 5 minutes" parts may have the wrong port or script
-name. After the first deploy, **the database is the source of truth** — edit
-through the CMS, not `seed.ts`.
+`content/apps/`, `content/games/` and `content/docs/` hold one MDX file per
+entry per locale. Three entries — Tier List, Task Management, Duck Strike —
+carry `status: planned` and no tagline rather than an invented one, because
+their own projects have no description anywhere yet
+([ADR-0009](docs/decisions/0009-the-page-states-current-reality.md)). Edit a
+file, commit, push — there is no separate publishing step.

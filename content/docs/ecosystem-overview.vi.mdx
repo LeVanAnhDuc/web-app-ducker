@@ -1,0 +1,36 @@
+---
+name: Tổng quan hệ sinh thái
+status: core
+order: 10
+tagline: Các ứng dụng hiện có, ứng dụng nào đã nối IDMS và ứng dụng nào chưa.
+---
+
+## Lõi và vệ tinh
+
+Hệ sinh thái có **một lõi** và **nhiều ứng dụng vệ tinh**.
+
+Lõi là IDMS (`web-app-ducker-id`): `server/` cấp token, `client/` là giao diện đăng nhập
+và bảng khởi chạy. Vệ tinh là các ứng dụng nghiệp vụ; mỗi ứng dụng tự lo dữ liệu của mình
+và chỉ hỏi lõi một câu: *người đang dùng là ai*.
+
+## Hiện trạng, không phải kiến trúc mong muốn
+
+Tính tới **17.08.2026, chưa ứng dụng vệ tinh nào thực sự nối vào IDMS.**
+
+| Ứng dụng | Trạng thái |
+|---|---|
+| Match CV | Chưa nối — README ghi "auth defer" |
+| Manage Gym | Chưa nối — một người dùng, mật khẩu trong env |
+| Calculate Badminton | Chạy độc lập, không dự kiến nối |
+| AI Study Coach | Chưa có mã chạy được |
+| Shorten Link | Repo riêng tư, không đọc được |
+
+Sơ đồ ở trang chủ vẽ đúng như vậy: nét liền chỉ dành cho kết nối đã có thật.
+
+## Ứng dụng nào nên nối
+
+Nối IDMS đáng làm khi ứng dụng **có dữ liệu riêng của từng người** hoặc **có nhiều vai trò
+sử dụng**. Manage Gym và Match CV đều thuộc nhóm đó.
+
+Ứng dụng không lưu gì ngoài trình duyệt — như Calculate Badminton — thì nối vào chỉ thêm
+một bước chặn giữa người dùng và việc họ muốn làm.

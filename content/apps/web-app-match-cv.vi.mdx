@@ -1,0 +1,24 @@
+---
+name: Match CV
+status: connected
+order: 20
+parent: web-app-ducker-id
+repo: https://github.com/LeVanAnhDuc/web-app-match-cv
+tagline: Chấm điểm CV theo mô tả công việc, rồi giúp bạn cải thiện nó
+techStack:
+  - TanStack Start (React 19)
+  - Ant Design
+  - NestJS 11
+  - Prisma
+  - PostgreSQL
+---
+
+Match CV nhận vào một CV và một mô tả công việc, trả về điểm khớp kèm báo cáo bằng ngôn
+ngữ dễ hiểu về những gì phù hợp và những gì còn thiếu, rồi giúp bạn hành động tiếp: gợi ý
+viết lại CV để bạn duyệt từng phần, một lá thư xin việc bám sát dữ liệu, và một bảng so
+sánh cho thấy phiên bản CV mới cải thiện được bao nhiêu.
+
+Ứng dụng dành cho người tìm việc muốn biết một CV có đáng gửi đi hay không trước khi gửi.
+Bạn dùng khoá AI của riêng mình (hoặc dùng khoá hệ thống dự phòng), nên luôn biết tài liệu
+của mình đi tới đâu. Chạy cục bộ dưới dạng hai ứng dụng: một API NestJS (`server/`, cổng
+`5200`) và một client TanStack Start (`client/`, cổng `5300`).

@@ -1,22 +1,14 @@
 import { Badge } from "@/components/ui/Badge";
 import { Chip } from "@/components/ui/Chip";
-import type { AppCard as AppCardRow } from "@/server/content/queries";
+import type { AppCard as AppCardRow } from "@/content";
 import styles from "./AppCard.module.css";
 
 /**
- * Dữ liệu một thẻ ứng dụng.
- *
- * Cố ý **không** dùng thẳng `AppCard` của `queries.ts`: `status` là chuyện của
- * CMS (nháp / đã đăng / lưu trữ), thẻ công khai chỉ hiện app đã đăng nên nó
- * không có gì để nói. Bỏ trường ra khỏi kiểu để nơi gọi không tưởng rằng thẻ
- * biết vẽ trạng thái biên tập.
- *
- * `repoUrl` là tuỳ chọn vì danh sách thẻ (`listApps`) không tải trường này; khi
- * có thì thẻ mới dựng liên kết GitHub.
+ * Dữ liệu một thẻ ứng dụng — hình dạng `AppCard` của `@/content` (ADR-0018),
+ * đọc thẳng từ frontmatter. Không còn `status` biên tập (nháp / đã đăng / lưu
+ * trữ) để lược bỏ: file-backed content không có trạng thái đó (R14).
  */
-export type AppCardData = Omit<AppCardRow, "status"> & {
-  repoUrl?: string | null;
-};
+export type AppCardData = AppCardRow;
 
 export type AppCardProps = {
   app: AppCardData;
@@ -36,13 +28,17 @@ export type AppCardProps = {
  *
  * Bất biến quan trọng nhất (design-rules §1): **tên hiển thị là tiêu đề, slug
  * repo chỉ là chữ mono phụ**. Slug không bao giờ được leo vào thẻ tiêu đề.
+ *
+ * `role="listitem"` is an ARIA role, not a tag change: the card stays an
+ * `<article>` (unchanged CSS), but the card grids it sits in (home, `/apps`)
+ * are semantically lists, and e2e/registry.spec.ts asserts on that role.
  */
 export function AppCard({ app, locale, statusLabel, repoLabel }: AppCardProps) {
   // Repo riêng tư thì không dựng liên kết: bấm vào chỉ ra trang 404 của GitHub.
   const repoHref = !app.isRepoPrivate && app.repoUrl ? app.repoUrl : null;
 
   return (
-    <article className={styles.card}>
+    <article className={styles.card} role="listitem">
       <div className={styles.top}>
         <h3 className={styles.name}>
           <a className={styles.nameLink} href={`/${locale}/apps/${app.slug}`}>
@@ -55,7 +51,13 @@ export function AppCard({ app, locale, statusLabel, repoLabel }: AppCardProps) {
       <p className={styles.slug}>
         {repoHref && repoLabel ? (
           <a
-            className={styles.slugLink}
+            // `nameLink` first: it only contributes `display`/`min-height` here (its
+            // `color` loses the cascade to `slugLink`'s own, later rule), reused
+            // rather than invented to reach the 24px tap target (WCAG 2.2 SC 2.5.8)
+            // now that this link exists on the list pages too — the old CMS-backed
+            // card never populated `repoUrl` here, so this anchor did not render
+            // before ADR-0018.
+            className={`${styles.nameLink} ${styles.slugLink}`}
             href={repoHref}
             aria-label={`${repoLabel}: ${app.slug}`}
             rel="noreferrer"
@@ -68,7 +70,11 @@ export function AppCard({ app, locale, statusLabel, repoLabel }: AppCardProps) {
         )}
       </p>
 
-      {app.tagline ? <p className={styles.tagline}>{app.tagline}</p> : null}
+      {app.tagline ? (
+        <p className={styles.tagline} data-testid="tagline">
+          {app.tagline}
+        </p>
+      ) : null}
 
       {app.techStack.length > 0 ? (
         <div className={styles.chips}>

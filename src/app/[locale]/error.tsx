@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { NextIntlClientProvider, useTranslations } from "next-intl";
 
-import { defaultLocale, locales } from "@/i18n/locales.generated";
+import { defaultLocale, locales } from "@/i18n/locales";
 import en from "@/i18n/messages/en.json";
 import vi from "@/i18n/messages/vi.json";
 import styles from "./status.module.css";

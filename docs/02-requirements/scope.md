@@ -58,5 +58,5 @@ old commits and tests still reference them. See [ADR-0019](../decisions/0019-no-
 | --- | --- | --- |
 | FR-18 | Ordering controls on `/admin/docs` | (bỏ) — the numeric `order` field and arrow buttons are two different models writing one column. See [ADR-0011](../decisions/0011-no-order-buttons-on-admin-docs.md) |
 | FR-19 | Raw HTML inside markdown (`<kbd>`, `<details>`, `<br>`) | chưa — safe default of `remark-rehype`; opening it means `rehype-raw` plus dropping the hand-written HTML filter |
-| FR-20 | Home page rendering the real `DocPage("home")` record | chưa — the record exists as a draft and `/docs/home` deliberately 404s. Open decision in [`backlog.md`](../04-state/backlog.md) |
+| FR-20 | Home page rendering the real `DocPage("home")` record | (bỏ) — the file-backed content migration dropped the record instead: no `content/docs/home.vi.mdx` was authored, so `/docs/home` still 404s and the home page still renders from interface strings. See [`backlog.md`](../04-state/backlog.md) §Open decisions |
 | FR-21 | Sign-in through Ducker ID (OAuth) | (bỏ) — there is no longer anything to sign in to. Revisit only if an end-user account ever appears |

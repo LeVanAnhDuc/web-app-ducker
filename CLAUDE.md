@@ -1,8 +1,10 @@
 # Ducker
 
-Ecosystem documentation site + content management back office.
+Ecosystem documentation site — a static site whose content is files in this repository.
 Display name: **Ducker**. Repository slug: `web-app-ducker` (renamed from `app-store-doc` on 2026-08-20).
-Next.js 16 · Prisma 7 · PostgreSQL (Neon) · Auth.js · next-intl · Cloudflare R2 · Vercel
+Next.js 16 · next-intl · Vercel. There is no database, no auth layer and no object
+store — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
+[ADR-0019](docs/decisions/0019-no-administration-surface.md).
 
 > This file is the **code-facing** half of the instructions. The process half —
 > documentation contract, feature workflow, hooks, skill routing — lives in
@@ -15,63 +17,59 @@ Next.js 16 · Prisma 7 · PostgreSQL (Neon) · Auth.js · next-intl · Cloudflar
 | Task | Document |
 | --- | --- |
 | **Starting a session — where things stand, what is owed** | **[`docs/04-state/backlog.md`](docs/04-state/backlog.md) — read this first** |
-| **Before reversing a decision, or when code looks strange** | [`docs/decisions/`](docs/decisions/README.md) — 17 ADRs, each with the alternatives that were rejected |
+| **Before reversing a decision, or when code looks strange** | [`docs/decisions/`](docs/decisions/README.md) — 20 ADRs, each with the alternatives that were rejected |
 | **Before changing any line of code** | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) — what breaks *silently* |
 | **Building any interface** | [`docs/design-system/ducker/MASTER.md`](docs/design-system/ducker/MASTER.md) — **required**. The token source of truth |
 | Why the interface looks like that | [ADR-0017](docs/decisions/0017-ink-and-state-design-direction.md) — colour is reserved for status; the chrome has none |
-| Architecture, data model, module boundaries | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) |
+| Architecture, data model, module boundaries | [`docs/03-design/architecture.md`](docs/03-design/architecture.md) — ⚠️ predates the file-backed migration; describes deleted systems (Prisma/Auth.js/R2) |
 | Scope — is this in or out? | [`docs/01-product/overview.md`](docs/01-product/overview.md) §Non-Goals · [`docs/02-requirements/scope.md`](docs/02-requirements/scope.md) |
 | Naming a new concept | [`docs/01-product/glossary.md`](docs/01-product/glossary.md) — it locks names |
-| Deploy, environment variables, database-backed tests | [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md) |
+| Deploy, environment variables | [`docs/05-operations/runbook.md`](docs/05-operations/runbook.md) — ⚠️ largely pre-migration; the deploy steps for Neon/R2/Vercel it describes no longer apply |
 
 The full map is [`docs/README.md`](docs/README.md).
 
 ## Commands
 
 ```bash
-pnpm install --frozen-lockfile   # install; postinstall runs `prisma generate`
+pnpm install --frozen-lockfile   # install; nothing to generate, no environment needed
 pnpm dev               # http://localhost:3000 → redirects to /vi
 pnpm test:run          # vitest, --maxWorkers=1
 pnpm typecheck         # tsc --noEmit
 pnpm lint
-pnpm build             # prebuild generates the locale list
+pnpm build             # no environment variables required — content is read from `content/`
 pnpm e2e               # Playwright, on its own port 3210
 ```
 
-⚠️ **The Prisma CLI does not read `.env`** — nor do vitest, tsx or Playwright's config
-loader by default. Only Next does. Pass the variable inline:
-`DATABASE_URL="…" pnpm exec prisma migrate deploy`. Without it Prisma falls back to the
-placeholder in `prisma.config.ts` and fails with `P1010`, which looks like a permissions
-problem and is actually the wrong database.
+The build needs no environment at all: there is no database, no secret, and no object
+store to configure. `.env.example` lists only two optional, non-secret variables.
 
-## Three boundaries that must not be crossed
+## One boundary that must not be crossed
 
-A component **never** imports Prisma, Auth.js, or the S3 SDK. Every access goes through
-exactly one door:
+A component **never** reads the filesystem directly. `src/content/` is the only door:
+it reads `content/**.mdx`, parses frontmatter, resolves locale fallback, and is the
+only module every page imports content through. Nothing else touches `content/` or
+`fs`. Reasoning: [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md).
 
-- `src/server/content/` — the only place that touches Prisma
-- `src/server/auth/` — the only place that knows Auth.js. Exposes only `getCurrentUser()`, `requireAdmin()`, `signOut()`
-- `src/server/media/` — the only place that knows Cloudflare R2
+⚠️ Until 2026-09-13 this was **three** boundaries — `src/server/content/` (Prisma),
+`src/server/auth/` (Auth.js) and `src/server/media/` (the S3 SDK), enforced by
+`src/server/auth/boundary.test.ts` — deleted along with the database, the admin
+surface and the object store ([ADR-0019](docs/decisions/0019-no-administration-surface.md)
+§4). If a server dependency ever returns, an enforcing test must return with it.
 
-`src/server/auth/boundary.test.ts` enforces this by scanning the source, so a violation
-fails the suite rather than waiting to be noticed. Reasoning: [ADR-0016](docs/decisions/0016-three-doors-enforced-by-test.md).
+## Three known traps
 
-## Four known traps
-
-1. **A server action is its own HTTP endpoint.** Guarding `/admin`'s `layout.tsx` does
-   *not* guard the action. Every writing action calls `await requireAdmin()` on its
-   first line.
-2. **`vitest` does not typecheck.** A green suite does not prove `tsc` is clean. Always
+1. **`vitest` does not typecheck.** A green suite does not prove `tsc` is clean. Always
    run `pnpm typecheck` separately, and `pnpm build` before claiming completion.
-3. **Parallel vitest is flaky on this Windows machine.** A failure under a parallel run
+2. **Parallel vitest is flaky on this Windows machine.** A failure under a parallel run
    is not a real failure until it repeats with `--maxWorkers=1`. Component tests use
    `fireEvent`, never `userEvent.type`.
-4. **There is only one `test` database branch** and `prisma migrate reset` empties it.
-   Never run two suites at once.
+3. **A content file's `status` must be one of five closed values** (`core` /
+   `connected` / `standalone` / `planned` / `private`, `src/content/frontmatter.ts`). A
+   sixth value fails the build rather than rendering an unstyled chip.
 
 The rest of the silent-failure list is in
-[`docs/03-design/invariants.md`](docs/03-design/invariants.md) — 17 entries, and it is
-the file to read before editing code.
+[`docs/03-design/invariants.md`](docs/03-design/invariants.md) — the file to read
+before editing code.
 
 ## Application names
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { setRequestLocale } from "next-intl/server";
 
-import { locales } from "@/i18n/locales.generated";
+import { locales } from "@/i18n/locales";
 
 /**
  * Layout của tầng `[locale]` — **không** dựng `<html>`/`<body>`.
@@ -12,8 +12,9 @@ import { locales } from "@/i18n/locales.generated";
  * `/vi` và `/vi/apps` rơi về kết xuất động, vì trang 404 cũng được dựng cùng
  * lúc với chúng.
  *
- * `<html>`/`<body>` vẫn nằm ở layout của từng nhóm route (`(public)`, và sau
- * này `(admin)`), đúng khuôn mẫu "nhiều layout gốc" của App Router.
+ * `<html>`/`<body>` vẫn nằm ở layout của nhóm route `(public)`, đúng khuôn mẫu
+ * "nhiều layout gốc" của App Router. Nhóm `(admin)` từng là root layout thứ
+ * hai ở tầng này; nó đã bị xoá cùng toàn bộ khu quản trị (ADR-0019).
  */
 export default async function LocaleLayout({
   children,
