@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { buildToc, getDocPage } from "./docs";
+import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { beforeAll, describe, expect, it } from "vitest";
+import { buildToc, getDocPage, listDocs } from "./docs";
 
 describe("buildToc", () => {
   it("takes level-2 headings only", () => {
@@ -62,5 +65,43 @@ describe("buildToc", () => {
 describe("getDocPage", () => {
   it("returns null for an unknown slug", async () => {
     expect(await getDocPage("nope", "vi")).toBeNull();
+  });
+});
+
+let fixtureRoot: string;
+
+beforeAll(() => {
+  fixtureRoot = mkdtempSync(join(tmpdir(), "ducker-docs-"));
+  mkdirSync(join(fixtureRoot, "docs"), { recursive: true });
+  const write = (f: string, name: string, order: number) =>
+    writeFileSync(
+      join(fixtureRoot, "docs", f),
+      `---\nname: ${name}\nstatus: core\norder: ${order}\n---\n## Heading\nDoc body.`,
+    );
+  write("getting-started.vi.mdx", "Getting Started", 10);
+  write("getting-started.en.mdx", "Getting Started", 10);
+  write("faq.vi.mdx", "Frequently Asked Questions", 20);
+  write("api-reference.en.mdx", "API Reference", 30); // en only
+});
+
+describe("listDocs", () => {
+  it("returns each doc with its slug and authored title", async () => {
+    const docs = await listDocs("vi", fixtureRoot);
+    expect(docs).toEqual([
+      { slug: "getting-started", title: "Getting Started" },
+      { slug: "faq", title: "Frequently Asked Questions" },
+    ]);
+  });
+
+  it("uses the fallback locale when the requested locale is not available", async () => {
+    const docs = await listDocs("en", fixtureRoot);
+    // faq only exists in vi, so it falls back to the default locale
+    expect(docs.map((d) => d.slug)).toEqual(["getting-started", "faq", "api-reference"]);
+  });
+
+  it("maintains the order from the frontmatter", async () => {
+    const docs = await listDocs("vi", fixtureRoot);
+    expect(docs.length).toBeGreaterThan(0);
+    expect(docs[0]?.slug).toBe("getting-started");
   });
 });

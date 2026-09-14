@@ -14,6 +14,10 @@ vi.mock("./registry", () => ({
 
 vi.mock("./docs", () => ({
   listDocSlugs: vi.fn(async () => ["getting-started", "faq"]),
+  listDocs: vi.fn(async () => [
+    { slug: "getting-started", title: "Getting Started" },
+    { slug: "faq", title: "Frequently Asked Questions" },
+  ]),
 }));
 
 import { listNavRows } from "./nav";
@@ -66,5 +70,14 @@ describe("listNavRows", () => {
   it("emits status PUBLISHED on every row (R14 — file-backed content has no draft state)", async () => {
     const rows = await listNavRows("vi");
     expect(rows.every((r) => r.status === "PUBLISHED")).toBe(true);
+  });
+
+  it("uses the authored title as doc row labels, not the slug", async () => {
+    const rows = await listNavRows("vi");
+    const docChildren = rows.filter((r) => r.parentId === "docs");
+    expect(docChildren.map((r) => r.labels[0]!.value)).toEqual([
+      "Getting Started",
+      "Frequently Asked Questions",
+    ]);
   });
 });

@@ -1,6 +1,6 @@
 import { navGroups } from "../../content/nav";
 import { listApps } from "./registry";
-import { listDocSlugs } from "./docs";
+import { listDocs } from "./docs";
 import type { NavRow } from "./nav-tree";
 
 /** A pushed child's source: enough to build one `NavRow` under a container. */
@@ -74,9 +74,9 @@ export async function listNavRows(locale: string): Promise<NavRow[]> {
   const apps = await listApps(locale);
   apps.forEach((app, order) => rows.push(childRow(app, order, "apps", "/apps", "APP", locale)));
 
-  const docSlugs = await listDocSlugs();
-  docSlugs.forEach((slug, order) =>
-    rows.push(childRow({ slug, name: slug }, order, "docs", "/docs", "DOC", locale)),
+  const docs = await listDocs(locale);
+  docs.forEach((doc, order) =>
+    rows.push(childRow({ slug: doc.slug, name: doc.title }, order, "docs", "/docs", "DOC", locale)),
   );
 
   return rows;

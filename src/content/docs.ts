@@ -1,6 +1,7 @@
 import { slugify } from "@/lib/slug";
 import { readGroup, readOne } from "./read";
 import { defaultLocale } from "@/i18n/locales.generated";
+import { join } from "node:path";
 
 export type TocItem = { anchor: string; title: string };
 
@@ -68,6 +69,11 @@ export function buildToc(markdown: string): TocItem[] {
 
 export async function listDocSlugs(): Promise<string[]> {
   return (await readGroup("docs", defaultLocale)).map((e) => e.data.slug!);
+}
+
+export async function listDocs(locale: string, root?: string): Promise<{ slug: string; title: string }[]> {
+  const contentRoot = root ? join(root) : undefined;
+  return (await readGroup("docs", locale, contentRoot)).map((e) => ({ slug: e.data.slug!, title: e.data.name }));
 }
 
 export async function getDocPage(slug: string, locale: string): Promise<DocPageDetail | null> {
