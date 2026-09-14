@@ -2,7 +2,7 @@
 import { describe, it, expect } from "vitest";
 import vi from "./messages/vi.json";
 import en from "./messages/en.json";
-import { locales, defaultLocale } from "./locales.generated";
+import { locales, defaultLocale } from "./locales";
 
 /** Cây chuỗi giao diện: lá là chuỗi, nhánh là nhóm khoá lồng nhau. */
 type MessageTree = { [key: string]: string | MessageTree };

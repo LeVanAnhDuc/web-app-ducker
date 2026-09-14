@@ -1,6 +1,6 @@
 import { slugify } from "@/lib/slug";
 import { readGroup, readOne } from "./read";
-import { defaultLocale } from "@/i18n/locales.generated";
+import { defaultLocale } from "@/i18n/locales";
 import { join } from "node:path";
 
 export type TocItem = { anchor: string; title: string };

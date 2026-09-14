@@ -1,7 +1,7 @@
 {
   "name": "web-app-ducker",
   "version": "1.0.0",
-  "description": "Trang tài liệu cho hệ sinh thái ứng dụng của [@LeVanAnhDuc](https://github.com/LeVanAnhDuc), kèm trang quản trị nội dung.",
+  "description": "Trang tài liệu cho hệ sinh thái ứng dụng của [@LeVanAnhDuc](https://github.com/LeVanAnhDuc), nội dung là file trong repo, không có trang quản trị.",
   "private": true,
   "packageManager": "pnpm@10.32.1",
   "scripts": {

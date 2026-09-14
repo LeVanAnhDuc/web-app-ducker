@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
-import { locales } from "@/i18n/locales.generated";
+import { locales } from "@/i18n/locales";
 import { firstLeafHref, type NavTreeNode } from "@/content/nav-tree";
 import { getNavTree } from "@/content";
 

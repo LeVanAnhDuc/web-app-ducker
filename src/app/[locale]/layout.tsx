@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { setRequestLocale } from "next-intl/server";
 
-import { locales } from "@/i18n/locales.generated";
+import { locales } from "@/i18n/locales";
 
 /**
  * Layout của tầng `[locale]` — **không** dựng `<html>`/`<body>`.

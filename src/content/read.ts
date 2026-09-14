@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { defaultLocale } from "@/i18n/locales.generated";
+import { defaultLocale } from "@/i18n/locales";
 import { parseEntry, type EntryFrontmatter } from "./frontmatter";
 
 export type Group = "apps" | "games" | "docs";

@@ -8,7 +8,7 @@ import { MarkdownBody } from "@/components/docs/MarkdownBody";
 import { NavDrawer } from "@/components/docs/NavDrawer";
 import { Sidebar } from "@/components/docs/Sidebar";
 import { Toc } from "@/components/docs/Toc";
-import { defaultLocale, locales } from "@/i18n/locales.generated";
+import { defaultLocale, locales } from "@/i18n/locales";
 import { findTrail } from "@/content/nav-tree";
 import { getDocPage, getNavTree, listDocSlugs } from "@/content";
 import { attachHeadingIds, renderMarkdown } from "@/lib/markdown";

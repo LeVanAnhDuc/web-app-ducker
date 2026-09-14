@@ -1,5 +1,5 @@
 import { navGroups } from "../../content/nav";
-import { defaultLocale } from "@/i18n/locales.generated";
+import { defaultLocale } from "@/i18n/locales";
 import { listApps } from "./registry";
 import { listDocs } from "./docs";
 import { buildNavTree, type NavRow, type NavTreeNode } from "./nav-tree";

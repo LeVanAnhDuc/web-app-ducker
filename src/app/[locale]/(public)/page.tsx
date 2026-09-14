@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AppCard } from "@/components/docs/AppCard";
 import { GameCard } from "@/components/docs/GameCard";
 import { WireDiagram, type WireItem } from "@/components/ui";
-import { defaultLocale, locales } from "@/i18n/locales.generated";
+import { defaultLocale, locales } from "@/i18n/locales";
 import { listApps, listGames } from "@/content";
 import styles from "./page.module.css";
 
@@ -18,7 +18,7 @@ import styles from "./page.module.css";
 type PageParams = { params: Promise<{ locale: string }> };
 
 export async function generateStaticParams() {
-  const { locales } = await import("@/i18n/locales.generated");
+  const { locales } = await import("@/i18n/locales");
   return locales.map((locale) => ({ locale }));
 }
 

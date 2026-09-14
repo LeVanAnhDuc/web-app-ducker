@@ -5,7 +5,7 @@ import { setRequestLocale } from "next-intl/server";
 
 import { TopBar } from "@/components/docs/TopBar";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
-import { locales } from "@/i18n/locales.generated";
+import { locales } from "@/i18n/locales";
 import { getNavTree } from "@/content";
 import styles from "./layout.module.css";
 

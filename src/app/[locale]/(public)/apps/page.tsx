@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { AppCard } from "@/components/docs/AppCard";
-import { defaultLocale, locales } from "@/i18n/locales.generated";
+import { defaultLocale, locales } from "@/i18n/locales";
 import { listApps } from "@/content";
 import styles from "./page.module.css";
 
