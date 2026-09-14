@@ -43,7 +43,7 @@
  * mục nội dung thì xoá rồi dựng lại — nên **id của chúng không bền qua các lần seed**.
  */
 import { hasDatabase, prisma } from "../src/server/db";
-import { assertNavInvariants, type NavKind, type NavRow } from "../src/server/content/nav";
+import { assertNavInvariants, type NavKind, type NavRow } from "../src/content/nav-tree";
 
 /** Một đoạn chữ ở cả hai ngôn ngữ. Mọi nội dung seed đều phải có đủ cả hai. */
 type Text = { vi: string; en: string };
