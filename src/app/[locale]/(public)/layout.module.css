@@ -10,4 +10,9 @@
 .main {
   flex: 1 1 auto;
   min-width: 0;
+  /* Cột dọc để trang tài liệu (`DocsShell`) giãn kín phần màn hình còn lại
+     dưới thanh trên cùng — nhờ vậy hai cột bên chạm đáy màn hình kể cả khi bài
+     ngắn. Trang khác chỉ có một phần tử gốc, giãn ngang như khối thường. */
+  display: flex;
+  flex-direction: column;
 }
