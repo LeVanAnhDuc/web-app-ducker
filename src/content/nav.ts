@@ -1,6 +1,6 @@
 import { navGroups } from "../../content/nav";
 import { defaultLocale } from "@/i18n/locales";
-import { listApps } from "./registry";
+import { listApps, listGames } from "./registry";
 import { listDocs } from "./docs";
 import { buildNavTree, type NavRow, type NavTreeNode } from "./nav-tree";
 
@@ -41,41 +41,36 @@ function childRow(
 /**
  * Navigation rows for one locale, built from the content files.
  *
- * `content/nav.ts` names three groups: apps and docs are containers whose children
- * are derived from the registry/docs readers, so adding an entry there never means
- * editing the nav tree by hand. Games are the exception (R5): there is no per-game
- * detail route, so the "games" row is itself a leaf pointing at `/games` and gets no
- * children — pushing one row per game the way apps and docs do would link
- * somewhere that does not exist.
+ * Apps and games are containers whose children come from the registry reader,
+ * each opened by an Overview leaf (`content/nav.ts`) so `firstLeafHref` points
+ * the top tab at `/apps` or `/games`. Games used to be a childless leaf (R5)
+ * because they had no detail route; ADR-0023 gave them one.
  *
- * Every row comes out `status: "PUBLISHED"` (R14): file-backed content has no draft
- * state, and `buildNavTree`/`assertNavInvariants` still filter on that field from
- * their Prisma-era days, so this keeps every row passing through that filter until a
- * later task retires it.
+ * Every row comes out `status: "PUBLISHED"` (R14): file-backed content has no
+ * draft state, and `buildNavTree` still filters on that field.
  */
 export async function listNavRows(locale: string): Promise<NavRow[]> {
   const rows: NavRow[] = [];
 
   navGroups.forEach((group, order) => {
-    if (group.id === "games") {
+    rows.push(containerRow(group.id, group.labels, order));
+    if (group.overview) {
       rows.push({
-        id: group.id,
-        parentId: null,
-        order,
+        id: `${group.id}:overview`,
+        parentId: group.id,
+        // Before every entry, whose orders start at 0.
+        order: -1,
         status: "PUBLISHED",
         kind: "APP",
-        href: `/${locale}/games`,
-        labels: Object.entries(group.labels).map(([loc, value]) => ({ locale: loc, value })),
+        href: `/${locale}/${group.id}`,
+        labels: Object.entries(group.overview).map(([loc, value]) => ({ locale: loc, value })),
       });
-      return;
     }
-    rows.push(containerRow(group.id, group.labels, order));
   });
 
-  const apps = await listApps(locale);
+  const [apps, games, docs] = await Promise.all([listApps(locale), listGames(locale), listDocs(locale)]);
   apps.forEach((app, order) => rows.push(childRow(app, order, "apps", `/${locale}/apps`, "APP", locale)));
-
-  const docs = await listDocs(locale);
+  games.forEach((game, order) => rows.push(childRow(game, order, "games", `/${locale}/games`, "APP", locale)));
   docs.forEach((doc, order) =>
     rows.push(childRow({ slug: doc.slug, name: doc.title }, order, "docs", `/${locale}/docs`, "DOC", locale)),
   );

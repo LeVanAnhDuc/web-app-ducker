@@ -3,6 +3,7 @@ import {
   buildNavTree,
   findTrail,
   firstLeafHref,
+  navHref,
   wouldCreateCycle,
   assertNavInvariants,
   resolveTranslation,
@@ -151,5 +152,18 @@ describe("resolveTranslation", () => {
   it("không bao giờ trả slug làm nhãn thay thế", () => {
     const r = resolveTranslation(rows, "ja", "vi");
     expect(r!.value.title).not.toMatch(/-/);
+  });
+});
+
+describe("navHref", () => {
+  it("maps a releases tab onto its entry's nav href", () => {
+    expect(navHref("/vi/apps/web-app-ducker-id/releases")).toBe("/vi/apps/web-app-ducker-id");
+    expect(navHref("/en/games/web-game-duck-caro/releases")).toBe("/en/games/web-game-duck-caro");
+  });
+
+  it("leaves every other path alone", () => {
+    for (const path of ["/vi/apps", "/vi/apps/x", "/vi/docs/releases-guide", "/vi/apps/releases"]) {
+      expect(navHref(path)).toBe(path);
+    }
   });
 });

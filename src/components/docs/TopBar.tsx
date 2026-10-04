@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { locales } from "@/i18n/locales";
-import { findTrail, firstLeafHref, type NavTreeNode } from "@/content/nav-tree";
+import { findTrail, firstLeafHref, navHref, type NavTreeNode } from "@/content/nav-tree";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { SearchDialog } from "./SearchDialog";
 import styles from "./TopBar.module.css";
@@ -52,10 +52,10 @@ export function TopBar({ locale, tree = [] }: TopBarProps) {
   const t = useTranslations();
   const pathname = usePathname() ?? `/${locale}`;
 
-  // Tab đang mở là nút gốc của đường từ gốc tới trang đang xem. Trang không nằm
-  // trong cây (trang chủ, danh sách ứng dụng, bài chưa gắn vào cây) thì không tab
-  // nào sáng — nói thật hơn là làm sáng bừa một tab.
-  const activeTabId = findTrail(tree, pathname)[0]?.id;
+  // The open tab is the root of the trail to the current page. A page outside the
+  // tree (the home page, a doc not yet attached) lights no tab — more honest than
+  // lighting one at random. `navHref` folds a Releases tab onto its entry (I22).
+  const activeTabId = findTrail(tree, navHref(pathname))[0]?.id;
 
   return (
     <header className={styles.header}>

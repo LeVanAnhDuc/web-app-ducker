@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { listApps, listGames, getApp } from "./registry";
+import { listApps, listGames, getApp, getEntry } from "./registry";
 
 let root: string;
 
@@ -108,5 +108,21 @@ describe("isRepoPrivate", () => {
     expect(planned?.integration).toBe("planned");
     expect(planned?.repoUrl).toBeNull();
     expect(planned?.isRepoPrivate).toBe(false);
+  });
+});
+
+describe("getEntry", () => {
+  it("finds a game, which getApp never did", async () => {
+    const game = await getEntry("games", "web-game-duck-caro", "vi");
+    expect(game?.name).toBe("Duck Caro");
+    expect(game?.repoUrl).toBe("https://github.com/LeVanAnhDuc/web-game-duck-caro");
+  });
+
+  it("does not cross groups", async () => {
+    expect(await getEntry("apps", "web-game-duck-caro", "vi")).toBeNull();
+  });
+
+  it("keeps getApp working as before", async () => {
+    expect((await getApp("web-app-ducker-id", "vi"))?.name).toBe("Ducker ID");
   });
 });
