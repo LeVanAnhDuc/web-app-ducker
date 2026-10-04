@@ -1,7 +1,7 @@
 # README and releases from GitHub, and a games section shaped like apps
 
 > **Related:** FR-25 · FR-26 · FR-27 · ADR-0018 (amended) · ADR-0019 §4 · ADR-0022 ·
-> ADR-0023 (to be written) · retires R5 of [`../file-backed-registry/`](../file-backed-registry/design.md)
+> ADR-0023 · retires R5 of [`../file-backed-registry/`](../file-backed-registry/design.md)
 
 ## 1. What exists today
 
@@ -59,8 +59,9 @@ with no `repo:` get no `/releases` route (`notFound()`).
 entries in `order`. `firstLeafHref` therefore points the top tab at the overview with no
 change to `TopBar`.
 
-**Overview.** Replaces both grids. One card component for apps and games: name, tagline,
-status chip, stack; the whole card is one link to the detail page. `GameCard` is deleted.
+**Overview.** Replaces both grids with registry rows (MASTER.md §4): swatch, name and
+tagline, slug, status badge; the whole row is one link to the detail page. `GameCard`
+is deleted; the home page uses `AppCard` with a `basePath` for games.
 
 **Detail page, middle column.**
 
@@ -112,15 +113,16 @@ getReleases(repo: RepoRef): Promise<Fetched<Release[]>>   // newest first, draft
 parseRepoUrl(url: string): RepoRef | null                 // github.com/<owner>/<name> only
 ```
 
-- `getReadme` calls `GET /repos/{o}/{r}/readme` with `Accept: application/vnd.github.raw+json`;
-  `branch` and the README's `path` are parsed from `html_url`, so no extra call for the
-  default branch.
+- `getReadme` calls `GET /repos/{o}/{r}/readme` (default JSON media type, base64
+  `content`); `branch` and the README's `path` are parsed from `html_url`, so no extra
+  call for the default branch.
 - `getReleases` calls `GET /repos/{o}/{r}/releases?per_page=100`.
 - **Never throws.** 404, 403/429 (rate limit), network error and malformed JSON all map
   to `unavailable`, and each logs one `console.warn` with the repo and the HTTP status.
 - `GITHUB_TOKEN`, when set, is sent as `Authorization: Bearer`. Optional: added to
-  `.env.example`; in CI it comes from `secrets.GITHUB_TOKEN`. One build makes about
-  19 repos × 2 = 38 requests — under the anonymous 60/h, but close.
+  `.env.example`; the deploy job's `vercel build` gets `secrets.GITHUB_TOKEN`, while the
+  CI check job stays environment-free (NFR-REL-04). One clean build measured 42
+  requests — under the anonymous 60/h, but close.
 
 **Accepted cost.** A refresh that hits an error caches the `unavailable` state until the
 next refresh (≤ 1 h). Simpler than keeping the last good copy, and the page still
@@ -162,8 +164,8 @@ TDD, unit first.
 - **Components**: tab strip `aria-current`; release list with only the first `open`;
   empty and unavailable states.
 - **E2E (Playwright)**: overview → detail → Releases tab and back; sidebar starts with
-  Overview. In CI, GitHub is replaced by fixtures so the run does not depend on the
-  network.
+  Overview. Every assertion holds for both `ok` and `unavailable`, so the run does not
+  depend on GitHub being reachable at build time.
 - Before claiming done: `pnpm test:run` · `typecheck` · `lint` · `build` · `e2e`.
 
 ## 10. Gates before code
@@ -181,3 +183,17 @@ TDD, unit first.
 `web-app-calculate-badminton` returns 404. Until its `repo:` is corrected or the repo is
 made public, its pages show the `unavailable` state — which is the correct rendering of
 the fact, not a bug in this feature.
+
+## 12. Decisions taken during implementation
+
+Delegated by the user and reported before merge:
+
+1. **Registry rows, not cards**, on the overview pages — MASTER.md §4 makes the ruled
+   row the signature element.
+2. **The site's current tokens**, not the mockup's "Ink and state" palette — the
+   repaint stays its own branch (backlog §In progress); the mockup set the layout.
+3. **Tab labels** `README` / `Bản phát hành` (en `README` / `Releases`).
+
+Found while looking at the running pages, and fixed in the same branch: release notes
+render through `MarkdownBody` (lists had lost their markers), and the TOC is height-bounded
+below 980px (21 release tags pushed the content off the first screen).

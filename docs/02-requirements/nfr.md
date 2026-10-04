@@ -76,7 +76,7 @@ row still states the bar a future write path would have to clear.
 | ~~NFR-REL-01~~ | ~~Every outbound call (object storage) has a timeout and an error branch~~ | **Retired 2026-09-14** — there is no object storage; images are static files under `public/` (ADR-0019) |
 | ~~NFR-REL-02~~ | ~~Seeding is idempotent — running it repeatedly does not duplicate records~~ | **Retired 2026-09-14** — there is no seed; content is authored files (ADR-0018) |
 | NFR-REL-03 | No infinite loading state: every request has an error branch on screen | manual |
-| NFR-REL-04 | **Strengthened 2026-09-14.** `pnpm build` succeeds with **no environment variables at all** and produces a complete site. Previously the site rendered empty without a database; now there is nothing to be without | `pnpm build` with an empty environment |
+| NFR-REL-04 | **Strengthened 2026-09-14.** `pnpm build` succeeds with **no environment variables at all** and produces a complete site. **Amended 2026-10-04 (ADR-0023):** without network access the README and Releases tabs render their "unavailable" notice instead of content; the build still never fails because of GitHub. Previously the site rendered empty without a database; now there is nothing to be without | `pnpm build` with an empty environment |
 | ~~NFR-REL-05~~ | ~~Content written to the database from outside the running server does not invalidate its cache, and the cache is on disk~~ | **Retired 2026-09-14** — there is no database and no external write path; content is read fresh from `content/` on every build (ADR-0018) |
 
 ## Data & privacy
