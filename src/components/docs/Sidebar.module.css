@@ -4,9 +4,8 @@
 .side {
   /* `.m-side`: đệm dưới dày để mục cuối không dính đáy khung cuộn. */
   padding: 20px 12px 40px;
-  border-right: 1px solid var(--line);
-  background: var(--surface);
-  height: 100%;
+  /* Viền phải và nền nằm trên ô cột của `DocsShell`, vì ô đó mới cao tới đáy
+     màn hình; đặt ở đây thì chúng dừng ở mục cuối cùng. */
 }
 
 /* Dưới 980px cột này không còn hiện (`DocsShell.module.css` ẩn nó): cây điều

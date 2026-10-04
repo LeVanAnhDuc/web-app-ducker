@@ -4,8 +4,10 @@
 .shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  min-height: 100%;
+  /* Giãn kín `<main>` (một cột flex) và kéo ba cột cao bằng nhau: viền và nền
+     của hai cột bên chạy suốt tới đáy màn hình thay vì dừng ở mục cuối. */
+  flex: 1 0 auto;
+  align-items: stretch;
 }
 
 .shell[data-sidebar="yes"] {
@@ -20,13 +22,24 @@
   grid-template-columns: 208px minmax(0, 1fr) 178px;
 }
 
-/* Hai cột ngoài đi theo người đọc suốt bài dài. Đây là bố cục, không phải
-   hiệu ứng cuộn — không có gì chuyển động. */
-.sidebarSlot,
+/* Ô cột cao bằng cả lưới nên viền và nền nằm ở đây, không nằm trên phần tử
+   bên trong — phần tử đó chỉ cao bằng nội dung của nó. */
+.sidebarSlot {
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+}
+
 .tocSlot {
+  border-left: 1px solid var(--line);
+}
+
+/* Hai cột ngoài đi theo người đọc suốt bài dài. Đây là bố cục, không phải
+   hiệu ứng cuộn — không có gì chuyển động. Phần dính là nội dung bên trong,
+   vì ô cột giờ cao bằng cả lưới thì tự nó không còn gì để dính. */
+.sidebarSlot > *,
+.tocSlot > * {
   position: sticky;
   top: 0;
-  align-self: start;
   max-height: 100vh;
   overflow-y: auto;
 }
@@ -53,8 +66,8 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .sidebarSlot,
-  .tocSlot {
+  .sidebarSlot > *,
+  .tocSlot > * {
     position: static;
     max-height: none;
     overflow-y: visible;
@@ -62,6 +75,7 @@
 
   .tocSlot {
     order: -1;
+    border-left: 0;
     padding: 20px 24px 0;
   }
 
