@@ -24,7 +24,7 @@ Spec and plan in [`../specs/github-readme-releases/`](../specs/github-readme-rel
 8 tasks; reasoning in [ADR-0023](../decisions/0023-readme-and-releases-from-github.md).
 Every app and game with a repository shows its README and releases, refreshed hourly by
 ISR; games have detail pages (R5 retired); `/apps` and `/games` are overview pages.
-Measured: 245 unit tests, 21 e2e, one clean build = 42 anonymous GitHub calls.
+Measured: 250 unit tests, 21 e2e, one clean build = 42 anonymous GitHub calls.
 **Open item:** `web-app-calculate-badminton` answers 404 on GitHub — its pages show the
 "unavailable" notice until its `repo:` is corrected or the repository is made public.
 **Owed on deploy:** set `GITHUB_TOKEN` in the Vercel project, or ISR refreshes on the

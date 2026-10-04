@@ -15,9 +15,9 @@ import { Sidebar } from "@/components/docs/Sidebar";
 import { Toc } from "@/components/docs/Toc";
 import { buildToc, getEntry, getNavTree, listEntries, type EntryGroup } from "@/content";
 import { findTrail } from "@/content/nav-tree";
-import { absolutizeUrl, getReadme, getReleases, parseRepoUrl, repoWebUrl } from "@/github";
+import { absolutizeUrl, getReadme, getReleases, isRuntimeRefresh, parseRepoUrl, repoWebUrl } from "@/github";
 import { defaultLocale, locales } from "@/i18n/locales";
-import { attachHeadingIds, renderMarkdown } from "@/lib/markdown";
+import { attachHeadingIds, renderMarkdown, renderMarkdownWithToc } from "@/lib/markdown";
 import { slugify } from "@/lib/slug";
 import styles from "./entry-page.module.css";
 
@@ -140,6 +140,15 @@ export async function detailMetadata(
   };
 }
 
+/**
+ * During an ISR refresh, refuse to replace a good page with the notice: throwing
+ * makes Next keep serving the last successful render (ADR-0023). At build time
+ * there is no earlier page, so the notice renders.
+ */
+function keepLastGoodPage(what: string, slug: string): void {
+  if (isRuntimeRefresh()) throw new Error(`${what} unavailable for ${slug}; keeping the last good page`);
+}
+
 function formatDate(iso: string, locale: string): string {
   // UTC on purpose (I11): the build server's zone must not shift a date by a day.
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(new Date(iso));
@@ -188,11 +197,13 @@ export async function DetailPage({
     const readme = await getReadme(repo);
     if (readme.status === "ok") {
       const at = { repo, branch: readme.data.branch, path: readme.data.path };
-      toc = buildToc(readme.data.markdown);
-      const html = await renderMarkdown(readme.data.markdown, {
+      // The TOC is read off the rendered headings: a third-party README can contain
+      // headings a line scan of the markdown would miscount (I23).
+      const rendered = await renderMarkdownWithToc(readme.data.markdown, {
         dropFirstH1: true,
         rewriteUrl: (url, kind) => absolutizeUrl(url, kind, at),
       });
+      toc = rendered.toc;
       body = (
         <>
           <p className={styles.source}>
@@ -201,10 +212,11 @@ export async function DetailPage({
               {t("entry.viewOriginal")}
             </a>
           </p>
-          <MarkdownBody html={attachHeadingIds(html, toc)} labels={labels} />
+          <MarkdownBody html={rendered.html} labels={labels} />
         </>
       );
     } else {
+      keepLastGoodPage("README", slug);
       body = (
         <GithubNotice
           tone="unavailable"
@@ -235,6 +247,7 @@ export async function DetailPage({
         </>
       );
     } else {
+      if (releases.status === "unavailable") keepLastGoodPage("Releases", slug);
       const empty = releases.status === "empty";
       body = (
         <GithubNotice

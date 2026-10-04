@@ -29,8 +29,15 @@ two link-tabs, **README** and **Releases**, at two URLs: `/<group>/<slug>` and
 
 Pages are generated at build time and refreshed by **ISR at most once an hour**
 (`revalidate = 3600` in each route). `src/github/` is the only module that calls the API
-(I21). It **never throws**: a failure becomes an `unavailable` state that renders a
-notice with a link to GitHub, and one `console.warn` naming the repository.
+(I21). It **never throws**: a failure becomes an `unavailable` state and one
+`console.warn` naming the repository. What the page does with `unavailable` depends on
+when it renders:
+
+- **At build time** it renders a notice with a link to GitHub — there is no earlier
+  page to fall back to, and GitHub being down must not fail a deploy.
+- **During an ISR refresh** the page throws instead, so Next keeps serving the last good
+  render. Rendering the notice there would replace a good README with "could not load"
+  for an hour every time the server is rate-limited.
 
 This **amends ADR-0018 §2** for entries with a repository. Frontmatter stays the source
 of name, status, order, tagline and stack. The `.mdx` body is no longer rendered for
@@ -49,7 +56,7 @@ item of each sidebar and the target of each top tab, and R5 is retired.
 | Fetch at build time only | A README edit would need a redeploy to show — the same drift, one step removed |
 | One URL with client-side tabs | Every page's HTML would carry up to 24 release bodies, and the table of contents would have to swap on the client |
 | One URL with `?tab=releases` | Reading `searchParams` forces dynamic rendering, losing ISR and calling GitHub on every request |
-| Keep the last good copy when a refresh fails | Needs storage this site deliberately does not have (ADR-0018, ADR-0019). The `unavailable` state lasts at most until the next refresh |
+| Store the last good copy ourselves | Needs storage this site deliberately does not have (ADR-0018, ADR-0019) — and is unnecessary: throwing during a refresh makes ISR keep the last good page for free |
 | Mirror READMEs into `content/` with a script | A second copy of the README is exactly the drift this decision removes |
 
 ## 4. Consequences
@@ -66,7 +73,11 @@ description.
   × 2, plus the uncached 404s). The anonymous limit is 60 an hour per IP, so two clean
   builds within an hour from one machine run out. `GITHUB_TOKEN` (optional, no scopes)
   raises it to 5,000. The CI check job stays environment-free (NFR-REL-04); the deploy
-  job's `vercel build` gets the Actions token.
+  job's `vercel build` gets the Actions token — but that token lives only as long as the
+  job. **Hourly refreshes run on the host, so `GITHUB_TOKEN` must also be a Vercel
+  project environment variable** (a fine-grained token with public read access).
+  Without it, refreshes run anonymously from shared egress IPs; when they are
+  rate-limited the pages stay on their last good render rather than going blank.
 - README text is English and is not in the search index.
 - ISR needs a server host. On a static-only host the tabs would update only on rebuild.
 

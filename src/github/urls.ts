@@ -20,7 +20,14 @@ export function absolutizeUrl(url: string, kind: "link" | "image", at: ReadmeLoc
   const dir = at.path.includes("/") ? at.path.slice(0, at.path.lastIndexOf("/") + 1) : "";
   // A throwaway origin gives us the URL spec's own `./`, `../` and `/` resolution,
   // including clamping `../` at the root, instead of re-implementing it.
-  const resolved = new URL(url, `https://readme.invalid/${dir}`);
+  let resolved: URL;
+  try {
+    resolved = new URL(url, `https://readme.invalid/${dir}`);
+  } catch {
+    // A backslash-and-bracket string the URL parser rejects. Left as written, the
+    // sanitizer still vets it; thrown, it would fail the whole build (I21).
+    return url;
+  }
   const repoPath = resolved.pathname.replace(/^\//, "");
   const { owner, name } = at.repo;
   const base =

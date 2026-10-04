@@ -42,6 +42,19 @@ export async function githubJson(path: string): Promise<JsonResult> {
   }
 }
 
+/**
+ * True when a production server is re-rendering a page (an ISR refresh), as
+ * opposed to `next build` or `next dev`.
+ *
+ * During a refresh an `unavailable` answer should throw: Next then keeps serving
+ * the last good page. Rendering the notice instead would replace a good README
+ * with "could not load" for an hour every time GitHub rate-limits the server.
+ * At build time there is no last good page, so the notice is the right render.
+ */
+export function isRuntimeRefresh(env: Record<string, string | undefined> = process.env): boolean {
+  return env.NODE_ENV === "production" && env.NEXT_PHASE !== "phase-production-build";
+}
+
 /** One line per failure, naming the repository — a swallowed error would read as "no README". */
 export function warnUnavailable(
   what: string,

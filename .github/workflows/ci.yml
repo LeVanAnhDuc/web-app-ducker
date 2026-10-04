@@ -185,7 +185,9 @@ jobs:
         env:
           # The README and Releases tabs (ADR-0023). Unlike the check job above,
           # this build is the one users see, so it must not share the anonymous
-          # 60-an-hour limit with every other job on a runner's IP.
+          # 60-an-hour limit with every other job on a runner's IP. It covers the
+          # build only: hourly refreshes run on Vercel and read the project's own
+          # GITHUB_TOKEN variable.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

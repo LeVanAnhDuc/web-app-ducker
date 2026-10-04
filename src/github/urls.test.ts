@@ -46,3 +46,13 @@ describe("absolutizeUrl", () => {
     );
   });
 });
+
+describe("absolutizeUrl on malformed input", () => {
+  it("returns a URL the URL parser rejects unchanged instead of throwing (I21)", () => {
+    // Raw strings: these are the exact characters a README link can carry.
+    for (const url of [String.raw`/\[x]`, String.raw`\/[`]) {
+      expect(() => absolutizeUrl(url, "link", root)).not.toThrow();
+      expect(absolutizeUrl(url, "link", root)).toBe(url);
+    }
+  });
+});

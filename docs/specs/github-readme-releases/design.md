@@ -79,7 +79,9 @@ after two transforms on the markdown tree:
   `../` resolve against the README's own directory. Absolute URLs, `mailto:` and
   `#anchors` are left alone.
 
-TOC: the README's `##` headings, through the existing `buildToc` / `attachHeadingIds`.
+TOC: the README's rendered `<h2>`s, read off the HTML tree in the same pass that stamps
+their ids (`renderMarkdownWithToc`, I23) — a line scan of third-party markdown can
+miscount.
 
 **Releases tab.** One `<details>` per release, newest first, drafts excluded. Summary:
 tag, name when it differs from the tag, date in the page's locale. Body: the release
@@ -124,9 +126,9 @@ parseRepoUrl(url: string): RepoRef | null                 // github.com/<owner>/
   CI check job stays environment-free (NFR-REL-04). One clean build measured 42
   requests — under the anonymous 60/h, but close.
 
-**Accepted cost.** A refresh that hits an error caches the `unavailable` state until the
-next refresh (≤ 1 h). Simpler than keeping the last good copy, and the page still
-renders.
+**A failed refresh keeps the last good page.** During an ISR refresh (not at build time)
+an `unavailable` answer throws, and Next keeps serving the last successful render. At
+build time the notice renders. Production refreshes need `GITHUB_TOKEN` set on the host.
 
 **Host.** ISR needs a server; ADR-0022 deploys to Vercel. On a static-only host the
 pages would update only on rebuild.

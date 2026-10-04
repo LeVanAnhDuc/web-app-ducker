@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { githubJson } from "./client";
+import { githubJson, isRuntimeRefresh } from "./client";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -44,5 +44,14 @@ describe("githubJson", () => {
   it("reports a malformed body instead of throwing", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("<html>", { status: 200 })));
     expect(await githubJson("/x")).toEqual({ ok: false, status: "parse" });
+  });
+});
+
+describe("isRuntimeRefresh", () => {
+  it("is true only when a production server re-renders a page", () => {
+    expect(isRuntimeRefresh({ NODE_ENV: "production" })).toBe(true);
+    expect(isRuntimeRefresh({ NODE_ENV: "production", NEXT_PHASE: "phase-production-build" })).toBe(false);
+    expect(isRuntimeRefresh({ NODE_ENV: "development" })).toBe(false);
+    expect(isRuntimeRefresh({ NODE_ENV: "test" })).toBe(false);
   });
 });

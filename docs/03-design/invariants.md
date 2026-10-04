@@ -66,6 +66,7 @@ R5 of the file-backed-registry design ("games have no detail page; `/games` link
 | I20 | Nav `href`s carry the locale prefix (`/${locale}/apps/...`) and `findTrail` matches on that exact string | Dropping the prefix, or comparing against a bare pathname, empties the sidebar with nothing erroring |
 | I21 | `src/github/` is the only module that calls the GitHub API, and none of it throws (ADR-0023) | A throw fails every build while GitHub is down; a second caller escapes the token and the fetch cache. Guarded by `src/github/boundary.test.ts` |
 | I22 | A Releases URL (`/<locale>/<group>/<slug>/releases`) is folded onto its README href by `navHref` before `findTrail` | The Releases URL is not a nav node: matching it as-is empties the sidebar and lights no top tab, with nothing erroring (I20) |
+| I23 | A README's TOC is read off its rendered `<h2>`s (`renderMarkdownWithToc`), not by scanning the markdown for `## ` lines | A setext heading, a `## ` in an HTML comment or a quote makes a line scan and the renderer disagree, and every later TOC link lands on the wrong heading. `buildToc` + `attachHeadingIds` remain only for authored `.mdx` |
 
 ## Presentation
 
