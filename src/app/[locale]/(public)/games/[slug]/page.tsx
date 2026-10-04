@@ -8,15 +8,15 @@ export const revalidate = 3600;
 type PageParams = { params: Promise<{ locale: string; slug: string }> };
 
 export function generateStaticParams() {
-  return detailStaticParams("apps", { requireRepo: false });
+  return detailStaticParams("games", { requireRepo: false });
 }
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { locale, slug } = await params;
-  return detailMetadata("apps", locale, slug, "readme");
+  return detailMetadata("games", locale, slug, "readme");
 }
 
-export default async function AppPage({ params }: PageParams) {
+export default async function GamePage({ params }: PageParams) {
   const { locale, slug } = await params;
-  return <DetailPage group="apps" locale={locale} slug={slug} tab="readme" />;
+  return <DetailPage group="games" locale={locale} slug={slug} tab="readme" />;
 }

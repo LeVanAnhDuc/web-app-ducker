@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { AppCard } from "@/components/docs/AppCard";
-import { GameCard } from "@/components/docs/GameCard";
 import { WireDiagram, type WireItem } from "@/components/ui";
 import { defaultLocale, locales } from "@/i18n/locales";
 import { listApps, listGames } from "@/content";
@@ -46,9 +45,8 @@ export default async function HomePage({ params }: PageParams) {
   const t = await getTranslations({ locale });
   const [apps, games] = await Promise.all([listApps(locale), listGames(locale)]);
 
-  // Nhãn trạng thái dịch một lần rồi truyền xuống: `WireDiagram`, `AppCard` và
-  // `GameCard` không được tự bịa chữ, chúng chỉ biết `integration` là khoá kỹ
-  // thuật nào.
+  // Status labels are translated once and passed down: `WireDiagram` and `AppCard`
+  // must not invent text — they only know which technical `integration` key it is.
   const statusLabels = {
     core: t("status.core"),
     connected: t("status.connected"),
@@ -118,9 +116,11 @@ export default async function HomePage({ params }: PageParams) {
           <h2 className={styles.sectionLabel}>{t("games.title")}</h2>
           <div className={styles.cards} role="list">
             {games.map((game) => (
-              <GameCard
+              <AppCard
                 key={game.slug}
-                game={game}
+                app={game}
+                locale={locale}
+                basePath={`/${locale}/games`}
                 statusLabel={statusLabels[game.integration]}
                 repoLabel={t("app.viewRepoOnGithub")}
               />

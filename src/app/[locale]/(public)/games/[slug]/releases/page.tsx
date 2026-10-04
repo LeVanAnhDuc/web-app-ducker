@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DetailPage, detailMetadata, detailStaticParams } from "../../_entry/entry-page";
+import { DetailPage, detailMetadata, detailStaticParams } from "../../../_entry/entry-page";
 
 // ISR: GitHub is asked again at most once an hour (ADR-0023). Must stay a literal —
 // Next reads segment config statically.
@@ -8,15 +8,15 @@ export const revalidate = 3600;
 type PageParams = { params: Promise<{ locale: string; slug: string }> };
 
 export function generateStaticParams() {
-  return detailStaticParams("apps", { requireRepo: false });
+  return detailStaticParams("games", { requireRepo: true });
 }
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
   const { locale, slug } = await params;
-  return detailMetadata("apps", locale, slug, "readme");
+  return detailMetadata("games", locale, slug, "releases");
 }
 
-export default async function AppPage({ params }: PageParams) {
+export default async function GameReleasesPage({ params }: PageParams) {
   const { locale, slug } = await params;
-  return <DetailPage group="apps" locale={locale} slug={slug} tab="readme" />;
+  return <DetailPage group="games" locale={locale} slug={slug} tab="releases" />;
 }

@@ -97,6 +97,12 @@
     grid-template-columns: 10px minmax(0, 1fr) auto;
   }
 
+  /* Three lines tall now: pin the swatch to the name, not the middle. */
+  .swatch {
+    align-self: start;
+    margin-top: 6px;
+  }
+
   .slug {
     grid-column: 2 / -1;
     grid-row: 2;

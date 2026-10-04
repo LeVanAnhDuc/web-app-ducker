@@ -63,7 +63,7 @@
     "eyebrow": "{count, plural, =0 {No games yet} one {# game} other {# games}}",
     "title": "Games",
     "lede": "Small games that run straight in the browser — no account, nothing to install.",
-    "description": "The games in the ecosystem, each linking straight out to its repository.",
+    "description": "The games in the ecosystem, each with its README and release history from GitHub.",
     "emptyTitle": "No games here yet",
     "emptyBody": "The first game shows up on this page as soon as it is added."
   },
@@ -99,5 +99,21 @@
     "title": "This page is broken",
     "body": "The content failed to load. Try once more; if it still fails, the fault is on the server, not on your machine.",
     "retry": "Retry"
+  },
+  "entry": {
+    "tabsLabel": "Contents of {name}",
+    "readme": "README",
+    "releases": "Releases",
+    "readmeSource": "From the repository's {path}, branch {branch}.",
+    "viewOriginal": "View the original on GitHub",
+    "readmeUnavailableTitle": "Could not load the README from GitHub",
+    "releasesUnavailableTitle": "Could not load releases from GitHub",
+    "unavailableBody": "GitHub returned nothing for this repository. The page tries again at its next refresh; meanwhile, read the original on GitHub.",
+    "openRepo": "Open the repository on GitHub",
+    "releasesCount": "{count, plural, one {# release} other {# releases}}, newest first.",
+    "latest": "Latest",
+    "releasesEmptyTitle": "No releases yet",
+    "releasesEmptyBody": "This repository has not published a release on GitHub. When it does, it shows up here within the hour.",
+    "releasesOnGithub": "Releases page on GitHub"
   }
 }

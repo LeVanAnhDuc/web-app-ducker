@@ -70,7 +70,7 @@ describe("getReleases", () => {
   });
 
   it("asks for 100 per page", async () => {
-    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => Response.json([]));
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(async () => Response.json([]));
     vi.stubGlobal("fetch", fetchMock);
     await getReleases(repo);
     expect(fetchMock.mock.calls[0]![0]).toBe("https://api.github.com/repos/o/r/releases?per_page=100");

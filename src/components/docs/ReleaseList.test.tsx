@@ -14,7 +14,7 @@ const r = (tag: string, over: Partial<{ name: string | null; html: string }> = {
 describe("ReleaseList", () => {
   it("opens only the newest release", () => {
     const { container } = render(
-      <ReleaseList releases={[r("v1.6.8"), r("v1.6.7"), r("v1.6.6")]} latestLabel="Mới nhất" />,
+      <ReleaseList releases={[r("v1.6.8"), r("v1.6.7"), r("v1.6.6")]} latestLabel="Mới nhất" bodyLabels={{ code: "Mã", table: "Bảng" }} />,
     );
     const details = container.querySelectorAll("details");
     expect(details).toHaveLength(3);
@@ -22,16 +22,28 @@ describe("ReleaseList", () => {
   });
 
   it("labels the newest as latest and gives every release its anchor", () => {
-    const { container } = render(<ReleaseList releases={[r("v1.6.8"), r("v1.6.7")]} latestLabel="Mới nhất" />);
+    const { container } = render(<ReleaseList releases={[r("v1.6.8"), r("v1.6.7")]} latestLabel="Mới nhất" bodyLabels={{ code: "Mã", table: "Bảng" }} />);
     expect(screen.getAllByText("Mới nhất")).toHaveLength(1);
     expect(container.querySelector('[id="release-v1.6.7"]')).not.toBeNull();
   });
 
   it("shows a distinct name beside the tag, and nothing for an empty body", () => {
     const { container } = render(
-      <ReleaseList releases={[r("v2.0.0", { name: "Hot-seat", html: "" })]} latestLabel="Mới nhất" />,
+      <ReleaseList releases={[r("v2.0.0", { name: "Hot-seat", html: "" })]} latestLabel="Mới nhất" bodyLabels={{ code: "Mã", table: "Bảng" }} />,
     );
     expect(screen.getByText("Hot-seat")).toBeInTheDocument();
     expect(container.textContent).not.toContain("undefined");
+  });
+
+  it("renders the notes as prose, so lists keep their markers", () => {
+    const { container } = render(
+      <ReleaseList
+        releases={[r("v1.0.0", { html: "<ul><li>deps: x</li></ul>" })]}
+        latestLabel="Mới nhất"
+        bodyLabels={{ code: "Mã", table: "Bảng" }}
+      />,
+    );
+    // MarkdownBody wraps prose in the `.prose` block that restores list-style.
+    expect(container.querySelector('[class*="prose"] ul')).not.toBeNull();
   });
 });

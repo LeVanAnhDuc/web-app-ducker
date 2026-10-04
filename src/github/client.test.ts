@@ -9,7 +9,7 @@ afterEach(() => {
 describe("githubJson", () => {
   it("sends the token when GITHUB_TOKEN is set", async () => {
     vi.stubEnv("GITHUB_TOKEN", "t0k");
-    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => new Response("{}", { status: 200 }));
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(async () => new Response("{}", { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     await githubJson("/repos/o/r/readme");
     const init = fetchMock.mock.calls[0]![1] as RequestInit & { headers: Record<string, string> };
@@ -19,7 +19,7 @@ describe("githubJson", () => {
 
   it("calls anonymously when GITHUB_TOKEN is empty", async () => {
     vi.stubEnv("GITHUB_TOKEN", "");
-    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => new Response("{}", { status: 200 }));
+    const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(async () => new Response("{}", { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     await githubJson("/x");
     const init = fetchMock.mock.calls[0]![1] as RequestInit & { headers: Record<string, string> };

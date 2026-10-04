@@ -54,7 +54,8 @@
   padding: 1px 8px;
   border: 1px solid var(--ink);
   border-radius: 3px;
-  font-size: var(--t-2xs);
+  /* A word, not a mono label, so it keeps the 14px prose floor (tokens.test.ts). */
+  font-size: var(--t-sm);
   font-weight: 600;
 }
 
@@ -67,22 +68,9 @@
   color: var(--muted);
 }
 
+/* Indent the notes under the tag; MarkdownBody owns their typography. */
 .notes {
   padding: 0 8px 20px 27px;
-  max-width: 66ch;
-  font-size: var(--t-md);
-  line-height: var(--lh-body);
-}
-
-.notes h3 {
-  margin: 16px 0 6px;
-  font-size: var(--t-md);
-}
-
-.notes code {
-  font-family: var(--mono);
-  font-size: var(--t-2xs);
-  color: var(--muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

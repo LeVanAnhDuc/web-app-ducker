@@ -25,7 +25,9 @@ test("the home registry lists both groups", async ({ page }) => {
 
 test("a planned entry shows no invented description", async ({ page }) => {
   await page.goto("/vi/apps");
-  const row = page.getByRole("listitem").filter({ hasText: "Tier List" });
+  // `/apps` now has a sidebar whose items carry the same names; the slug appears
+  // only in the overview row, so it picks the row and not the sidebar entry.
+  const row = page.getByRole("listitem").filter({ hasText: "web-app-tier-list" });
   await expect(row).toBeVisible();
 
   // `content/apps/web-app-tier-list.vi.mdx` carries no `tagline` — the card must
