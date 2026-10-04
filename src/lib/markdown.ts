@@ -161,22 +161,64 @@ const prettyCodeOptions: PrettyCodeOptions = {
   ],
 };
 
-/**
- * Thứ tự bắt buộc: parse → gfm → rehype → tô màu → **sanitize** → stringify.
- * Đảo sanitize lên trước bước tô màu thì nó xoá sạch `<span>` shiki vừa tạo
- * và khối mã mất hết màu.
- */
-const processor = unified()
-  .use(remarkParse)
-  .use(remarkGfm)
-  .use(remarkStripRawHtml)
-  .use(remarkRehype)
-  .use(rehypePrettyCode, prettyCodeOptions)
-  .use(rehypeSanitize, schema)
-  .use(rehypeStringify);
+// ---------------------------------------------------------------------------
+// 3b. README transforms (ADR-0023)
+// ---------------------------------------------------------------------------
 
-/** Markdown → HTML đã sanitize, khối mã đã tô màu. Dấu tiếng Việt giữ nguyên. */
-export async function renderMarkdown(md: string): Promise<string> {
+export type RenderOptions = {
+  /** Called for every link, image and reference definition. README-relative URLs need it. */
+  rewriteUrl?: (url: string, kind: "link" | "image") => string;
+  /** The README's own title repeats the page hero; drop the first top-level H1. */
+  dropFirstH1?: boolean;
+};
+
+type UrlNode = { type: string; url?: unknown; depth?: unknown; children?: unknown };
+
+function rewriteUrls(node: UrlNode, rewrite: NonNullable<RenderOptions["rewriteUrl"]>): void {
+  if (typeof node.url === "string") {
+    if (node.type === "image") node.url = rewrite(node.url, "image");
+    else if (node.type === "link" || node.type === "definition") node.url = rewrite(node.url, "link");
+  }
+  if (Array.isArray(node.children)) {
+    for (const child of node.children as UrlNode[]) rewriteUrls(child, rewrite);
+  }
+}
+
+function remarkReadme(options: RenderOptions) {
+  return (tree: unknown) => {
+    const root = tree as UrlNode;
+    if (options.dropFirstH1 && Array.isArray(root.children)) {
+      const children = root.children as UrlNode[];
+      const index = children.findIndex((c) => c.type === "heading" && c.depth === 1);
+      if (index >= 0) children.splice(index, 1);
+    }
+    if (options.rewriteUrl) rewriteUrls(root, options.rewriteUrl);
+  };
+}
+
+/**
+ * Mandatory order: parse → gfm → rehype → highlight → **sanitize** → stringify.
+ * Sanitizing before highlighting strips the shiki `<span>`s it just made.
+ * The README transform runs on the markdown tree, before any of that, so the
+ * sanitizer still sees — and still vets — every rewritten URL.
+ */
+function createProcessor(options: RenderOptions) {
+  return unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+    .use(remarkStripRawHtml)
+    .use(remarkReadme, options)
+    .use(remarkRehype)
+    .use(rehypePrettyCode, prettyCodeOptions)
+    .use(rehypeSanitize, schema)
+    .use(rehypeStringify);
+}
+
+const defaultProcessor = createProcessor({});
+
+/** Markdown → sanitised HTML with highlighted code. Vietnamese diacritics survive. */
+export async function renderMarkdown(md: string, options?: RenderOptions): Promise<string> {
+  const processor = options ? createProcessor(options) : defaultProcessor;
   const file = await processor.process(md);
   return String(file);
 }

@@ -85,3 +85,37 @@ describe("attachHeadingIds", () => {
     expect(stamped).toContain("<h2>Second</h2>");
   });
 });
+
+describe("renderMarkdown options", () => {
+  it("passes every link and image URL through rewriteUrl with its kind", async () => {
+    const seen: string[] = [];
+    await renderMarkdown("[a](docs/a.md) ![s](shot.png)\n\n[ref][r]\n\n[r]: other.md", {
+      rewriteUrl: (url, kind) => {
+        seen.push(`${kind} ${url}`);
+        return `https://example.test/${url}`;
+      },
+    });
+    expect(seen.sort()).toEqual(["image shot.png", "link docs/a.md", "link other.md"]);
+  });
+
+  it("emits the rewritten URLs", async () => {
+    const html = await renderMarkdown("[a](docs/a.md) ![s](shot.png)", {
+      rewriteUrl: (url) => `https://example.test/${url}`,
+    });
+    expect(html).toContain('href="https://example.test/docs/a.md"');
+    expect(html).toContain('src="https://example.test/shot.png"');
+  });
+
+  it("drops only the first top-level H1", async () => {
+    const html = await renderMarkdown("# Project\n\nIntro\n\n# Second\n\n## Part", { dropFirstH1: true });
+    expect(html).not.toContain("Project");
+    expect(html).toContain("<h1>Second</h1>");
+    expect(html).toContain("<h2>Part</h2>");
+  });
+
+  it("changes nothing without options", async () => {
+    const html = await renderMarkdown("# Project\n\n[a](docs/a.md)");
+    expect(html).toContain("<h1>Project</h1>");
+    expect(html).toContain('href="docs/a.md"');
+  });
+});
