@@ -1,0 +1,112 @@
+/* Overview rows — MASTER.md §4's registry row, drawn with the site's current
+   tokens (the "Ink and state" repaint is a separate branch). */
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.item {
+  border-bottom: 1px solid var(--line);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) minmax(0, 18rem) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: var(--tap);
+  padding: 14px 12px;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+
+.row:hover {
+  background: var(--surface);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* A connected app hangs under its identity provider. */
+.row[data-branch="yes"] {
+  padding-left: 36px;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  background: var(--muted);
+}
+
+.swatch[data-status="core"] {
+  background: var(--st-core);
+}
+
+.swatch[data-status="connected"] {
+  background: var(--st-connected);
+}
+
+.swatch[data-status="standalone"] {
+  background: var(--st-standalone);
+}
+
+.swatch[data-status="planned"] {
+  background: var(--st-planned);
+}
+
+.swatch[data-status="private"] {
+  background: var(--st-private);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--t-md);
+  font-weight: 600;
+  line-height: var(--lh-head);
+}
+
+.tagline {
+  font-size: var(--t-sm);
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.slug {
+  font-family: var(--mono);
+  font-size: var(--t-2xs);
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .row {
+    grid-template-columns: 10px minmax(0, 1fr) auto;
+  }
+
+  /* Three lines tall now: pin the swatch to the name, not the middle. */
+  .swatch {
+    align-self: start;
+    margin-top: 6px;
+  }
+
+  .slug {
+    grid-column: 2 / -1;
+    grid-row: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}

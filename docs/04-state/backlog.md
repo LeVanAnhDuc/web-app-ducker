@@ -2,7 +2,7 @@
 
 > **Answers:** What is being worked on, what comes next, and what is owed?
 > **Status:** 🟢 complete
-> **Updated:** 2026-09-14 · commit 3e4e67a
+> **Updated:** 2026-10-04 · branch feat/github-readme-releases
 > **Update when:** work starts or finishes · brainstorming produces new work · a shortcut is taken deliberately
 
 <!-- HOW TO FILL
@@ -17,6 +17,18 @@ DOES NOT CONTAIN: out-of-scope features (-> 01-product/overview.md §Non-Goals).
 -->
 
 ## In progress
+
+**README and Releases from GitHub — code and documentation complete, on
+`feat/github-readme-releases`, PR open, awaiting the user's merge decision (2026-10-04).**
+Spec and plan in [`../specs/github-readme-releases/`](../specs/github-readme-releases/design.md),
+8 tasks; reasoning in [ADR-0023](../decisions/0023-readme-and-releases-from-github.md).
+Every app and game with a repository shows its README and releases, refreshed hourly by
+ISR; games have detail pages (R5 retired); `/apps` and `/games` are overview pages.
+Measured: 250 unit tests, 21 e2e, one clean build = 42 anonymous GitHub calls.
+**Open item:** `web-app-calculate-badminton` answers 404 on GitHub — its pages show the
+"unavailable" notice until its `repo:` is corrected or the repository is made public.
+**Owed on deploy:** set `GITHUB_TOKEN` in the Vercel project, or ISR refreshes on the
+server run anonymously.
 
 **File-backed registry — code and documentation complete, on `feat/file-backed-registry`,
 not yet merged to `main`.** [`../specs/file-backed-registry/plan.md`](../specs/file-backed-registry/plan.md),

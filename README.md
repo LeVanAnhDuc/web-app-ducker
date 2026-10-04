@@ -18,7 +18,7 @@ description, or publishing a guide is an edit to a file under `content/` and a
 push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 [ADR-0019](docs/decisions/0019-no-administration-surface.md).
 
-> **Status:** the application code is complete — **192 unit tests** pass
+> **Status:** the application code is complete — **250 unit tests** pass
 > (`pnpm test:run`), `tsc --noEmit` is clean, and `pnpm build` succeeds with
 > **no environment variables at all**. `pnpm e2e` passes **16/16**.
 > **Never deployed to Vercel**, but nothing blocks it any more — the deploy
@@ -27,18 +27,18 @@ push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 ## Features
 
 - **Public ecosystem pages**
-  - A detail page per app — hero and body rendered from Markdown. The page
-    also renders a feature grid, but no content file currently authors
-    `features`, so it renders on no page yet
-  - An ecosystem overview and standalone doc pages, each with its own
-    detail page. Games have no detail page of their own — `/games` lists
-    them with the same card treatment as an app, and each card links
-    straight to its repository
+  - A detail page per app and per game with two tabs, **README** and
+    **Releases**, both read from the project's GitHub repository and refreshed
+    hourly; relative links and images in the README point back to GitHub, and
+    an entry without a repository shows its own Markdown body instead
+  - `/apps` and `/games` are overview pages — every entry as one ruled row —
+    opened by the top tabs and listed first in each sidebar
+  - Standalone doc pages, each with its own detail page
   - A table of contents, a search dialog, and a sidebar navigation tree
 
 - **A games section**
   - Duck-themed games are their own top-level group alongside apps and docs,
-    listed on `/games` with the same card treatment as an app
+    with the same overview and detail pages as an app
 
 - **Content is files, not an admin area**
   - No sign-in, no editor UI, no database. Every app, game and doc is one MDX
@@ -83,7 +83,7 @@ push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 
 Next.js 16 · next-intl · Vercel. No database, no auth layer, no object store.
 
-Testing: Vitest (192 unit tests) and Playwright (16 e2e).
+Testing: Vitest (250 unit tests) and Playwright (21 e2e).
 
 ## Running
 

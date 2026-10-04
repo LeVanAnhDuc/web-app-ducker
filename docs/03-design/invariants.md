@@ -2,7 +2,7 @@
 
 > **Answers:** What can I change that makes the system wrong **silently** — tests still green, result still wrong?
 > **Status:** 🟢 complete — reviewed against this project 2026-09-14
-> **Updated:** 2026-09-14 · commit 3e4e67a
+> **Updated:** 2026-10-04 · branch feat/github-readme-releases
 > **Update when:** a new invariant is discovered — usually right after someone has just broken one
 
 <!-- HOW TO FILL
@@ -55,6 +55,8 @@ crash instead.
 
 I11 (UTC timestamps) is untouched here — out of this migration's scope.
 
+R5 of the file-backed-registry design ("games have no detail page; `/games` links outward") is **retired 2026-10-04** by [ADR-0023](../decisions/0023-readme-and-releases-from-github.md): games now have the same overview and detail routes as apps.
+
 ## New since the file-backed move
 
 | # | Invariant | What breaks if you violate it |
@@ -62,6 +64,9 @@ I11 (UTC timestamps) is untouched here — out of this migration's scope.
 | I18 | A content file's `status` must be one of the five closed values (`core` / `connected` / `standalone` / `planned` / `private`) | A sixth value throws in `parseEntry` (`src/content/frontmatter.ts`) and fails the build — previously impossible, because `status` was a Postgres enum column |
 | I19 | `src/i18n/locales.ts` is a hand-maintained constant, no longer generated | A locale listed there with no matching `messages/<locale>.json` falls back to `vi` silently in `src/i18n/request.ts`. `messages.test.ts` checks `vi`/`en` match each other, not that every listed locale has a file — it does not catch this |
 | I20 | Nav `href`s carry the locale prefix (`/${locale}/apps/...`) and `findTrail` matches on that exact string | Dropping the prefix, or comparing against a bare pathname, empties the sidebar with nothing erroring |
+| I21 | `src/github/` is the only module that calls the GitHub API, and none of it throws (ADR-0023) | A throw fails every build while GitHub is down; a second caller escapes the token and the fetch cache. Guarded by `src/github/boundary.test.ts` |
+| I22 | A Releases URL (`/<locale>/<group>/<slug>/releases`) is folded onto its README href by `navHref` before `findTrail` | The Releases URL is not a nav node: matching it as-is empties the sidebar and lights no top tab, with nothing erroring (I20) |
+| I23 | A README's TOC is read off its rendered `<h2>`s (`renderMarkdownWithToc`), not by scanning the markdown for `## ` lines | A setext heading, a `## ` in an HTML comment or a quote makes a line scan and the renderer disagree, and every later TOC link lands on the wrong heading. `buildToc` + `attachHeadingIds` remain only for authored `.mdx` |
 
 ## Presentation
 

@@ -1,7 +1,7 @@
 // src/lib/markdown.test.ts
 import { readFileSync } from "node:fs";
 import { describe, it, expect } from "vitest";
-import { attachHeadingIds, renderMarkdown } from "./markdown";
+import { attachHeadingIds, renderMarkdown, renderMarkdownWithToc } from "./markdown";
 
 describe("renderMarkdown", () => {
   it("dựng tiêu đề và đoạn văn", async () => {
@@ -83,5 +83,69 @@ describe("attachHeadingIds", () => {
     const stamped = attachHeadingIds(html, [{ anchor: "first" }]);
     expect(stamped).toContain('<h2 id="first">');
     expect(stamped).toContain("<h2>Second</h2>");
+  });
+});
+
+describe("renderMarkdown options", () => {
+  it("passes every link and image URL through rewriteUrl with its kind", async () => {
+    const seen: string[] = [];
+    await renderMarkdown("[a](docs/a.md) ![s](shot.png)\n\n[ref][r]\n\n[r]: other.md", {
+      rewriteUrl: (url, kind) => {
+        seen.push(`${kind} ${url}`);
+        return `https://example.test/${url}`;
+      },
+    });
+    expect(seen.sort()).toEqual(["image shot.png", "link docs/a.md", "link other.md"]);
+  });
+
+  it("emits the rewritten URLs", async () => {
+    const html = await renderMarkdown("[a](docs/a.md) ![s](shot.png)", {
+      rewriteUrl: (url) => `https://example.test/${url}`,
+    });
+    expect(html).toContain('href="https://example.test/docs/a.md"');
+    expect(html).toContain('src="https://example.test/shot.png"');
+  });
+
+  it("drops only the first top-level H1", async () => {
+    const html = await renderMarkdown("# Project\n\nIntro\n\n# Second\n\n## Part", { dropFirstH1: true });
+    expect(html).not.toContain("Project");
+    expect(html).toContain("<h1>Second</h1>");
+    expect(html).toContain("<h2>Part</h2>");
+  });
+
+  it("changes nothing without options", async () => {
+    const html = await renderMarkdown("# Project\n\n[a](docs/a.md)");
+    expect(html).toContain("<h1>Project</h1>");
+    expect(html).toContain('href="docs/a.md"');
+  });
+});
+
+describe("renderMarkdownWithToc", () => {
+  it("takes the TOC from the rendered h2s, so anchors cannot drift (third-party READMEs)", async () => {
+    const md = [
+      "<!-- ## Hidden -->",
+      "",
+      "Setext",
+      "------",
+      "",
+      "> ## Quoted",
+      "",
+      "## Install",
+    ].join("\n");
+    const { html, toc } = await renderMarkdownWithToc(md);
+    expect(toc.map((t) => t.title)).toEqual(["Setext", "Quoted", "Install"]);
+    expect(html).toContain('<h2 id="install">Install</h2>');
+    expect(html).toContain('<h2 id="setext">Setext</h2>');
+    expect(html).not.toContain('id="hidden"');
+  });
+
+  it("disambiguates repeated headings the way buildToc does", async () => {
+    const { toc } = await renderMarkdownWithToc("## Cài đặt\n\n## Cài đặt\n\n## Cài đặt 2");
+    expect(toc.map((t) => t.anchor)).toEqual(["cai-dat", "cai-dat-2", "cai-dat-2-2"]);
+  });
+
+  it("still applies the README options", async () => {
+    const { html } = await renderMarkdownWithToc("# Title\n\n## Part", { dropFirstH1: true });
+    expect(html).not.toContain("Title");
   });
 });

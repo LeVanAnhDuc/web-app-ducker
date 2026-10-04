@@ -21,6 +21,9 @@ DOES NOT CONTAIN: long domain explanations (-> overview.md).
 | App kind | Whether an app is the identity core or a satellite | `AppKind` = `CORE` \| `SATELLITE` | Lõi / Vệ tinh | Core / Satellite |
 | Feature | One bullet of what an app can do | `Feature` | Tính năng | Feature |
 | Doc page | A standalone article that is not about one app | `DocPage` | Trang hướng dẫn | Guide |
+| Overview | The page a group's top tab opens: every app or every game as one ruled row, first item of that group's sidebar | `OverviewPage`, nav row `apps:overview` / `games:overview` | Tổng quan | Overview |
+| README tab | An entry's repository README, fetched from GitHub (ADR-0023) | `tab="readme"` | README | README |
+| Releases tab | An entry's published GitHub releases, newest first | `tab="releases"` | Bản phát hành | Releases |
 | Section | One heading-plus-body block inside an app page or doc page | `Section` | Mục | Section |
 | Anchor | The slug of a section, used by the table of contents | `Section.anchor` | — | — |
 | Nav node | One entry in the navigation tree; the same tree renders the top tabs and the sidebar | `NavNode` | Mục điều hướng | Navigation item |

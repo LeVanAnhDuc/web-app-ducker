@@ -1,4 +1,4 @@
-import { slugify } from "@/lib/slug";
+import { createAnchorAllocator } from "@/lib/slug";
 import { readGroup, readOne } from "./read";
 import { defaultLocale } from "@/i18n/locales";
 import { join } from "node:path";
@@ -19,12 +19,8 @@ export type DocPageDetail = {
 const FENCE_DELIMITER = /^\s*([`~]{3,})/;
 
 export function buildToc(markdown: string): TocItem[] {
-  // Disambiguation state: `seen` counts occurrences per slug base (so repeats of the
-  // same heading keep counting up), `emitted` is every anchor already handed out —
-  // checked so a base's own count never collides with an anchor a *different* base
-  // happened to produce (e.g. "Cài đặt" (2nd) vs. "Cài đặt 2").
-  const seen = new Map<string, number>();
-  const emitted = new Set<string>();
+  // Disambiguation lives in `createAnchorAllocator`, shared with the README path.
+  const anchorFor = createAnchorAllocator();
   const out: TocItem[] = [];
 
   // Fenced code blocks (``` or ~~~, 3+ chars, ignoring the info string) must not have
@@ -48,21 +44,7 @@ export function buildToc(markdown: string): TocItem[] {
     const m = /^##\s+(.+?)\s*$/.exec(line);
     if (!m) continue;
     const title = m[1]!;
-    // An emoji-only or symbol-only title slugifies to "", which would render as
-    // `href="#"` and jump to the top of the page — fall back to a stable per-position
-    // anchor instead, still run through the same collision-avoidance below.
-    const base = slugify(title) || `section-${out.length + 1}`;
-
-    let n = (seen.get(base) ?? 0) + 1;
-    let candidate = n === 1 ? base : `${base}-${n}`;
-    while (emitted.has(candidate)) {
-      n++;
-      candidate = `${base}-${n}`;
-    }
-    seen.set(base, n);
-    emitted.add(candidate);
-
-    out.push({ anchor: candidate, title });
+    out.push({ anchor: anchorFor(title), title });
   }
   return out;
 }

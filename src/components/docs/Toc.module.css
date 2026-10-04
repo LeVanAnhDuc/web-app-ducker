@@ -72,4 +72,11 @@
     padding-left: 0;
     border-left: 0;
   }
+
+  /* At the top of the article a long TOC (21 release tags) would push the
+     content below the first screen; scroll it in its own box instead. */
+  .list {
+    max-height: 14rem;
+    overflow-y: auto;
+  }
 }

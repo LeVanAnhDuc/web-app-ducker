@@ -224,6 +224,18 @@ export function firstLeafHref(node: NavTreeNode): string | null {
 }
 
 /**
+ * The nav-tree href a pathname belongs to.
+ *
+ * An entry's Releases tab (`/<locale>/<group>/<slug>/releases`) is not a node of
+ * its own — it is the same entry as the README tab. `findTrail` matches exact
+ * strings (I20), so without this the sidebar empties and no top tab lights up
+ * on every Releases page, with nothing erroring.
+ */
+export function navHref(pathname: string): string {
+  return pathname.replace(/^(\/[^/]+\/(?:apps|games)\/[^/]+)\/releases$/, "$1");
+}
+
+/**
  * Kiểm bốn bất biến kiểm được từ danh sách phẳng: I1, I2, I5, I6 (spec §4).
  *
  * Không còn nơi nào trong production gọi hàm này nữa — nơi gọi duy nhất trước

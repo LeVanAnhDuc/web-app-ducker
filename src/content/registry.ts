@@ -36,11 +36,11 @@ function toCard(e: ReadEntry): AppCard {
 }
 
 export async function listApps(locale: string, root?: string): Promise<AppCard[]> {
-  return (await readGroup("apps", locale, root)).map(toCard);
+  return listEntries("apps", locale, root);
 }
 
 export async function listGames(locale: string, root?: string): Promise<AppCard[]> {
-  return (await readGroup("games", locale, root)).map(toCard);
+  return listEntries("games", locale, root);
 }
 
 export type AppSearchEntry = { slug: string; name: string; body: string };
@@ -61,9 +61,20 @@ export async function listAppsWithBody(locale: string, root?: string): Promise<A
   }));
 }
 
-export async function getApp(slug: string, locale: string, root?: string): Promise<AppDetail | null> {
-  // Apps only — games have no detail page in this design; `/games` links outward.
-  const entry = await readOne("apps", slug, locale, root);
+/** The two groups that have detail pages; docs have their own reader. */
+export type EntryGroup = "apps" | "games";
+
+export async function listEntries(group: EntryGroup, locale: string, root?: string): Promise<AppCard[]> {
+  return (await readGroup(group, locale, root)).map(toCard);
+}
+
+export async function getEntry(
+  group: EntryGroup,
+  slug: string,
+  locale: string,
+  root?: string,
+): Promise<AppDetail | null> {
+  const entry = await readOne(group, slug, locale, root);
   if (!entry) return null;
   return {
     ...toCard(entry),
@@ -76,4 +87,8 @@ export async function getApp(slug: string, locale: string, root?: string): Promi
     locale: entry.locale,
     isFallback: entry.isFallback,
   };
+}
+
+export async function getApp(slug: string, locale: string, root?: string): Promise<AppDetail | null> {
+  return getEntry("apps", slug, locale, root);
 }

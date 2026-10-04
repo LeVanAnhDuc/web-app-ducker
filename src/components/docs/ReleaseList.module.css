@@ -1,0 +1,80 @@
+.list {
+  border-top: 1px solid var(--line);
+}
+
+.release {
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 16px;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.summary::-webkit-details-marker {
+  display: none;
+}
+
+.summary::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform 200ms ease;
+}
+
+.release[open] > .summary::before {
+  transform: rotate(45deg);
+}
+
+.summary:hover {
+  background: var(--surface);
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+
+.name {
+  font-size: var(--t-sm);
+}
+
+.latest {
+  padding: 1px 8px;
+  border: 1px solid var(--ink);
+  border-radius: 3px;
+  /* A word, not a mono label, so it keeps the 14px prose floor (tokens.test.ts). */
+  font-size: var(--t-sm);
+  font-weight: 600;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.date {
+  font-size: var(--t-sm);
+  color: var(--muted);
+}
+
+/* Indent the notes under the tag; MarkdownBody owns their typography. */
+.notes {
+  padding: 0 8px 20px 27px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .summary::before {
+    transition: none;
+  }
+}

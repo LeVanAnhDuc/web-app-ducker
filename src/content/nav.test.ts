@@ -10,6 +10,10 @@ vi.mock("./registry", () => ({
     { slug: "ducker-id", name: "Ducker ID" },
     { slug: "match-cv", name: "Match CV" },
   ]),
+  listGames: vi.fn(async () => [
+    { slug: "web-game-duck-caro", name: "Duck Caro" },
+    { slug: "web-game-duck-flap", name: "Duck Flap" },
+  ]),
 }));
 
 vi.mock("./docs", () => ({
@@ -21,7 +25,7 @@ vi.mock("./docs", () => ({
 }));
 
 import { listNavRows } from "./nav";
-import { buildNavTree } from "./nav-tree";
+import { buildNavTree, firstLeafHref } from "./nav-tree";
 
 describe("listNavRows", () => {
   it("produces one root row per group, in the order content/nav.ts declares", async () => {
@@ -43,12 +47,16 @@ describe("listNavRows", () => {
     ).toBe(true);
   });
 
-  it("puts every app under the apps container, with kind APP (R4)", async () => {
+  it("opens the apps group with an Overview leaf, then every app (R4)", async () => {
     const tree = buildNavTree(await listNavRows("vi"), "vi", "vi");
-    const appsNode = tree.find((n) => n.id === "apps")!;
-    expect(appsNode.children).toHaveLength(2);
-    expect(appsNode.children.every((c) => c.kind === "APP")).toBe(true);
-    expect(appsNode.children.map((c) => c.href)).toEqual(["/vi/apps/ducker-id", "/vi/apps/match-cv"]);
+    const apps = tree.find((n) => n.id === "apps")!;
+    expect(apps.children.map((c) => c.href)).toEqual([
+      "/vi/apps",
+      "/vi/apps/ducker-id",
+      "/vi/apps/match-cv",
+    ]);
+    expect(apps.children[0]!.label).toBe("Tổng quan");
+    expect(apps.children.every((c) => c.kind === "APP")).toBe(true);
   });
 
   it("puts every doc under the docs container, with kind DOC (R4/I7)", async () => {
@@ -59,12 +67,27 @@ describe("listNavRows", () => {
     expect(docChildren.map((r) => r.href)).toEqual(["/vi/docs/getting-started", "/vi/docs/faq"]);
   });
 
-  it("makes the games row a leaf pointing at /games, with no children (R5)", async () => {
+  it("makes games a container shaped like apps — R5 is retired", async () => {
+    const tree = buildNavTree(await listNavRows("en"), "en", "vi");
+    const games = tree.find((n) => n.id === "games")!;
+    expect(games.kind).toBe("CONTAINER");
+    expect(games.href).toBeNull();
+    expect(games.children.map((c) => c.href)).toEqual([
+      "/en/games",
+      "/en/games/web-game-duck-caro",
+      "/en/games/web-game-duck-flap",
+    ]);
+    expect(games.children[0]!.label).toBe("Overview");
+  });
+
+  it("points each top tab at its overview", async () => {
+    const tree = buildNavTree(await listNavRows("vi"), "vi", "vi");
+    expect(tree.map((n) => firstLeafHref(n))).toEqual(["/vi/apps", "/vi/games", "/vi/docs/getting-started"]);
+  });
+
+  it("gives docs no Overview leaf — there is no /docs page", async () => {
     const rows = await listNavRows("vi");
-    const games = rows.find((r) => r.id === "games")!;
-    expect(games.kind).toBe("APP");
-    expect(games.href).toBe("/vi/games");
-    expect(rows.some((r) => r.parentId === "games")).toBe(false);
+    expect(rows.some((r) => r.id === "docs:overview")).toBe(false);
   });
 
   it("emits status PUBLISHED on every row (R14 — file-backed content has no draft state)", async () => {

@@ -21,6 +21,8 @@ export type AppCardProps = {
   statusLabel?: string;
   /** Nhãn liên kết repo, đã dịch. Ví dụ "Xem trên GitHub". */
   repoLabel?: string;
+  /** Group prefix for the name link; defaults to `/${locale}/apps`. Games pass `/${locale}/games`. */
+  basePath?: string;
 };
 
 /**
@@ -33,7 +35,8 @@ export type AppCardProps = {
  * `<article>` (unchanged CSS), but the card grids it sits in (home, `/apps`)
  * are semantically lists, and e2e/registry.spec.ts asserts on that role.
  */
-export function AppCard({ app, locale, statusLabel, repoLabel }: AppCardProps) {
+export function AppCard({ app, locale, statusLabel, repoLabel, basePath }: AppCardProps) {
+  const detailHref = `${basePath ?? `/${locale}/apps`}/${app.slug}`;
   // Repo riêng tư thì không dựng liên kết: bấm vào chỉ ra trang 404 của GitHub.
   const repoHref = !app.isRepoPrivate && app.repoUrl ? app.repoUrl : null;
 
@@ -41,7 +44,7 @@ export function AppCard({ app, locale, statusLabel, repoLabel }: AppCardProps) {
     <article className={styles.card} role="listitem">
       <div className={styles.top}>
         <h3 className={styles.name}>
-          <a className={styles.nameLink} href={`/${locale}/apps/${app.slug}`}>
+          <a className={styles.nameLink} href={detailHref}>
             {app.name}
           </a>
         </h3>

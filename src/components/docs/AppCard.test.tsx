@@ -25,4 +25,9 @@ describe("AppCard", () => {
     expect(screen.getByRole("link", { name: /Manage Gym/ }))
       .toHaveAttribute("href", "/en/apps/app-manage-gym");
   });
+
+  it("links into the group named by basePath — games are not apps", () => {
+    render(<AppCard app={base} locale="vi" basePath="/vi/games" />);
+    expect(screen.getByRole("link", { name: /Manage Gym/ })).toHaveAttribute("href", "/vi/games/app-manage-gym");
+  });
 });

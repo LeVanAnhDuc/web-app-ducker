@@ -23,6 +23,35 @@ export function slugify(input: string): string {
     .replace(/^-+|-+$/g, ""); // không để gạch nối thừa ở hai đầu
 }
 
+/**
+ * Hands out unique heading anchors in document order — the one disambiguation
+ * rule shared by `buildToc` (authored markdown) and `renderMarkdownWithToc`
+ * (READMEs), so the same headings always get the same anchors.
+ *
+ * `seen` counts occurrences per base, so repeats keep counting up; `emitted`
+ * stops a base's own count colliding with an anchor a different base produced
+ * ("Cài đặt" (2nd) vs. "Cài đặt 2"). An emoji- or symbol-only title slugifies to
+ * "", which would render `href="#"` — it gets a stable per-position anchor.
+ */
+export function createAnchorAllocator(): (title: string) => string {
+  const seen = new Map<string, number>();
+  const emitted = new Set<string>();
+  let position = 0;
+  return (title) => {
+    position += 1;
+    const base = slugify(title) || `section-${position}`;
+    let n = (seen.get(base) ?? 0) + 1;
+    let candidate = n === 1 ? base : `${base}-${n}`;
+    while (emitted.has(candidate)) {
+      n++;
+      candidate = `${base}-${n}`;
+    }
+    seen.set(base, n);
+    emitted.add(candidate);
+    return candidate;
+  };
+}
+
 /** Anchor của một mục dùng chung quy tắc với slug để `#...` luôn khớp mục lục. */
 export function toAnchor(title: string): string {
   return slugify(title);
