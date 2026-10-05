@@ -17,7 +17,7 @@
 
 .lede {
   margin: 0 0 8px;
-  max-width: 58ch;
+  max-width: var(--measure);
   font-size: var(--t-md);
   line-height: var(--lh-body);
   color: var(--muted);
@@ -46,7 +46,7 @@
 }
 
 .empty {
-  max-width: 58ch;
+  max-width: var(--measure);
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 20px;

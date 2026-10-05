@@ -112,7 +112,7 @@ Two clearly distinct families, in the **reverse** of the usual arrangement:
 | Role | Stack | Reasoning |
 | --- | --- | --- |
 | **Headings** | `--sans`, tight, heavy, `letter-spacing: -0.015em` | A heading here is a catalogue entry, not a headline. Sans set tight reads as a label. |
-| **Body** | `--serif`, 16px / 1.75 / 66ch | The site is long Vietnamese prose. Serif body is easier over a long read and rare enough on the web to carry the personality alone. |
+| **Body** | `--serif`, 16px / 1.75 / full column width | The site is long Vietnamese prose. Serif body is easier over a long read and rare enough on the web to carry the personality alone. |
 | **Slug and code only** | `--mono` | See §5. Never for small labels — that is template chrome. |
 
 ```css
@@ -139,11 +139,17 @@ Two clearly distinct families, in the **reverse** of the usual arrangement:
 | `--t-3xl` | 38 | H1 |
 | `--t-4xl` | 48 | registry hero |
 
-`--lh-body: 1.75` · `--lh-head: 1.2` · `--measure: 66ch`
+`--lh-body: 1.75` · `--lh-head: 1.2` · `--measure: none`
 
 The 1.75 is not preference. Stacked Vietnamese diacritics (ế ữ ộ ằ ể) touch the line
-above at tighter leading. The measure stays at 66 rather than the 75 a serif would
-normally allow, for the same reason — Vietnamese sets denser.
+above at tighter leading.
+
+**Measure — lifted 2026-10-05, by the owner's decision.** Body text was capped at 66ch
+(narrower than the 75 a serif allows, because Vietnamese sets denser). It now fills the
+middle column at every width: the owner preferred content that uses the screen over a
+reading measure. The cost is long lines on wide screens (~140 characters at 1440px).
+`--measure` stays the single switch — set a `ch` value in `src/styles/tokens.css` to
+bring a cap back everywhere at once.
 
 ---
 
