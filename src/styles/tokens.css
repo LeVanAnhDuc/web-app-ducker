@@ -79,8 +79,10 @@
   --lh-body: 1.75;
   --lh-head: 1.25;
 
-  /* Đo dòng văn xuôi tối đa: 66 ký tự, phía hẹp vì tiếng Việt nhiều dấu. */
-  --measure: 66ch;
+  /* No line-length cap: content fills the middle column at every width, by the
+     owner's decision (2026-10-05). Was 66ch (MASTER.md §2) — set a `ch` value
+     here again to bring the measure back everywhere at once. */
+  --measure: none;
 }
 
 @media (prefers-color-scheme: dark) {

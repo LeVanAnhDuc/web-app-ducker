@@ -109,7 +109,7 @@
 .prose ol,
 .prose blockquote {
   margin: 0 0 14px;
-  /* Đo dòng văn xuôi tối đa 66ch (design-rules §3). */
+  /* Line length follows `--measure` (tokens.css). */
   max-width: var(--measure);
 }
 

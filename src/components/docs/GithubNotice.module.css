@@ -1,5 +1,5 @@
 .notice {
-  max-width: 66ch;
+  max-width: var(--measure);
   padding: 24px;
   border: 1px solid var(--line);
   border-radius: 6px;
