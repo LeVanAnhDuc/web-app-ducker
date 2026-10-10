@@ -31,6 +31,7 @@
 | [ADR-0021](0021-versions-and-notes-derive-from-commits.md) | The version and the release notes are derived from commit subjects | 2026-09-14 | accepted |
 | [ADR-0022](0022-deploy-from-actions-not-vercel-git.md) | CI gates the deploy, and GitHub Actions ships it | 2026-09-14 | accepted |
 | [ADR-0023](0023-readme-and-releases-from-github.md) | An entry's README and releases come from GitHub, refreshed hourly | 2026-10-04 | accepted |
+| [ADR-0024](0024-host-on-vercel-git-deploys-off-in-repo.md) | Host on Vercel, with its Git deploys switched off from the repository | 2026-10-10 | accepted |
 <!-- END:auto -->
 
 Status values: `accepted` · `superseded by ADR-00xx` · `deprecated`

@@ -40,25 +40,25 @@ no PR or issue is open, `.worktrees/` is empty, and the latest release is `v0.2.
 - **#13 Content fills the middle column** (2026-10-05) — `--measure` set to `none`, the
   66-character line cap removed; the trade is recorded in `MASTER.md` §2.
 
-**Blocking the first deploy — a decision, not a bug.** The host is undecided: Vercel as
-`ci.yml` configures it, or GitHub Pages — which would need `output: 'export'`, delete
-`src/middleware.ts`, turn `/api/search-index/[locale]` into a build-time file
-(**contradicting NFR-PERF-05**, so it needs its own ADR) and turn `/[locale]/n/[id]` into
-static pages. The one real user-facing cost of Pages is that `/` would always land on
-`/vi`: locale can no longer be negotiated from `Accept-Language` without a server.
-`next/image` is used nowhere, so the usual worst blocker is absent.
+**First deploy — host chosen, credentials pending (2026-10-10), on
+`ci/vercel-integration`.** The host is Vercel
+([ADR-0024](../decisions/0024-host-on-vercel-git-deploys-off-in-repo.md), which also
+records why GitHub Pages lost). A root `vercel.json` now turns Vercel's Git deploys off,
+so the double-deploy trap is closed in the repository rather than in the dashboard.
+Runbook §6.3, §6.5 and §6.6 are updated to match.
 
-Until the host is chosen, the `deploy` job **skips loudly** — a `::notice::` and a
-job-summary heading — rather than fail; a permanently red pipeline is one people stop
-reading. As of 2026-10-10 the repository has **no GitHub secrets at all**
-(`gh secret list` is empty) and has never been deployed. If Vercel is chosen:
+Stopped at: waiting for the user's account steps. As of 2026-10-10 the repository has
+**no GitHub secrets at all** and has never been deployed. Remaining, in order:
 
-- run `vercel link` once, then set `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
-  as repository secrets (runbook §6);
-- set `GITHUB_TOKEN` in the Vercel project, or the ISR refreshes from #12 run anonymously
-  against GitHub's rate limit;
-- **if the Vercel Git integration is ever connected, turn its auto-deploy off**
-  (runbook §6.3) or every push deploys twice, the ungated copy possibly last.
+1. user — `vercel login` on this machine;
+2. Claude — `vercel link`, then set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as repository
+   secrets (neither is secret, both come from `.vercel/project.json`);
+3. user — `gh secret set VERCEL_TOKEN`, and `vercel env add GITHUB_TOKEN production`
+   (runbook §6.5) — the values never pass through the session;
+4. merge → the `deploy` job runs for real → walk runbook §6.6 on the production URL.
+
+Until step 3, the `deploy` job keeps **skipping loudly** — a `::notice::` and a
+job-summary heading — rather than failing.
 
 **Open item from #12:** `web-app-calculate-badminton` still does not resolve on GitHub
 (re-checked 2026-10-10) — its pages show the "unavailable" notice until its `repo:` is
@@ -96,17 +96,16 @@ There are no database-backed tests left to skip — the database is gone
 
 | Work | Related | Priority | Why that priority |
 | --- | --- | --- | --- |
-| Choose the host, then deploy for the first time | ADR-0022 | high | the only thing standing between `main` and a live site; see §In progress for what each choice costs |
+| Finish the first deploy to Vercel | ADR-0022 · ADR-0024 | high | the only thing standing between `main` and a live site; steps in §In progress |
 | **"Ink and state" repaint** — not yet specified. Apply [`MASTER.md`](../design-system/ducker/MASTER.md) to the surviving CSS modules: rewrite `src/styles/tokens.css` and `tokens.test.ts`, and raise `--tap` (still `28px`) and the threshold in `e2e/a11y-tap-target.spec.ts` to 44px | ADR-0017 | high | the design system and the code still describe two different products. Approved mockup: 12 artboards, 4 screens × 375 / 768 / 1440 — an Artifact, **not in this repository**. The tap change alone turns that e2e spec red until it is updated |
 | Resolve the `NFR-A11Y-06` / `MASTER.md` §7 conflict on mono UPPERCASE labels, and the `I14` / `MASTER.md` §2 conflict on heading weight | NFR-A11Y-06 · I14 | high | owed to the repaint branch, resolved explicitly, not silently. `NFR-A11Y-06` blesses mono UPPERCASE 11px labels used in 20+ places; `MASTER.md` §7 forbids both. `I14` pins `h1,h2,h3` to serif-400; `MASTER.md` §2 makes headings tight heavy sans |
 | Wire `pnpm audit` into CI | NFR-SEC-05 | high | `ci.yml` runs no audit step, so the threshold is manual. The advisory count has not been re-measured since 2026-09-13, before five dependencies were removed |
-| Rename `src/middleware.ts` to the `proxy` convention | — | medium | Next 16 warns the `middleware` file convention is deprecated. Moot if GitHub Pages is chosen, which deletes the file |
+| Rename `src/middleware.ts` to the `proxy` convention | — | medium | Next 16 warns the `middleware` file convention is deprecated |
 | Add a CSS-level `color-scheme` to each theme block while rewriting `tokens.css` | FR-15 · [ADR-0020](../decisions/0020-next-themes-for-the-theme.md) | medium | next-themes sets the property at runtime, so visitors with JavaScript disabled get none. The token rewrite already owns that file |
 | Author the `features` frontmatter field | — | low | no content file sets it, so `FeatureGrid` renders on no page. The deleted `prisma/seed.ts` (`git show e085a74:prisma/seed.ts`) authored feature blocks for five applications; since #12 every page also shows its README, so this is a content task of reduced value |
 
 ## Open decisions
 
-- **Deploy host** — Vercel or GitHub Pages. See §In progress.
 - **Raw HTML in markdown is not rendered** (FR-19) — no `<kbd>`, `<details>`, `<br>`.
   Opening it means `rehype-raw` + `allowDangerousHtml: true` and dropping the
   hand-written filter in `src/lib/markdown.ts`; sanitisation already has
