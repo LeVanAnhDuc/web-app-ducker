@@ -2,7 +2,7 @@
 
 > **Answers:** What is being worked on, what comes next, and what is owed?
 > **Status:** 🟢 complete
-> **Updated:** 2026-10-04 · branch feat/github-readme-releases
+> **Updated:** 2026-10-10 · branch main
 > **Update when:** work starts or finishes · brainstorming produces new work · a shortcut is taken deliberately
 
 <!-- HOW TO FILL
@@ -18,155 +18,95 @@ DOES NOT CONTAIN: out-of-scope features (-> 01-product/overview.md §Non-Goals).
 
 ## In progress
 
-**README and Releases from GitHub — code and documentation complete, on
-`feat/github-readme-releases`, PR open, awaiting the user's merge decision (2026-10-04).**
-Spec and plan in [`../specs/github-readme-releases/`](../specs/github-readme-releases/design.md),
-8 tasks; reasoning in [ADR-0023](../decisions/0023-readme-and-releases-from-github.md).
-Every app and game with a repository shows its README and releases, refreshed hourly by
-ISR; games have detail pages (R5 retired); `/apps` and `/games` are overview pages.
-Measured: 250 unit tests, 21 e2e, one clean build = 42 anonymous GitHub calls.
-**Open item:** `web-app-calculate-badminton` answers 404 on GitHub — its pages show the
-"unavailable" notice until its `repo:` is corrected or the repository is made public.
-**Owed on deploy:** set `GITHUB_TOKEN` in the Vercel project, or ISR refreshes on the
-server run anonymously.
+**Nothing is in flight (2026-10-10).** Every branch is merged: PRs #1–#13 are on `main`,
+no PR or issue is open, `.worktrees/` is empty, and the latest release is `v0.2.1`
+(2026-10-05). The last feature work, in order:
 
-**File-backed registry — code and documentation complete, on `feat/file-backed-registry`,
-not yet merged to `main`.** [`../specs/file-backed-registry/plan.md`](../specs/file-backed-registry/plan.md),
-10 tasks, all done. Deleted the admin surface (58 files), `src/server/` (24 files),
-`prisma/` and 5 dependencies (`@prisma/client`, `@prisma/adapter-pg`, `next-auth`,
-`@aws-sdk/client-s3`, `bcryptjs`); content moved to `content/**.mdx`, 25 files (10 apps +
-12 duck games + 3 docs). Decisions:
-[ADR-0018](../decisions/0018-content-is-files-not-rows.md),
-[ADR-0019](../decisions/0019-no-administration-surface.md). Real numbers below, in
-§Where the code stands.
+- **#7 File-backed registry** (2026-09-14) — the admin surface, `src/server/`, `prisma/`
+  and five dependencies deleted; content lives in `content/**.mdx`.
+  [ADR-0018](../decisions/0018-content-is-files-not-rows.md),
+  [ADR-0019](../decisions/0019-no-administration-surface.md),
+  [`../specs/file-backed-registry/`](../specs/file-backed-registry/plan.md).
+- **#8–#10 Release automation and CI** (2026-09-14) — version and notes derived from
+  commit subjects ([ADR-0021](../decisions/0021-versions-and-notes-derive-from-commits.md));
+  `ci.yml` gates every merge and owns a deploy job
+  ([ADR-0022](../decisions/0022-deploy-from-actions-not-vercel-git.md)).
+- **#11 Full-height side columns** (2026-10-04).
+- **#12 README and releases from GitHub** (2026-10-04) — every app and game with a
+  repository shows its README and releases, refreshed hourly by ISR; games have detail
+  pages; `/apps` and `/games` are overview pages.
+  [ADR-0023](../decisions/0023-readme-and-releases-from-github.md),
+  [`../specs/github-readme-releases/`](../specs/github-readme-releases/design.md).
+- **#13 Content fills the middle column** (2026-10-05) — `--measure` set to `none`, the
+  66-character line cap removed; the trade is recorded in `MASTER.md` §2.
 
-**Next planned: "Ink and state" repaint** — not yet specified. Applies
-[`../design-system/ducker/MASTER.md`](../design-system/ducker/MASTER.md) to the ~25
-CSS modules that survive the migration above. Approved mockup: 12 artboards, 4 screens ×
-375 / 768 / 1440. **Nothing about the mockup is in this repository** — it is an Artifact.
+**Blocking the first deploy — a decision, not a bug.** The host is undecided: Vercel as
+`ci.yml` configures it, or GitHub Pages — which would need `output: 'export'`, delete
+`src/middleware.ts`, turn `/api/search-index/[locale]` into a build-time file
+(**contradicting NFR-PERF-05**, so it needs its own ADR) and turn `/[locale]/n/[id]` into
+static pages. The one real user-facing cost of Pages is that `/` would always land on
+`/vi`: locale can no longer be negotiated from `Accept-Language` without a server.
+`next/image` is used nowhere, so the usual worst blocker is absent.
 
-Deliberately kept as two branches: a diff that both deletes a subsystem and repaints
-every surface cannot be reviewed.
+Until the host is chosen, the `deploy` job **skips loudly** — a `::notice::` and a
+job-summary heading — rather than fail; a permanently red pipeline is one people stop
+reading. As of 2026-10-10 the repository has **no GitHub secrets at all**
+(`gh secret list` is empty) and has never been deployed. If Vercel is chosen:
 
-**Known conflict, owed to that branch:** `NFR-A11Y-06` blesses mono UPPERCASE labels
-(11px) and the code uses them in 20+ places; `MASTER.md` §7 forbids both the all-caps
-tracked eyebrow and mono for small labels. `I14` also pins `h1,h2,h3` to serif-400 with
-no tracking, while `MASTER.md` §2 makes headings tight heavy sans. Deliberately not
-resolved by this migration — both must be resolved when the repaint lands, not silently.
+- run `vercel link` once, then set `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+  as repository secrets (runbook §6);
+- set `GITHUB_TOKEN` in the Vercel project, or the ISR refreshes from #12 run anonymously
+  against GitHub's rate limit;
+- **if the Vercel Git integration is ever connected, turn its auto-deploy off**
+  (runbook §6.3) or every push deploys twice, the ungated copy possibly last.
 
-**next-themes migration — merged.** `e085a74` on this branch. Design and plan in
-[`../specs/next-themes/`](../specs/next-themes/), reasoning in
-[ADR-0020](../decisions/0020-next-themes-for-the-theme.md).
-
-**Release automation — installed, awaiting its first run.** The repository had no
-release mechanism and no tag at all; it now derives both the version and the notes from
-commit subjects via git-cliff, on every push to `main`. Reasoning in
-[ADR-0021](../decisions/0021-versions-and-notes-derive-from-commits.md). Installed from
-the two workspace skills `commit-rule` (with `design` declared at slot 04 — this
-repository has used that type 5 times) and `release-note`. **The first release will be
-`v0.1.0` and will cover all 50 commits in one note.** Preview it without pushing:
-`pnpm release:next` · `pnpm release:notes`.
+**Open item from #12:** `web-app-calculate-badminton` still does not resolve on GitHub
+(re-checked 2026-10-10) — its pages show the "unavailable" notice until its `repo:` is
+corrected or the repository is made public.
 
 Owed on the next clone, on every machine: `git config core.hooksPath .githooks`. It is
 local configuration and cannot be committed — the CI check in
 `.github/workflows/commit-lint.yml` exists precisely because of that, and must not be
 dropped as redundant.
 
-**CI and deploy — written, and deploy is one manual step away from working.**
-`.github/workflows/ci.yml` runs typecheck · lint · unit tests · build · e2e on every PR
-and every push to `main`, and a `deploy` job behind `needs: [static, e2e]` ships to
-Vercel with `vercel build` + `vercel deploy --prebuilt`. Reasoning in
-[ADR-0022](../decisions/0022-deploy-from-actions-not-vercel-git.md), steps in
-[`../05-operations/runbook.md`](../05-operations/runbook.md) §6 (rewritten — §1–5 and §7
-of that file are still pre-migration and must not be followed).
+**Two traps from 2026-09-14, kept because they fail silently.** Both came from a stale
+worktree, `.worktrees/next-themes/` (since deleted):
 
-**Deploy is deferred by decision, not blocked by accident (2026-09-14).** The host is
-still undecided: Vercel as `ci.yml` configures it, or GitHub Pages — which would need
-`output: 'export'`, delete `src/middleware.ts`, turn `/api/search-index/[locale]` into a
-build-time file (**contradicting NFR-PERF-05**, so it needs its own ADR) and turn
-`/[locale]/n/[id]` into static pages. The one real user-facing cost of Pages is that `/`
-would always land on `/vi`: locale can no longer be negotiated from `Accept-Language`
-without a server. `next/image` is used nowhere, so the usual worst blocker is absent.
-Next 16.3.1 also now warns that the `middleware` file convention is deprecated in favour
-of `proxy`, so that file needs attention either way.
-
-Until the host is chosen, a missing secret makes the `deploy` job **skip loudly** — a
-`::notice::` and a job-summary heading saying nothing was deployed — rather than fail.
-Failing painted every push to `main` red for a reason nobody intended to fix that day,
-and a permanently red pipeline is one people stop reading.
-
-**Original state, kept for when the decision lands.** `VERCEL_TOKEN`,
-`VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are not set, and the last two do not exist until
-someone runs `vercel link` once — the repository has still never been deployed. Until
-then the deploy job fails at its first step naming the missing secret; the checks above
-it run normally. **If the Vercel Git integration is ever connected, turn its
-auto-deploy off** (runbook §6.3) or every push deploys twice, ungated copy possibly
-last.
-
-**Two traps found while installing it, both from the same cause — a stale worktree.**
-`.worktrees/next-themes/` still holds a pre-migration checkout with its own
-`node_modules`, and two tools were walking into it:
-
-- `pnpm test:run` did not finish. `vitest.config.mts` declared
-  `exclude: ["node_modules/**", ...]`, and declaring `exclude` **replaces** vitest's
-  default `**/node_modules/**` — so only the root `node_modules` was skipped and vitest
-  silently ran thousands of dependency test files. Fixed to `**/node_modules/**` plus
-  `.worktrees/**`; the suite now finishes in ~44s. The symptom was a hang, never a red
-  test, which is why nobody read it as a config bug.
-- The `.env.example` hook warned about 10 variables "the code reads" — `DATABASE_URL`,
-  the `R2_*` set, `ADMIN_*`. **All ten come from that worktree**, not from this tree;
-  the deleted `src/server/` is what read them. `docs-regen.sh` now excludes
-  `.worktrees`. Nothing is missing from `.env.example`.
-
-Last completed: documenting the file-backed-registry migration — this entry, plus
-`invariants.md`, `nfr.md`, `CLAUDE.md`, `README.md` and ADR-0015's mechanism — and two
-small code follow-ups that belonged with the story: renaming
-`src/i18n/locales.generated.ts` → `locales.ts` (nothing has generated it since Task 9),
-and pruning `src/lib/schemas.ts` down to the one export (`statusValues`) that
-`src/content/nav-tree.ts` still imports. 2026-09-14.
+- `vitest.config.mts` once declared `exclude: ["node_modules/**", ...]` — declaring
+  `exclude` **replaces** vitest's default `**/node_modules/**`, so vitest silently ran
+  thousands of dependency test files inside the worktree. Now `**/node_modules/**` plus
+  `.worktrees/**`. The symptom was a hang, never a red test.
+- The `.env.example` hook reported variables that only the worktree's deleted
+  `src/server/` read. `docs-regen.sh` now excludes `.worktrees`.
 
 ## Where the code stands
 
-Real run on 2026-09-14, on this branch, with **no environment variables set at all**:
+Real run on 2026-10-10, on `main` at `b0f4c35`, with no environment variables set:
 
 | Check | Result |
 | --- | --- |
-| `pnpm test:run` | **192 passed**, 0 skipped (28 files) |
+| `pnpm test:run` | **250 passed**, 0 skipped (37 files) |
 | `pnpm typecheck` · `pnpm lint` | clean |
-| `pnpm build` | succeeds with no environment configured — `NFR-REL-04`, strengthened |
-| `pnpm e2e` | **16 passed**, 0 skipped |
+| `pnpm build` · `pnpm e2e` | not re-run on 2026-10-10 — both run green in CI on every PR; #13's checks passed before merge |
 
 There are no database-backed tests left to skip — the database is gone
 ([ADR-0018](../decisions/0018-content-is-files-not-rows.md)).
-
-**Never deployed to Vercel** — but nothing blocks it now. The old blocker (missing
-Neon / Cloudflare R2 credentials) no longer applies: there is no database and no object
-store left to provision.
 
 ## Next up
 
 | Work | Related | Priority | Why that priority |
 | --- | --- | --- | --- |
-| Merge `feat/file-backed-registry` to `main`, then deploy to Vercel | — | high | first deploy ever, and the first time this project needs no datastore credentials to do it |
-| Rewrite `src/styles/tokens.css` and `tokens.test.ts` against MASTER.md, and raise the `--tap` threshold in `e2e/a11y-tap-target.spec.ts` from 28px to 44px | ADR-0017 | high | the design system and the code currently describe two different products. The tap change alone will turn that e2e spec red until it is updated |
-| Resolve the `NFR-A11Y-06` / `MASTER.md` §7 conflict on mono UPPERCASE labels, and the `I14` / `MASTER.md` §2 conflict on heading weight | NFR-A11Y-06 · I14 | high | owed to the "Ink and state" repaint branch — see §In progress above |
-| The `features` frontmatter field has no author across any of the 25 content files — `FeatureGrid` renders `null` on an empty array, so `apps/[slug]/page.tsx`'s feature grid renders on no page at all | — | medium | the schema supports it and nothing populates it; the deleted `prisma/seed.ts` authored feature blocks for five of the six applications and is recoverable at `git show e085a74:prisma/seed.ts` — sourcing it for all ten current applications is a content task against 22 READMEs, not a fix-wave edit |
-| Wire `pnpm audit` into CI | NFR-SEC-05 | **high** | there is no `.github/workflows/` at all, so the threshold is manual today. Re-run `pnpm audit` after this migration — five dependencies (`@prisma/client`, `@prisma/adapter-pg`, `next-auth`, `@aws-sdk/client-s3`, `bcryptjs`) that carried some of the 15 advisories measured 2026-09-13 are gone, but the count has not been re-measured |
-| Add a CSS-level `color-scheme` to each theme block while rewriting `tokens.css` | FR-15 · [ADR-0020](../decisions/0020-next-themes-for-the-theme.md) | medium | next-themes sets the property at runtime, so visitors with JavaScript disabled get none. Three declarations, and the token rewrite already owns that file |
-
-The Neon project, the R2 bucket, `ADMIN_PASSWORD_HASH`/`AUTH_SECRET`/`PREVIEW_SECRET`,
-declaring datastore variables on Vercel, and arranging a database backup are all gone
-from this table — none of them are needed any more (ADR-0018, ADR-0019). So is
-reviewing the seeded content through the CMS: there is no CMS and no seed; the content
-now living in `content/**.mdx` was authored directly, not seeded.
+| Choose the host, then deploy for the first time | ADR-0022 | high | the only thing standing between `main` and a live site; see §In progress for what each choice costs |
+| **"Ink and state" repaint** — not yet specified. Apply [`MASTER.md`](../design-system/ducker/MASTER.md) to the surviving CSS modules: rewrite `src/styles/tokens.css` and `tokens.test.ts`, and raise `--tap` (still `28px`) and the threshold in `e2e/a11y-tap-target.spec.ts` to 44px | ADR-0017 | high | the design system and the code still describe two different products. Approved mockup: 12 artboards, 4 screens × 375 / 768 / 1440 — an Artifact, **not in this repository**. The tap change alone turns that e2e spec red until it is updated |
+| Resolve the `NFR-A11Y-06` / `MASTER.md` §7 conflict on mono UPPERCASE labels, and the `I14` / `MASTER.md` §2 conflict on heading weight | NFR-A11Y-06 · I14 | high | owed to the repaint branch, resolved explicitly, not silently. `NFR-A11Y-06` blesses mono UPPERCASE 11px labels used in 20+ places; `MASTER.md` §7 forbids both. `I14` pins `h1,h2,h3` to serif-400; `MASTER.md` §2 makes headings tight heavy sans |
+| Wire `pnpm audit` into CI | NFR-SEC-05 | high | `ci.yml` runs no audit step, so the threshold is manual. The advisory count has not been re-measured since 2026-09-13, before five dependencies were removed |
+| Rename `src/middleware.ts` to the `proxy` convention | — | medium | Next 16 warns the `middleware` file convention is deprecated. Moot if GitHub Pages is chosen, which deletes the file |
+| Add a CSS-level `color-scheme` to each theme block while rewriting `tokens.css` | FR-15 · [ADR-0020](../decisions/0020-next-themes-for-the-theme.md) | medium | next-themes sets the property at runtime, so visitors with JavaScript disabled get none. The token rewrite already owns that file |
+| Author the `features` frontmatter field | — | low | no content file sets it, so `FeatureGrid` renders on no page. The deleted `prisma/seed.ts` (`git show e085a74:prisma/seed.ts`) authored feature blocks for five applications; since #12 every page also shows its README, so this is a content task of reduced value |
 
 ## Open decisions
 
-- ~~**`DocPage("home")` is `DRAFT` and `/docs/home` 404s on purpose.**~~ **Resolved
-  2026-09-14, dropped.** The move to file-backed content (this migration) closed FR-20
-  by deleting the record instead of building a renderer for it: `content/docs/` has no
-  `home.vi.mdx`, so there is nothing left to publish and no dead link to worry about.
-  The home page keeps rendering from interface strings, as it always did.
+- **Deploy host** — Vercel or GitHub Pages. See §In progress.
 - **Raw HTML in markdown is not rendered** (FR-19) — no `<kbd>`, `<details>`, `<br>`.
   Opening it means `rehype-raw` + `allowDangerousHtml: true` and dropping the
   hand-written filter in `src/lib/markdown.ts`; sanitisation already has
@@ -188,32 +128,30 @@ now living in `content/**.mdx` was authored directly, not seeded.
 
 | Where | What was traded | Why it was acceptable | When it must be paid |
 | --- | --- | --- | --- |
-| `docs/03-design/architecture.md` and `docs/05-operations/runbook.md` | Downgraded to 🔴/🟡 without rewriting bodies | Substantial rewrite work; post-migration status update takes priority. Architecture has 17 stale references to deleted systems (Prisma, Auth.js, R2, Neon, src/server/*). Runbook has ~84. | Pair of ADRs (ADR-0018, ADR-0019) explain what was removed; new documents needed to describe current file-backed system and Vercel deployment with no datastore |
-| No CI at all | `pnpm audit`, tests, typecheck and build run only on a developer machine | Single contributor, every gate is run manually before commit | as soon as a second person commits, or NFR-SEC-05 must be automatic |
+| `docs/03-design/architecture.md` and `docs/05-operations/runbook.md` | Downgraded to 🔴/🟡 without rewriting bodies | Substantial rewrite work; post-migration status update took priority. Architecture has 17 stale references to deleted systems (Prisma, Auth.js, R2, Neon, src/server/*). Runbook has ~84; only its §6 was rewritten | Before the first deploy, at the latest — the runbook's §1–5 and §7 describe steps that no longer apply |
 
-The three rows this table used to carry — the Credentials-provider auth abstraction,
-the unverified `prisma/seed.ts` content, and the missing database backup — retired with
-`src/server/auth/`, `prisma/seed.ts` and the database itself (ADR-0018, ADR-0019).
-Content now lives in git, which is its own backup.
+The "no CI at all" row retired with #9: `ci.yml` runs typecheck, lint, unit tests,
+build and e2e on every PR and every push to `main`. Only `pnpm audit` is still manual
+(§Next up).
 
 ## One trap when running e2e
 
 **Playwright runs on its own port 3210, not 3000**, and never reuses an existing server
-(`reuseExistingServer: false`). See the comment in `playwright.config.ts`. Unrelated to
-the migration above — kept here because it is still a live trap.
+(`reuseExistingServer: false`). See the comment in `playwright.config.ts`.
 
 ## Rebuilding the environment on a new machine
 
 Full detail in [`../05-operations/runbook.md`](../05-operations/runbook.md) — ⚠️ that
 file is largely pre-migration; its Neon/R2/Vercel deploy steps and its `DATABASE_URL`
-section no longer apply. The short version, current as of this migration:
+section no longer apply. The short version:
 
 ```bash
 git clone https://github.com/LeVanAnhDuc/web-app-ducker.git
 cd web-app-ducker
-pnpm install                # install; nothing to generate, no environment needed
+pnpm install --frozen-lockfile   # nothing to generate, no environment needed
+git config core.hooksPath .githooks
 cp .env.example .env
-pnpm dev                    # http://localhost:3000 → redirects to /vi
+pnpm dev                         # http://localhost:3000 → redirects to /vi
 ```
 
 Node 20+. No environment variables are required — the site renders its full content
