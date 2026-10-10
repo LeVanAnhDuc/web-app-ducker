@@ -2,7 +2,7 @@
 
 > **Answers:** How do I stand this up, deploy it, and run the database-backed tests?
 > **Status:** 🟡 detailed, but **predates the file-backed migration** — describes Neon/R2/Vercel infrastructure that no longer exists
-> **Updated:** 2026-09-14 · file-backed-registry
+> **Updated:** 2026-10-10 · §6 only (host chosen, ADR-0024)
 > **Update when:** a new environment variable · an infrastructure provider changes · a deploy step turns out wrong
 
 > ⚠️ The body below is still Vietnamese — see [`../README.md`](../README.md) §Language. **The migration to file-backed content (2026-09-14, ADR-0018, ADR-0019) removed the database, auth layer and object store, so sections on Neon, R2, Auth.js and database-backed tests no longer apply.**
@@ -394,14 +394,16 @@ Thiếu cái nào thì job `deploy` dừng ngay ở bước đầu và **nói r�
 bước đó tồn tại chỉ để tránh việc Vercel CLI đổ ở mấy bước sau bằng một thông báo
 trông như lỗi mạng.
 
-### 6.3 Tắt auto-deploy của Vercel Git integration
+### 6.3 Vercel Git integration không tự deploy — đã khoá trong repo
 
-Nếu bạn đã nối repo với Vercel qua GitHub App, **mỗi push sẽ deploy hai lần** — một
-lần do Vercel, một lần do Actions — và bản không qua kiểm thử có thể về đích sau,
-tức là đè lên bản đã kiểm. Vào **Project Settings → Git** và tắt Production Branch
-auto-deploy, hoặc đặt Ignored Build Step thành `exit 0`.
+Nếu repo được nối với Vercel qua GitHub App (`vercel link` có thể tự nối), mỗi push sẽ
+deploy hai lần — một lần do Vercel, một lần do Actions — và bản không qua kiểm thử có
+thể về đích sau, đè lên bản đã kiểm. Từ ADR-0024, `vercel.json` ở gốc repo đặt
+`"git": { "deploymentEnabled": false }`: Vercel không tạo deployment nào từ Git push,
+trên mọi nhánh, kể cả khi đã nối. Deploy bằng CLI (`vercel deploy --prebuilt`) không bị
+ảnh hưởng.
 
-Đây là cái bẫy dễ nhất để dính, vì cả hai đường đều "hoạt động".
+**Đừng xoá dòng đó** để "bật preview cho PR" — muốn preview thì viết job trong CI.
 
 ### 6.4 `vercel build`, tuyệt đối không phải `next build`
 
@@ -416,11 +418,21 @@ hai handler vẫn deploy xanh rồi **trả về rỗng trong production**, vì 
 ENOENT trong `read.ts` không phân biệt được "bundle thiếu file" với "nhóm nội dung
 rỗng".
 
-### 6.5 Không có biến môi trường nào phải khai
+### 6.5 Biến môi trường — chỉ một, và đặt trên Vercel
 
-Build không cần biến nào — không DB, không secret, không object store. `.env.example`
-chỉ còn hai biến tuỳ chọn và không phải secret. Job `e2e` cố tình **không** đặt biến
-nào, để tính chất đó không âm thầm mất đi (NFR-REL-04).
+Build không cần biến nào — không DB, không secret, không object store. Job `e2e` cố
+tình **không** đặt biến nào, để tính chất đó không âm thầm mất đi (NFR-REL-04).
+
+Production cần **một** biến: `GITHUB_TOKEN` (ADR-0023). Không có nó, các lần làm mới
+README/Releases mỗi giờ (ISR) gọi GitHub ẩn danh, giới hạn 60 request/giờ. Dùng
+fine-grained token, quyền "Public repositories (read-only)", có hạn dùng. Đặt trên
+**Vercel**, không phải GitHub secret — ISR chạy trên Vercel:
+
+```bash
+pnpm dlx vercel@59.16.0 env add GITHUB_TOKEN production
+```
+
+`vercel pull` trong job deploy kéo biến này xuống, nên `vercel build` ở CI cũng dùng nó.
 
 ### 6.6 Sau lần deploy đầu — kiểm bằng mắt
 
@@ -433,6 +445,8 @@ nào, để tính chất đó không âm thầm mất đi (NFR-REL-04).
 4. `/api/search-index/vi` → trả về JSON **không rỗng**. Đây là phép thử trực tiếp cho
    mục 6.4: rỗng nghĩa là `content/` không lên được bundle.
 5. Đổi chủ đề sáng/tối → tải lại → lựa chọn còn nguyên.
+6. Trang một ứng dụng có repo (ví dụ `/vi/apps/web-app-ducker-id`) → tab README và
+   Releases có nội dung, không phải thông báo "unavailable".
 
 ---
 
