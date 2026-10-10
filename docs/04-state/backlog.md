@@ -63,9 +63,12 @@ gated `deploy` job.
 on 2026-10-11 instead of being entered in a terminal, so they sit in a local
 transcript. Rotate both, then update the secret and the Vercel variable.
 
-**Open item from #12:** `web-app-calculate-badminton` still does not resolve on GitHub
-(re-checked 2026-10-10) — its pages show the "unavailable" notice until its `repo:` is
-corrected or the repository is made public.
+**Resolved 2026-10-11 — the open item from #12.** `web-app-calculate-badminton` answered
+404 because the repository was named `app-calculate-badminton`. It was renamed on GitHub
+to match the content file's `repo:`, its Pages base path followed
+(https://levananhduc.github.io/web-app-calculate-badminton/), and its README now renders
+here. That repository's Pages deploy had been failing since its own #6 on a test that
+needed a local `.env`; fixed in its #8.
 
 Owed on the next clone, on every machine: `git config core.hooksPath .githooks`. It is
 local configuration and cannot be committed — the CI check in
