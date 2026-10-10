@@ -2,7 +2,7 @@
 
 > **Answers:** What is being worked on, what comes next, and what is owed?
 > **Status:** 🟢 complete
-> **Updated:** 2026-10-10 · branch main
+> **Updated:** 2026-10-11 · branch docs/first-deploy
 > **Update when:** work starts or finishes · brainstorming produces new work · a shortcut is taken deliberately
 
 <!-- HOW TO FILL
@@ -18,9 +18,9 @@ DOES NOT CONTAIN: out-of-scope features (-> 01-product/overview.md §Non-Goals).
 
 ## In progress
 
-**Nothing is in flight (2026-10-10).** Every branch is merged: PRs #1–#13 are on `main`,
-no PR or issue is open, `.worktrees/` is empty, and the latest release is `v0.2.1`
-(2026-10-05). The last feature work, in order:
+**Nothing is in flight (2026-10-11).** Every branch is merged: PRs #1–#15 are on `main`,
+no PR or issue is open, `.worktrees/` is empty, and the latest release is `v0.2.3`
+(2026-10-10). The last feature work, in order:
 
 - **#7 File-backed registry** (2026-09-14) — the admin surface, `src/server/`, `prisma/`
   and five dependencies deleted; content lives in `content/**.mdx`.
@@ -40,25 +40,28 @@ no PR or issue is open, `.worktrees/` is empty, and the latest release is `v0.2.
 - **#13 Content fills the middle column** (2026-10-05) — `--measure` set to `none`, the
   66-character line cap removed; the trade is recorded in `MASTER.md` §2.
 
-**First deploy — host chosen, credentials pending (2026-10-10), on
-`ci/vercel-integration`.** The host is Vercel
-([ADR-0024](../decisions/0024-host-on-vercel-git-deploys-off-in-repo.md), which also
-records why GitHub Pages lost). A root `vercel.json` now turns Vercel's Git deploys off,
-so the double-deploy trap is closed in the repository rather than in the dashboard.
-Runbook §6.3, §6.5 and §6.6 are updated to match.
+**Live on Vercel since 2026-10-11 — https://web-app-ducker.vercel.app.** The host is
+Vercel ([ADR-0024](../decisions/0024-host-on-vercel-git-deploys-off-in-repo.md), which
+also records why GitHub Pages lost). The first deploy came from re-running the CI run of
+`9aac736` (#15) once the secrets existed; every later push to `main` deploys through the
+gated `deploy` job.
 
-Stopped at: waiting for the user's account steps. As of 2026-10-10 the repository has
-**no GitHub secrets at all** and has never been deployed. Remaining, in order:
+- Vercel project `web-app-ducker` under `duclevananhregister-1123s-projects`. `vercel
+  link` **did** connect the Git integration, as feared — `vercel.json` was already on
+  `main`, so it creates no deployments. It also appended `.env*` to `.gitignore`, which
+  would have matched `.env.example`; that line was reverted, not committed.
+- Repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. Vercel
+  production variable: `GITHUB_TOKEN` (sensitive).
+- Runbook §6.6, walked on 2026-10-11 with `curl`: `/` → 307 `/vi`, and → `/en` with
+  `Accept-Language: en`; `/vi`, `/en`, `/vi/apps`, `/vi/games`, app and game detail
+  pages all 200; `/api/search-index/vi` returns a non-empty index, so `content/**`
+  reached the bundle (§6.4); `web-app-ducker`'s releases page lists `v0.1.0`…`v0.2.3`;
+  Ducker ID's README renders. **Not checked:** the theme toggle surviving a reload
+  (needs a browser) and a `/[locale]/n/[id]` route (no link to one on the home page).
 
-1. user — `vercel login` on this machine;
-2. Claude — `vercel link`, then set `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` as repository
-   secrets (neither is secret, both come from `.vercel/project.json`);
-3. user — `gh secret set VERCEL_TOKEN`, and `vercel env add GITHUB_TOKEN production`
-   (runbook §6.5) — the values never pass through the session;
-4. merge → the `deploy` job runs for real → walk runbook §6.6 on the production URL.
-
-Until step 3, the `deploy` job keeps **skipping loudly** — a `::notice::` and a
-job-summary heading — rather than failing.
+**Owed:** the `VERCEL_TOKEN` and `GITHUB_TOKEN` values were pasted into a chat session
+on 2026-10-11 instead of being entered in a terminal, so they sit in a local
+transcript. Rotate both, then update the secret and the Vercel variable.
 
 **Open item from #12:** `web-app-calculate-badminton` still does not resolve on GitHub
 (re-checked 2026-10-10) — its pages show the "unavailable" notice until its `repo:` is
@@ -96,7 +99,8 @@ There are no database-backed tests left to skip — the database is gone
 
 | Work | Related | Priority | Why that priority |
 | --- | --- | --- | --- |
-| Finish the first deploy to Vercel | ADR-0022 · ADR-0024 | high | the only thing standing between `main` and a live site; steps in §In progress |
+| Rotate `VERCEL_TOKEN` and `GITHUB_TOKEN` | ADR-0024 | high | both values passed through a chat transcript — see §In progress |
+| Align the Node version — Vercel runs functions on 24.x, CI builds on 22 | ADR-0022 | low | no failure seen; one `engines.node` field in `package.json` pins both |
 | **"Ink and state" repaint** — not yet specified. Apply [`MASTER.md`](../design-system/ducker/MASTER.md) to the surviving CSS modules: rewrite `src/styles/tokens.css` and `tokens.test.ts`, and raise `--tap` (still `28px`) and the threshold in `e2e/a11y-tap-target.spec.ts` to 44px | ADR-0017 | high | the design system and the code still describe two different products. Approved mockup: 12 artboards, 4 screens × 375 / 768 / 1440 — an Artifact, **not in this repository**. The tap change alone turns that e2e spec red until it is updated |
 | Resolve the `NFR-A11Y-06` / `MASTER.md` §7 conflict on mono UPPERCASE labels, and the `I14` / `MASTER.md` §2 conflict on heading weight | NFR-A11Y-06 · I14 | high | owed to the repaint branch, resolved explicitly, not silently. `NFR-A11Y-06` blesses mono UPPERCASE 11px labels used in 20+ places; `MASTER.md` §7 forbids both. `I14` pins `h1,h2,h3` to serif-400; `MASTER.md` §2 makes headings tight heavy sans |
 | Wire `pnpm audit` into CI | NFR-SEC-05 | high | `ci.yml` runs no audit step, so the threshold is manual. The advisory count has not been re-measured since 2026-09-13, before five dependencies were removed |
