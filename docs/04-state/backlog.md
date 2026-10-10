@@ -2,7 +2,7 @@
 
 > **Answers:** What is being worked on, what comes next, and what is owed?
 > **Status:** 🟢 complete
-> **Updated:** 2026-10-11 · branch docs/first-deploy
+> **Updated:** 2026-10-11 · branch ci/project-scoped-token
 > **Update when:** work starts or finishes · brainstorming produces new work · a shortcut is taken deliberately
 
 <!-- HOW TO FILL
@@ -59,9 +59,22 @@ gated `deploy` job.
   Ducker ID's README renders. **Not checked:** the theme toggle surviving a reload
   (needs a browser) and a `/[locale]/n/[id]` route (no link to one on the home page).
 
-**Owed:** the `VERCEL_TOKEN` and `GITHUB_TOKEN` values were pasted into a chat session
-on 2026-10-11 instead of being entered in a terminal, so they sit in a local
-transcript. Rotate both, then update the secret and the Vercel variable.
+**Credentials narrowed and rotated (2026-10-11), on `ci/project-scoped-token`.** The
+first values were pasted into a chat session, so both were replaced:
+
+- `VERCEL_TOKEN` is now **scoped to the `web-app-ducker` project only** — Vercel's token
+  Scope offers Full Account, a team's All Projects, or one project. That needed Vercel
+  CLI 63.1.2 in `ci.yml`: 59.16.0 failed `vercel pull` with "Could not retrieve Project
+  Settings" (reproduced locally against both versions).
+- `GITHUB_TOKEN` was regenerated and moved from a project variable to a **team Shared
+  Environment Variable** linked to `web-app-ducker`, so other projects can link it
+  (runbook §6.5). The project-level variable was deleted — it would have overridden the
+  shared one.
+
+The replacement values were also pasted into the chat, so they sit in a local
+transcript too; the exposure is now one project's deploys and read-only public data.
+**Still owed:** once a deploy from this branch's CLI pin passes, delete the old
+all-projects token at vercel.com/account/tokens.
 
 **Resolved 2026-10-11 — the open item from #12.** `web-app-calculate-badminton` answered
 404 because the repository was named `app-calculate-badminton`. It was renamed on GitHub
@@ -102,7 +115,7 @@ There are no database-backed tests left to skip — the database is gone
 
 | Work | Related | Priority | Why that priority |
 | --- | --- | --- | --- |
-| Rotate `VERCEL_TOKEN` and `GITHUB_TOKEN` | ADR-0024 | high | both values passed through a chat transcript — see §In progress |
+| Delete the old all-projects Vercel token | ADR-0024 | high | it can still deploy or delete any project in the account; replaced by a project-scoped one — see §In progress |
 | Align the Node version — Vercel runs functions on 24.x, CI builds on 22 | ADR-0022 | low | no failure seen; one `engines.node` field in `package.json` pins both |
 | **"Ink and state" repaint** — not yet specified. Apply [`MASTER.md`](../design-system/ducker/MASTER.md) to the surviving CSS modules: rewrite `src/styles/tokens.css` and `tokens.test.ts`, and raise `--tap` (still `28px`) and the threshold in `e2e/a11y-tap-target.spec.ts` to 44px | ADR-0017 | high | the design system and the code still describe two different products. Approved mockup: 12 artboards, 4 screens × 375 / 768 / 1440 — an Artifact, **not in this repository**. The tap change alone turns that e2e spec red until it is updated |
 | Resolve the `NFR-A11Y-06` / `MASTER.md` §7 conflict on mono UPPERCASE labels, and the `I14` / `MASTER.md` §2 conflict on heading weight | NFR-A11Y-06 · I14 | high | owed to the repaint branch, resolved explicitly, not silently. `NFR-A11Y-06` blesses mono UPPERCASE 11px labels used in 20+ places; `MASTER.md` §7 forbids both. `I14` pins `h1,h2,h3` to serif-400; `MASTER.md` §2 makes headings tight heavy sans |

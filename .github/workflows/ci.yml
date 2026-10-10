@@ -34,7 +34,10 @@ env:
   NODE_VERSION: "22"
   # Pinned exactly, for the same reason release.yml pins git-cliff: a behaviour
   # change upstream must not silently change what gets shipped.
-  VERCEL_CLI_VERSION: "59.16.0"
+  # 59.16.0 could not read a project-scoped token ("Could not retrieve Project
+  # Settings" at `vercel pull`); 63.1.2 can. Do not go back below it while
+  # VERCEL_TOKEN is scoped to this one project (runbook §6.1).
+  VERCEL_CLI_VERSION: "63.1.2"
 
 jobs:
   # ── Everything that needs no browser and no build ──────────────────────────
@@ -186,8 +189,8 @@ jobs:
           # The README and Releases tabs (ADR-0023). Unlike the check job above,
           # this build is the one users see, so it must not share the anonymous
           # 60-an-hour limit with every other job on a runner's IP. It covers the
-          # build only: hourly refreshes run on Vercel and read the project's own
-          # GITHUB_TOKEN variable.
+          # build only: hourly refreshes run on Vercel and read the team's shared
+          # GITHUB_TOKEN variable, linked to this project (runbook §6.5).
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
