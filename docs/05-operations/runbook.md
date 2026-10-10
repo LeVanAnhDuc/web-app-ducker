@@ -370,15 +370,18 @@ Hai trong ba secret không tồn tại cho tới khi project được tạo trê
 máy bạn, một lần:
 
 ```bash
-pnpm dlx vercel@59.16.0 login
-pnpm dlx vercel@59.16.0 link       # chọn/tạo project cho repo này
+pnpm dlx vercel@63.1.2 login
+pnpm dlx vercel@63.1.2 link       # chọn/tạo project cho repo này
 cat .vercel/project.json           # -> { "orgId": "...", "projectId": "..." }
 ```
 
 `.vercel/` đã nằm trong `.gitignore` — **đừng commit nó**.
 
-Token lấy ở [vercel.com/account/tokens](https://vercel.com/account/tokens). Nó deploy
-được *mọi* project trong tài khoản, nên hãy đặt thời hạn và coi như mật khẩu.
+Token lấy ở [vercel.com/account/tokens](https://vercel.com/account/tokens). Ở ô
+**Scope**, chọn team rồi chọn **chỉ project `web-app-ducker`** — token khi đó không đụng
+được project nào khác. Đặt tên theo repo (`gha-web-app-ducker`) và đặt thời hạn. Token
+chỉ-một-project cần Vercel CLI ≥ 63.1.2: bản 59.16.0 báo `Could not retrieve Project
+Settings` ở `vercel pull` (2026-10-11).
 
 ### 6.2 Ba secret của repo
 
@@ -426,13 +429,15 @@ tình **không** đặt biến nào, để tính chất đó không âm thầm m
 Production cần **một** biến: `GITHUB_TOKEN` (ADR-0023). Không có nó, các lần làm mới
 README/Releases mỗi giờ (ISR) gọi GitHub ẩn danh, giới hạn 60 request/giờ. Dùng
 fine-grained token, quyền "Public repositories (read-only)", có hạn dùng. Đặt trên
-**Vercel**, không phải GitHub secret — ISR chạy trên Vercel:
+**Vercel**, không phải GitHub secret — ISR chạy trên Vercel.
 
-```bash
-pnpm dlx vercel@59.16.0 env add GITHUB_TOKEN production
-```
+Từ 2026-10-11 nó là **Shared Environment Variable của team** (Team Settings →
+Environment Variables), loại Sensitive, môi trường Production, link vào
+`web-app-ducker`. Project khác cần đọc GitHub thì chỉ việc link thêm; rotate thì sửa một
+chỗ. **Đừng tạo thêm `GITHUB_TOKEN` ở cấp project** — biến cấp project luôn thắng biến
+Shared cùng tên, và sẽ lặng lẽ che nó.
 
-`vercel pull` trong job deploy kéo biến này xuống, nên `vercel build` ở CI cũng dùng nó.
+Bước build trong CI không dùng biến này: nó lấy `secrets.GITHUB_TOKEN` mà Actions tự cấp.
 
 ### 6.6 Sau lần deploy đầu — kiểm bằng mắt
 
