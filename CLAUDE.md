@@ -17,7 +17,7 @@ store — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 | Task | Document |
 | --- | --- |
 | **Starting a session — where things stand, what is owed** | **[`docs/04-state/backlog.md`](docs/04-state/backlog.md) — read this first** |
-| **Before reversing a decision, or when code looks strange** | [`docs/decisions/`](docs/decisions/README.md) — 20 ADRs, each with the alternatives that were rejected |
+| **Before reversing a decision, or when code looks strange** | [`docs/decisions/`](docs/decisions/README.md) — the ADRs, each with the alternatives that were rejected |
 | **Before changing any line of code** | [`docs/03-design/invariants.md`](docs/03-design/invariants.md) — what breaks *silently* |
 | **Building any interface** | [`docs/design-system/ducker/MASTER.md`](docs/design-system/ducker/MASTER.md) — **required**. The token source of truth |
 | Why the interface looks like that | [ADR-0017](docs/decisions/0017-ink-and-state-design-direction.md) — colour is reserved for status; the chrome has none |
@@ -65,11 +65,9 @@ it reads `content/**.mdx`, parses frontmatter, resolves locale fallback, and is 
 only module every page imports content through. Nothing else touches `content/` or
 `fs`. Reasoning: [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md).
 
-⚠️ Until 2026-09-13 this was **three** boundaries — `src/server/content/` (Prisma),
-`src/server/auth/` (Auth.js) and `src/server/media/` (the S3 SDK), enforced by
-`src/server/auth/boundary.test.ts` — deleted along with the database, the admin
-surface and the object store ([ADR-0019](docs/decisions/0019-no-administration-surface.md)
-§4). If a server dependency ever returns, an enforcing test must return with it.
+If a server-side dependency (database, auth, object store) is ever added, add a test
+that enforces its boundary in the same change
+([ADR-0019](docs/decisions/0019-no-administration-surface.md) §4).
 
 ## Three known traps
 
@@ -92,10 +90,10 @@ Display names are capitalised with spaces: **Manage Gym**, not `web-app-manage-g
 repository slug appears only in a secondary role, in mono type, coloured `--ink-soft`. Full
 mapping table in `docs/design-system/ducker/MASTER.md` §5.
 
-## README (REQUIRED — keep in sync with features)
+## README — keep `## Features` in sync
 
 `README.md` describes what the app does for its users — it is not a boilerplate page.
-Every commit that adds or changes user-facing behaviour (`feat:`) MUST update the
+Every commit that adds or changes user-facing behaviour (`feat:`) also updates the
 `## Features` section of `README.md` in the same branch, before merging — one short
 English bullet in the existing style.
 
