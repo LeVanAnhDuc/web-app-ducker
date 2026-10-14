@@ -8,7 +8,7 @@
 }
 
 html {
-  /* Neo màu nền ngay ở gốc để không loé nền trắng khi chủ đề tối. */
+  /* Anchor the background at the root so dark mode never flashes white. */
   background: var(--bg);
 }
 
@@ -20,14 +20,14 @@ body {
   font-size: var(--t-md);
   line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
-  /* Thân trang không bao giờ cuộn ngang — bảng và khối mã tự cuộn trong hộp riêng. */
+  /* The page body never scrolls horizontally — tables and code blocks scroll in their own box. */
   overflow-x: hidden;
 }
 
 /*
- * Tiêu đề là serif weight 400 — thứ tạo cảm giác "tài liệu" thay vì "bảng
- * điều khiển". Trang tham chiếu đặt H1 ở 36px/400/normal.
- * Tracking âm cũ (−0.022em) bị bỏ hẳn: nó ép dấu tiếng Việt vào nhau.
+ * Headings are serif weight 400 — what makes it feel like "documentation"
+ * rather than "dashboard". The reference page sets H1 at 36px/400/normal.
+ * The old negative tracking (−0.022em) is gone: it crushed Vietnamese diacritics.
  */
 h1,
 h2,
@@ -39,7 +39,7 @@ h3 {
   text-wrap: balance;
 }
 
-/* h4 ở lại sans — nó đóng vai nhãn của thẻ, không phải tiêu đề bài. */
+/* h4 stays sans — it acts as a card label, not an article heading. */
 h4 {
   line-height: var(--lh-head);
   text-wrap: balance;
@@ -57,23 +57,23 @@ a {
 }
 
 /*
- * Màu khối mã.
+ * Code block colours.
  *
- * `renderMarkdown` chạy shiki ở chế độ hai chủ đề, nên mỗi token mang sẵn
- * `--shiki-light` và `--shiki-dark` dưới dạng biến nội tuyến chứ không phải màu
- * cứng. Ba khối dưới đây quyết định lấy biến nào — thiếu chúng thì khối mã ra
- * đơn sắc. Cùng cấu trúc ba trạng thái như tokens.css.
+ * `renderMarkdown` runs shiki in dual-theme mode, so every token carries
+ * `--shiki-light` and `--shiki-dark` as inline variables rather than hard-coded
+ * colours. The three blocks below pick which variable applies — without them
+ * code blocks render monochrome. Same three-state structure as tokens.css.
  */
 /*
- * Selector phải là `code[data-theme]`, KHÔNG phải `.shiki`.
- * rehype-pretty-code không gắn class `shiki` nào — nó gắn `data-theme` và đặt
- * `--shiki-light`/`--shiki-dark` vào `style` nội tuyến của từng token. Bản đầu
- * viết `.shiki` theo phỏng đoán nên không khớp gì cả và khối mã ra đơn sắc,
- * lỗi chỉ lộ khi xem tận mắt vì CSS không khớp thì không báo lỗi.
- * Hợp đồng này được `src/lib/markdown.test.ts` canh.
+ * The selector must be `code[data-theme]`, NOT `.shiki`.
+ * rehype-pretty-code adds no `shiki` class — it sets `data-theme` and puts
+ * `--shiki-light`/`--shiki-dark` in each token's inline `style`. The first
+ * version guessed `.shiki`, matched nothing, and code rendered monochrome — a
+ * bug visible only by eye, because unmatched CSS raises no error.
+ * `src/lib/markdown.test.ts` guards this contract.
  *
- * Không dùng `[data-theme]` trần: nó sẽ khớp luôn `:root[data-theme="dark"]`
- * của nút chuyển chủ đề và nhuộm cả trang theo màu token mã.
+ * Never use a bare `[data-theme]`: it would also match the theme toggle's
+ * `:root[data-theme="dark"]` and tint the whole page with code-token colours.
  */
 code[data-theme],
 code[data-theme] span,
@@ -99,7 +99,7 @@ pre[data-theme] span {
   color: var(--shiki-dark);
 }
 
-/* Tiêu điểm bàn phím phải thấy được ở mọi phần tử tương tác. */
+/* Keyboard focus must be visible on every interactive element. */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

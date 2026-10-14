@@ -27,7 +27,7 @@ const labels = {
 };
 
 describe("AppHero", () => {
-  it("tên hiển thị là h1, slug repo chỉ ở vai phụ", () => {
+  it("the display name is the h1, the repo slug is secondary only", () => {
     render(<AppHero app={app} locale="vi" crumb="Ứng dụng / Lõi" labels={labels} />);
     const heading = screen.getByRole("heading", { level: 1 });
     expect(heading).toHaveTextContent("Ducker ID");
@@ -35,7 +35,7 @@ describe("AppHero", () => {
     expect(screen.getByText("ducker-id")).toBeInTheDocument();
   });
 
-  it("repo riêng tư thì không dựng liên kết chết, thay bằng huy hiệu", () => {
+  it("a private repo gets a badge instead of a dead link", () => {
     render(
       <AppHero
         app={{ ...app, isRepoPrivate: true }}
@@ -48,7 +48,7 @@ describe("AppHero", () => {
     expect(screen.getByText("Repo riêng tư")).toBeInTheDocument();
   });
 
-  it("báo bản dịch thiếu khi nội dung lùi về ngôn ngữ khác", () => {
+  it("flags a missing translation when content falls back to another locale", () => {
     render(
       <AppHero
         app={{ ...app, locale: "vi", isFallback: true }}
@@ -62,7 +62,7 @@ describe("AppHero", () => {
 });
 
 describe("FeatureGrid", () => {
-  it("dựng tiêu đề và mô tả tính năng từ frontmatter", () => {
+  it("renders feature titles and descriptions from frontmatter", () => {
     render(
       <FeatureGrid
         title="Tính năng"
@@ -76,7 +76,7 @@ describe("FeatureGrid", () => {
     expect(screen.getByText("Màn hình xin quyền OAuth.")).toBeInTheDocument();
   });
 
-  it("không tính năng nào thì không dựng tiêu đề cho khối trống", () => {
+  it("renders no heading for an empty block when there are no features", () => {
     const { container } = render(<FeatureGrid features={[]} title="Tính năng" />);
     expect(container).toBeEmptyDOMElement();
   });

@@ -1,13 +1,13 @@
-/* Cột điều hướng — hình khối chép từ `.m-side` trong mockup v3 mục 02.
-   Hình khối của chính cây nằm trong `NavTree.module.css`. */
+/* Navigation column.
+   The tree's own styling lives in `NavTree.module.css`. */
 
 .side {
-  /* `.m-side`: đệm dưới dày để mục cuối không dính đáy khung cuộn. */
+  /* Generous bottom padding so the last item does not touch the bottom of the scroll box. */
   padding: 20px 12px 40px;
-  /* Viền phải và nền nằm trên ô cột của `DocsShell`, vì ô đó mới cao tới đáy
-     màn hình; đặt ở đây thì chúng dừng ở mục cuối cùng. */
+  /* The right border and background sit on `DocsShell`'s column cell, because that
+     cell reaches the bottom of the screen; set here, they would stop at the last item. */
 }
 
-/* Dưới 980px cột này không còn hiện (`DocsShell.module.css` ẩn nó): cây điều
-   hướng chuyển vào ngăn kéo `NavDrawer` mở từ đầu bài. Nên ở đây không còn
-   quy tắc đáp ứng nào cả — giữ lại thì chúng là CSS chết. */
+/* Below 980px this column is hidden (`DocsShell.module.css` hides it): the tree
+   moves into the `NavDrawer` opened from the top of the article. So there are no
+   responsive rules here; keeping them would be dead CSS. */

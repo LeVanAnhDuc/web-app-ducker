@@ -9,21 +9,21 @@ import rehypeStringify from "rehype-stringify";
 import { createAnchorAllocator } from "./slug";
 
 /**
- * Kết xuất Markdown thành HTML đã sanitize, khối mã đã tô màu.
+ * Renders Markdown to sanitised HTML with highlighted code blocks.
  *
- * Nội dung hôm nay do một người viết, nhưng khi nối IDMS sẽ là nhiều người.
- * Lúc đó không ai nhớ quay lại thêm sanitize, nên sanitize nằm sẵn trong
- * đường ống ngay từ đầu.
+ * Content has one author today, but will have many if it is ever opened up.
+ * By then nobody remembers to come back and add sanitising, so it sits in the
+ * pipeline from the start.
  */
 
 // ---------------------------------------------------------------------------
-// 1. Bỏ HTML thô trong Markdown
+// 1. Drop raw HTML from the Markdown
 // ---------------------------------------------------------------------------
 
 /**
- * Thẻ mà nội dung bên trong cũng phải biến mất, không chỉ riêng cặp thẻ.
- * `<script>alert(1)</script>` mà chỉ bỏ hai thẻ thì chuỗi `alert(1)` còn lại
- * dưới dạng văn bản — vô hại nhưng bẩn, và cho thấy bộ lọc chưa hiểu cấu trúc.
+ * Tags whose inner content must disappear too, not just the tag pair.
+ * Removing only the two tags of `<script>alert(1)</script>` leaves `alert(1)` behind
+ * as text — harmless but dirty, and a sign the filter does not understand structure.
  */
 const DANGEROUS_RAW_TAGS = new Set([
   "script",
@@ -39,23 +39,23 @@ const DANGEROUS_RAW_TAGS = new Set([
   "math",
 ]);
 
-/** Hình dạng tối thiểu của một nút mdast mà bộ lọc cần biết. */
+/** The minimal shape of an mdast node that the filter needs to know. */
 type MdastNode = { type: string; value?: unknown; children?: unknown };
 
 const closingTagPattern = (tag: string) => new RegExp(`</\\s*${tag}\\s*>`, "i");
 
 /**
- * Xoá mọi nút `html` khỏi cây mdast, kèm nội dung nằm giữa cặp thẻ nguy hiểm.
+ * Removes every `html` node from the mdast tree, plus the content between dangerous tag pairs.
  *
- * `remark-rehype` mặc định đã bỏ nút `html`, nhưng nó chỉ bỏ đúng nút đó —
- * văn bản kẹp giữa `<script>` và `</script>` vẫn sống sót vì đó là nút `text`
- * riêng. Hàm này quét theo cặp thẻ nên dọn được cả phần thân.
+ * `remark-rehype` already drops `html` nodes by default, but only that node —
+ * the text between `<script>` and `</script>` survives because it is a separate
+ * `text` node. This function scans by tag pair, so it clears the body as well.
  */
 function stripRawHtml(node: MdastNode): void {
   if (!Array.isArray(node.children)) return;
 
   const kept: MdastNode[] = [];
-  /** Đang ở trong cặp thẻ nguy hiểm nào, `null` là không ở trong cặp nào. */
+  /** Which dangerous tag pair we are inside; `null` means none. */
   let insideTag: string | null = null;
 
   for (const child of node.children as MdastNode[]) {
@@ -68,7 +68,7 @@ function stripRawHtml(node: MdastNode): void {
       }
 
       const openTag = /^<\s*([a-zA-Z][a-zA-Z0-9-]*)/.exec(raw)?.[1]?.toLowerCase();
-      // Khối HTML gọn trong một nút (`<script>…</script>`) không mở cặp mới.
+      // An HTML block contained in one node (`<script>…</script>`) does not open a new pair.
       if (openTag && DANGEROUS_RAW_TAGS.has(openTag) && !closingTagPattern(openTag).test(raw)) {
         insideTag = openTag;
       }
@@ -95,15 +95,15 @@ function remarkStripRawHtml() {
 // ---------------------------------------------------------------------------
 
 /**
- * Shiki tô màu bằng cách bọc từng token trong `<span>` mang `style`, và
- * rehype-pretty-code bọc khối mã trong `<figure>` kèm các thuộc tính `data-*`.
- * Schema mặc định của rehype-sanitize (theo GitHub) không biết những thứ đó:
- * nó không có `figure`, chỉ cho `className` dạng `language-*` trên `code`, và
- * không cho `style` ở bất cứ đâu. Vì sanitize chạy **sau** khi tô màu, giữ
- * nguyên schema mặc định sẽ xoá sạch màu vừa sinh ra.
+ * Shiki highlights by wrapping each token in a `<span>` carrying `style`, and
+ * rehype-pretty-code wraps the code block in a `<figure>` with `data-*` attributes.
+ * rehype-sanitize's default schema (GitHub's) knows none of that: it has no
+ * `figure`, only allows `className` of the form `language-*` on `code`, and
+ * allows `style` nowhere. Since sanitising runs **after** highlighting, keeping
+ * the default schema would wipe out the colours just produced.
  *
- * Nới lỏng chỉ đúng những gì đường ống của chính ta tạo ra. `<script>`,
- * handler nội tuyến và giao thức `javascript:` vẫn bị chặn như cũ.
+ * Loosen exactly what our own pipeline produces and nothing more. `<script>`,
+ * inline handlers and the `javascript:` protocol are still blocked as before.
  */
 const codeAttributes = ["className", "style", "data*"];
 
@@ -112,9 +112,9 @@ const schema = {
   tagNames: [...(defaultSchema.tagNames ?? []), "figure", "figcaption"],
   attributes: {
     ...defaultSchema.attributes,
-    // Thay hẳn định nghĩa cũ `[["className", /^language-./]]`: sanitize lấy
-    // định nghĩa **đầu tiên** khớp tên, nên để lại bản hạn chế thì bản rộng
-    // phía sau không bao giờ được dùng.
+    // Replace the old `[["className", /^language-./]]` definition outright: sanitize
+    // uses the **first** definition matching the name, so leaving the restrictive one
+    // in place means the broader one after it is never used.
     code: [...codeAttributes],
     pre: [...codeAttributes, "tabIndex"],
     span: [...codeAttributes],
@@ -125,13 +125,13 @@ const schema = {
 };
 
 // ---------------------------------------------------------------------------
-// 3. Đường ống
+// 3. Pipeline
 // ---------------------------------------------------------------------------
 
 /**
- * Hai chủ đề sinh ra biến CSS `--shiki-light` / `--shiki-dark` thay vì mã màu
- * cứng, đúng quy tắc "mọi màu qua biến CSS" và ba trạng thái chủ đề của
- * design-rules. CSS toàn cục cần một lần khai báo:
+ * Two themes emit the CSS variables `--shiki-light` / `--shiki-dark` instead of
+ * hard-coded colours, in line with the "every colour through a CSS variable" rule
+ * and the three theme states. Global CSS needs one declaration:
  *
  * ```css
  * .shiki, .shiki span { color: var(--shiki-light); }
@@ -145,16 +145,16 @@ const schema = {
  */
 const prettyCodeOptions: PrettyCodeOptions = {
   theme: { light: "github-light", dark: "github-dark" },
-  // Nền do token thiết kế quyết định, không để chủ đề shiki ghi đè.
+  // The design tokens own the background; the shiki theme must not override it.
   keepBackground: false,
   defaultLang: "plaintext",
   transformers: [
     {
       name: "keep-source",
       /**
-       * Shiki cắt mã thành từng token nằm trong `<span>` riêng, nên `pnpm install`
-       * không còn là một chuỗi liền trong HTML. Giữ lại mã nguyên bản trên `<pre>`
-       * để nút Sao chép và chỉ mục tìm kiếm vẫn lấy được đúng những gì tác giả gõ.
+       * Shiki splits code into tokens, each in its own `<span>`, so `pnpm install`
+       * is no longer one contiguous string in the HTML. Keep the original source on `<pre>`
+       * so the Copy button and the search index still get exactly what the author typed.
        */
       pre(node) {
         node.properties["data-code"] = this.source;

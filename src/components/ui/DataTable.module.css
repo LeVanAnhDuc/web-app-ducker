@@ -1,12 +1,12 @@
-/* Bảng dữ liệu — hình khối chép từ .m-tbl trong mockup đã duyệt.
-   Bảng cuộn ngang trong hộp riêng; thân trang không bao giờ cuộn ngang. */
+/* Data table.
+   The table scrolls horizontally in its own box; the page body never does. */
 
 .scroll {
   overflow-x: auto;
   max-width: 100%;
 }
 
-/* Hộp cuộn được nhận tiêu điểm để cuộn bằng bàn phím — phải thấy được. */
+/* The scroll box takes focus for keyboard scrolling — focus must be visible. */
 .scroll:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -15,10 +15,10 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  /* Ô bảng là văn xuôi — sàn 14px của §3. `.scroll` ở trên đã cuộn ngang riêng
-     nên chữ to hơn không làm thân trang cuộn ngang. */
+  /* Table cells are prose — the 14px floor (MASTER.md §2). `.scroll` above scrolls
+     on its own, so larger text never makes the page body scroll sideways. */
   font-size: var(--t-sm);
-  /* Số liệu xếp cột phải thẳng hàng. */
+  /* Numbers in a column must line up. */
   font-variant-numeric: tabular-nums;
 }
 
@@ -32,7 +32,7 @@
   padding-bottom: 8px;
 }
 
-/* Tiêu đề cột là nhãn mono VIẾT HOA; mockup `.g-tbl th` đặt 12px. */
+/* Column headers are UPPERCASE mono labels at 12px. */
 .table th {
   text-align: left;
   font-family: var(--mono);

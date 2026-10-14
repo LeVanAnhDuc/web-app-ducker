@@ -1,6 +1,6 @@
-/* Hộp tìm kiếm — nút bấm chép hình khối từ `.m-search` / `.m-kbd` của mockup.
-   Hộp thoại là vật thể thực sự nổi lên nên đây là một trong số ít chỗ được
-   dùng đổ bóng (design-rules §5). */
+/* Search: the trigger button and the dialog.
+   The dialog is a genuinely floating object, so this is one of the few places
+   allowed a shadow. */
 
 .trigger {
   display: flex;
@@ -12,7 +12,7 @@
   background: var(--surface);
   color: var(--muted);
   font-family: inherit;
-  /* Nhãn nút là văn xuôi, và mockup `.m-search` cũng đặt 14px. */
+  /* The button label is prose, so 14px. */
   font-size: var(--t-sm);
   line-height: 1.7;
   cursor: pointer;
@@ -23,8 +23,8 @@
   color: var(--ink);
 }
 
-/* Phím tắt là nhãn mono chữ thường (`Ctrl K`), không viết hoa toàn phần, nên
-   không hưởng ngoại lệ 11px — nó về bậc nhãn mono 12px. Mockup `.m-kbd` cũng 12px. */
+/* The shortcut is a lowercase mono label (`Ctrl K`), not fully uppercase, so it
+   does not get the 11px exception; it uses the 12px mono label step. */
 .kbd {
   font-family: var(--mono);
   font-size: var(--t-2xs);
@@ -33,7 +33,7 @@
   padding: 1px 4px;
 }
 
-/* -- hộp thoại -- */
+/* -- dialog -- */
 .overlay {
   position: fixed;
   inset: 0;
@@ -41,7 +41,7 @@
   display: flex;
   justify-content: center;
   padding: 12vh 16px 16px;
-  /* Nền mờ lấy từ token, không mã màu tay. */
+  /* Scrim comes from a token, not a hand-written colour. */
   background: color-mix(in srgb, var(--ink) 32%, transparent);
 }
 
@@ -88,7 +88,7 @@
   background: var(--surface-2);
   color: var(--muted);
   font-family: inherit;
-  /* Nhãn nút là văn xuôi — sàn 14px của §3, 13px cũ nằm dưới sàn. */
+  /* The button label is prose: the 14px floor; the old 13px was below it. */
   font-size: var(--t-sm);
   cursor: pointer;
 }
@@ -139,8 +139,8 @@
   line-height: 1.7;
 }
 
-/* Đường dẫn ở vai phụ: mono, cỡ nhỏ, màu --muted. Đường dẫn viết thường nên
-   không hưởng ngoại lệ 11px — bậc nhãn mono là 12px (giống `.slug` của AppCard). */
+/* The path is secondary: mono, small, coloured --muted. Paths are lowercase, so no
+   11px exception; the mono label step is 12px (like AppCard's `.slug`). */
 .resultHref {
   font-family: var(--mono);
   font-size: var(--t-2xs);
@@ -149,7 +149,7 @@
 }
 
 @media (max-width: 720px) {
-  /* Trên điện thoại, nhãn chữ nhường chỗ; giữ nút để vẫn bấm được. */
+  /* On phones the text label gives way; the button stays so it can still be tapped. */
   .trigger {
     gap: 10px;
   }

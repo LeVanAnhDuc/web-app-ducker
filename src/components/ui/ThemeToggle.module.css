@@ -1,13 +1,13 @@
-/* Nút chuyển chủ đề — cùng hình khối với nút chuyển ngôn ngữ của `TopBar`:
-   một hộp viền, các nút dính nhau, nút đang chọn nền mực chữ nền.
-   Mọi màu qua biến CSS, không mã màu trực tiếp (design-rules §2). */
+/* Theme toggle — same shape as the `TopBar` language switcher:
+   one bordered box, buttons joined, the selected one ink-filled with bg text.
+   Every colour goes through a CSS variable, no literal colour codes (MASTER.md §1). */
 
-/* Cố ý KHÔNG `overflow: hidden` như `.langs`: viền tiêu điểm của nút giữa sẽ bị
-   cắt mất, mà đây là đường đi duy nhất của người chỉ dùng bàn phím. Bo góc vì
-   vậy đặt lên từng nút đầu/cuối. */
-/* `inline-flex`, không phải `flex`: cột trái của trang quản trị là flex dọc, nên
-   một hộp `display: flex` cấp khối bị kéo giãn hết chiều ngang và cái viền chạy
-   dài quá ba nút. Đã thấy tận mắt trước khi sửa. */
+/* Deliberately NO `overflow: hidden` like `.langs`: it would clip the middle
+   button's focus ring, the only path for keyboard-only users. The corner radius
+   therefore goes on the first/last button instead. */
+/* `inline-flex`, not `flex`: inside a vertical flex column, a block-level
+   `display: flex` box stretches to the full width and the border runs past the
+   three buttons. Seen by eye before the fix. */
 .group {
   display: inline-flex;
   flex: none;
@@ -15,9 +15,9 @@
   border-radius: 5px;
 }
 
-/* min-width VÀ min-height đều ≥ --tap (28px): WCAG 2.2 SC 2.5.8 đòi 24×24,
-   và e2e `a11y-tap-target.spec.ts` quét cả trang nên số này phải đúng thật.
-   Không khai `font-size`: nút chỉ chứa ký hiệu SVG, không chứa chữ. */
+/* min-width AND min-height both ≥ --tap (28px): WCAG 2.2 SC 2.5.8 requires 24×24,
+   and the e2e `a11y-tap-target.spec.ts` scans the whole page, so this must hold.
+   No `font-size` declared: the button holds only an SVG icon, no text. */
 .button {
   display: inline-flex;
   align-items: center;
@@ -39,7 +39,7 @@
   border-radius: 0 4px 4px 0;
 }
 
-/* Vạch ngăn giữa ba nút — đường kẻ, không phải khoảng trống (design-rules §5). */
+/* Dividers between the three buttons — a rule, not a gap. */
 .button + .button {
   border-left: 1px solid var(--line);
 }
@@ -48,14 +48,14 @@
   color: var(--ink);
 }
 
-/* Nút đang chọn: nền đầy bằng mực, đúng lối `.lang[aria-current="true"]`.
-   Nhấn mạnh đến từ nền đầy chứ không từ hue (design-rules §2). */
+/* Selected button: solid ink fill, same as `.lang[aria-current="true"]`.
+   Emphasis comes from a solid fill, not from hue (MASTER.md §1). */
 .button[aria-pressed="true"] {
   background: var(--ink);
   color: var(--bg);
 }
 
-/* Viền tiêu điểm nổi lên trên hai nút bên cạnh, cùng cách `OrderControls` làm. */
+/* The focus ring rises above the neighbouring buttons. */
 .button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -69,7 +69,7 @@
   height: 14px;
 }
 
-/* Chuyển động chỉ bật cho ai không yêu cầu giảm chuyển động (design-rules §9). */
+/* Motion only for users who have not asked for reduced motion. */
 @media (prefers-reduced-motion: no-preference) {
   .button {
     transition:

@@ -1,5 +1,5 @@
-/* Thẻ ứng dụng — hình khối chép từ `.m-card` trong mockup đã duyệt.
-   Đường kẻ thay cho đổ bóng (design-rules §5): thẻ nằm trong luồng, không nổi lên. */
+/* App card. A hairline instead of a shadow: the card sits in the flow, it
+   does not float. */
 
 .card {
   display: flex;
@@ -18,12 +18,12 @@
   gap: 10px;
 }
 
-/* Tên hiển thị: đây là tiêu đề của thẻ, và chỉ có tên hiển thị ở đây.
+/* Display name: this is the card's title, and only the display name goes here.
 
-   Không khai `font-weight` hay `letter-spacing`: đây là `<h3>`, mà quy tắc
-   `h1,h2,h3` của `globals.css` đã đặt serif 400 và tracking 0. Selector class
-   mạnh hơn selector thẻ, nên `650` và `-0.012em` cũ âm thầm vô hiệu hoá cả hai
-   và ép dấu tiếng Việt vào nhau. */
+   No `font-weight` or `letter-spacing`: this is an `<h3>`, and the `h1,h2,h3`
+   rule in `globals.css` already sets serif 400 and tracking 0. A class selector
+   beats a type selector, so the old `650` and `-0.012em` silently overrode both
+   and squeezed Vietnamese diacritics together. */
 .name {
   margin: 0;
   min-width: 0;
@@ -31,9 +31,9 @@
   line-height: var(--lh-head);
 }
 
-/* `inline-flex` + `min-height` chỉ để đạt ngưỡng bấm: cỡ chữ ở đây cho hộp cao
-   18px, dưới 24px mà WCAG 2.2 SC 2.5.8 đòi. Lỗi này sống qua toàn bộ bộ test cho
-   tới khi `e2e/a11y-tap-target.spec.ts` quét ra. */
+/* `inline-flex` + `min-height` only to reach the tap target: the font size here
+   gives an 18px box, under the 24px WCAG 2.2 SC 2.5.8 requires. This bug survived
+   the whole test suite until `e2e/a11y-tap-target.spec.ts` caught it. */
 .nameLink {
   display: inline-flex;
   align-items: center;
@@ -46,8 +46,8 @@
   color: var(--accent);
 }
 
-/* Slug repo luôn ở vai phụ: mono, cỡ nhỏ, màu --muted (design-rules §1).
-   12px là bậc "nhãn mono" — 10.5px cũ thấp hơn cả ngoại lệ 11px của §3. */
+/* The repo slug is always secondary: mono, small, coloured --muted.
+   12px is the "mono label" step; the old 10.5px was below even the 11px exception. */
 .slug {
   margin: 0;
   font-family: var(--mono);
@@ -72,7 +72,7 @@
 .tagline {
   margin: 0;
   font-size: var(--t-sm);
-  /* Văn xuôi: leading không dưới 1.7 vì dấu tiếng Việt chồng nhau. */
+  /* Prose: leading no lower than 1.7, because Vietnamese diacritics collide. */
   line-height: 1.7;
   color: var(--muted);
   overflow-wrap: break-word;

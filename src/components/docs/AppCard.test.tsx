@@ -9,18 +9,18 @@ const base = {
 };
 
 describe("AppCard", () => {
-  it("tên hiển thị là tiêu đề, slug chỉ là chữ phụ", () => {
+  it("the display name is the heading, the slug is secondary text only", () => {
     render(<AppCard app={base} locale="vi" />);
     expect(screen.getByRole("heading")).toHaveTextContent("Manage Gym");
     expect(screen.getByRole("heading")).not.toHaveTextContent("app-manage-gym");
   });
 
-  it("repo riêng tư thì không dựng liên kết GitHub chết", () => {
+  it("a private repo gets no dead GitHub link", () => {
     render(<AppCard app={{ ...base, isRepoPrivate: true }} locale="vi" />);
     expect(screen.queryByRole("link", { name: /github/i })).toBeNull();
   });
 
-  it("liên kết trỏ tới đường dẫn có tiền tố locale", () => {
+  it("the link points to a locale-prefixed path", () => {
     render(<AppCard app={base} locale="en" />);
     expect(screen.getByRole("link", { name: /Manage Gym/ }))
       .toHaveAttribute("href", "/en/apps/app-manage-gym");

@@ -1,5 +1,5 @@
-/* Callout — hình khối chép từ .m-callout trong mockup đã duyệt.
-   Sắc thái chọn qua [data-tone], không map màu trong JS. */
+/* Callout.
+   Tone is chosen via [data-tone]; colours are not mapped in JS. */
 
 .callout {
   display: block;
@@ -16,7 +16,7 @@
   background: var(--accent-bg);
 }
 
-/* Mockup dùng đúng cặp màu này cho khối "Lưu ý" và "Trạng thái". */
+/* Warning tone borrows the standalone status colour pair. */
 .callout[data-tone="warning"] {
   border-left-color: var(--st-standalone);
   background: var(--st-standalone-bg);
@@ -36,7 +36,7 @@
   color: var(--st-standalone);
 }
 
-/* Văn xuôi: leading không bao giờ dưới 1.7 vì dấu tiếng Việt chồng nhau. */
+/* Prose: leading never below 1.7 because Vietnamese diacritics stack. */
 .body {
   font-size: var(--t-sm);
   line-height: var(--lh-body);

@@ -14,14 +14,14 @@ export type Feature = { title: string; description: string | null; icon: string 
 
 export type FeatureGridProps = {
   features: Feature[];
-  /** Tiêu đề khối, đã dịch. Ví dụ "Tính năng". */
+  /** Block heading, already translated, e.g. "Tính năng". */
   title: string;
 };
 
 /**
- * Lưới tính năng của trang ứng dụng (mockup màn 02, `.m-feats`).
+ * Feature grid of the app page.
  *
- * Không tính năng nào thì không dựng tiêu đề "Tính năng" cho một khối trống.
+ * With no features, no "Tính năng" heading is rendered over an empty block.
  */
 export function FeatureGrid({ features, title }: FeatureGridProps) {
   if (features.length === 0) return null;

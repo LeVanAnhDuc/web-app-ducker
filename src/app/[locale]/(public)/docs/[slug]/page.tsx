@@ -15,20 +15,20 @@ import { attachHeadingIds, renderMarkdown } from "@/lib/markdown";
 import styles from "./page.module.css";
 
 /**
- * Trang hướng dẫn — ba cột theo mockup màn 03.
+ * Guide page — three columns.
  *
- * Cùng khung với trang ứng dụng, khác ở chỗ không có khối tính năng. Cột trái
- * dựng từ đúng cây điều hướng đó, nên một bài hướng dẫn nằm cạnh ứng dụng trong
- * cùng một nhánh vẫn hiện đúng chỗ.
+ * Same frame as the app page, minus the features block. The left column is built
+ * from the same navigation tree, so a guide that sits next to an app in the same
+ * branch still shows up in the right place.
  *
- * ADR-0018: `home` không còn là một slug dành riêng nữa — Task 6 cố tình không
- * viết `content/docs/home.*.mdx`, và FR-20 đã bị gỡ bỏ. Một slug không có file
- * thì `getDocPage` trả `null` và trang này 404 tự nhiên, không cần canh riêng.
+ * ADR-0018: `home` is no longer a reserved slug — `content/docs/home.*.mdx`
+ * deliberately does not exist, and FR-20 has been retired. A slug with no file
+ * makes `getDocPage` return `null` and this page 404s naturally, no special guard.
  */
 
 type PageParams = { params: Promise<{ locale: string; slug: string }> };
 
-/** `listDocSlugs()` liệt kê `content/docs/` qua locale mặc định. */
+/** `listDocSlugs()` lists `content/docs/` through the default locale. */
 export async function generateStaticParams() {
   const docs = await listDocSlugs();
   return locales.flatMap((locale) => docs.map((slug) => ({ locale, slug })));
@@ -45,8 +45,8 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     title: `${page.title} — ${t("brand.name")}`,
     description: page.description ?? undefined,
     alternates: {
-      // Canonical trỏ chính nó; `languages` phát đủ locale đang bật cộng
-      // `x-default` trỏ locale mặc định.
+      // Canonical points at itself; `languages` emits every enabled locale plus
+      // `x-default` pointing at the default locale.
       canonical: `/${locale}/docs/${slug}`,
       languages: {
         ...Object.fromEntries(locales.map((code) => [code, `/${code}/docs/${slug}`])),
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
 
 export default async function DocPage({ params }: PageParams) {
   const { locale, slug } = await params;
-  // Thiếu dòng này trang rơi về kết xuất động (ghi chú bàn giao của Task 12).
+  // Without this line the page falls back to dynamic rendering.
   setRequestLocale(locale);
 
   const t = await getTranslations({ locale });
@@ -68,12 +68,12 @@ export default async function DocPage({ params }: PageParams) {
 
   const currentHref = `/${locale}/docs/${slug}`;
 
-  // Cột trái là con cháu của tab đang mở, đúng như trang ứng dụng — cùng một cây,
-  // cùng một cách dựng. Bài chưa gắn vào cây thì không có cột trái.
+  // The left column is the descendants of the open tab, exactly as on the app page —
+  // same tree, same construction. A page not attached to the tree has no left column.
   const trail = findTrail(await getNavTree(locale), currentHref);
   const sidebarNodes = trail[0]?.children ?? [];
 
-  // "Hướng dẫn · Tích hợp" — đường đi trong cây, bỏ phần tử cuối vì đó là bài này.
+  // "Hướng dẫn · Tích hợp" — the path in the tree, minus the last item since that is this page.
   const crumb =
     trail.length > 1
       ? trail
@@ -84,14 +84,14 @@ export default async function DocPage({ params }: PageParams) {
 
   const fallbackLabel = t("fallback.notice");
 
-  // R3: `page.toc` đã có sẵn (`getDocPage` gọi `buildToc` giúp); chỉ còn phải tự
-  // kết xuất HTML và gắn cùng anchor vào từng `<h2>` đã kết xuất.
+  // R3: `page.toc` is already there (`getDocPage` calls `buildToc`); all that is left
+  // is rendering the HTML and attaching the same anchors to each rendered `<h2>`.
   const html = attachHeadingIds(await renderMarkdown(page.body), page.toc);
 
   return (
     <DocsShell
       sidebar={
-        // `undefined` chứ không phải một `Sidebar` rỗng — xem chú thích ở trang ứng dụng.
+        // `undefined`, not an empty `Sidebar` — see the comment on the app page.
         sidebarNodes.length > 0 ? (
           <Sidebar nodes={sidebarNodes} activeHref={currentHref} label={t("sidebar.label")} />
         ) : undefined
@@ -111,10 +111,10 @@ export default async function DocPage({ params }: PageParams) {
             />
             {page.description ? <p className={styles.lede}>{page.description}</p> : null}
           </header>
-          {/* Ngăn kéo điều hướng của màn hẹp, đặt NGAY ĐẦU BÀI như mockup mục 07 —
-              ngay dưới tiêu đề, trước mục nội dung đầu tiên. Ở màn rộng nó ẩn
-              hoàn toàn vì cột trái đã làm đúng việc đó. Cùng `sidebarNodes`,
-              cùng `NavTree`: một cây, hai chỗ hiện. */}
+          {/* Narrow-screen navigation drawer, placed AT THE TOP OF THE ARTICLE —
+              right under the title, before the first content section. On wide
+              screens it is fully hidden because the left column does that job.
+              Same `sidebarNodes`, same `NavTree`: one tree, shown in two places. */}
           <NavDrawer
             nodes={sidebarNodes}
             activeHref={currentHref}

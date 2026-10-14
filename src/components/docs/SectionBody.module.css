@@ -1,9 +1,8 @@
-/* Một mục nội dung — hình khối chép từ `.m-h2`, `.m-p`, `.m-pre`, `.m-tbl`
-   trong mockup đã duyệt. */
+/* A content section: heading, prose, code blocks and tables. */
 
 .section {
   margin-top: 30px;
-  /* Neo nhảy tới không bị thanh trên cùng che mất tiêu đề. */
+  /* Anchor jumps do not leave the heading hidden under the top bar. */
   scroll-margin-top: 16px;
 }
 
@@ -16,18 +15,18 @@
   font-size: var(--t-xl);
   font-weight: 650;
   line-height: var(--lh-head);
-  /* Không tracking âm ở đây: 21px dưới ngưỡng 24px của design-rules §3, ép lại
-     thì dấu tiếng Việt chồng vào nhau. */
+  /* No negative tracking here: 21px is under the 24px threshold, and tightening
+     it makes Vietnamese diacritics collide. */
   text-wrap: balance;
 }
 
-/* Liên kết neo: mono, muted, chỉ hiện rõ khi rê chuột hoặc có tiêu điểm. */
-/* Liên kết neo ẩn tới khi hover, nhưng nó vẫn là một đích bấm và vẫn nhận được
-   tiêu điểm bàn phím — nên vẫn phải đạt 24x24 (WCAG 2.2 SC 2.5.8). Chữ nhỏ cho
-   hộp thấp, nên cần `min-height`/`min-width` chứ không chỉ padding.
+/* Anchor link: mono, muted, only fully visible on hover or focus. */
+/* The anchor link is hidden until hover, but it is still a tap target and still
+   takes keyboard focus, so it must still reach 24x24 (WCAG 2.2 SC 2.5.8). Small
+   text makes a short box, so it needs `min-height`/`min-width`, not just padding.
 
-   Dấu `#` là ký tự mono chữ thường, không phải nhãn VIẾT HOA, nên không hưởng
-   ngoại lệ 11px của §3 — về bậc nhãn mono 12px. */
+   The `#` is a lowercase mono glyph, not an UPPERCASE label, so it does not get
+   the 11px exception; it uses the 12px mono label step. */
 .anchor {
   display: inline-flex;
   align-items: center;
@@ -50,7 +49,7 @@
   margin: 16px 0;
 }
 
-/* Bảng cuộn ngang trong hộp riêng: thân trang không bao giờ cuộn ngang. */
+/* Tables scroll horizontally in their own box: the page body never scrolls horizontally. */
 .tableScroll {
   overflow-x: auto;
   margin: 16px 0;
@@ -64,15 +63,15 @@
 .tableScroll table {
   width: 100%;
   border-collapse: collapse;
-  /* Ô bảng là văn xuôi — sàn 14px của §3. Bảng đã nằm trong hộp cuộn ngang
-     riêng nên chữ to hơn chỉ làm hộp cuộn dài ra, không đẩy thân trang. */
+  /* Table cells are prose: the 14px floor. The table already sits in its own
+     scroll box, so larger text only lengthens that box, it never pushes the body. */
   font-size: var(--t-sm);
-  /* Số liệu xếp cột phải thẳng hàng. */
+  /* Numbers line up in columns. */
   font-variant-numeric: tabular-nums;
 }
 
-/* Tiêu đề cột là nhãn mono VIẾT HOA. Mockup `.g-tbl th` đặt 12px — dùng bậc
-   nhãn mono thay vì tụt xuống đáy ngoại lệ. */
+/* Column headers are UPPERCASE mono labels. Use the 12px mono label step rather
+   than dropping to the bottom of the exception. */
 .tableScroll th {
   text-align: left;
   padding: 7px 10px;
@@ -93,11 +92,11 @@
   line-height: var(--lh-body);
 }
 
-/* -- văn xuôi kết xuất từ Markdown -------------------------------------- */
+/* -- prose rendered from Markdown --------------------------------------- */
 
-/* Đây là thân bài thật của trang hướng dẫn, nên nó phải ở cỡ thân bài: 16px
-   (§3, và mockup `.m-p` cũng dùng `--t-md`). 14.5px cũ vừa ngoài bậc vừa nhỏ
-   hơn chuẩn đo từ năm trang docs lớn. */
+/* This is the real body of a guide page, so it uses the body size: 16px
+   (`--t-md`). The old 14.5px was both off the scale and smaller than the norm
+   measured across five large docs sites. */
 .prose {
   font-size: var(--t-md);
   line-height: var(--lh-body);
@@ -125,18 +124,18 @@
   line-height: var(--lh-head);
 }
 
-/* `h4` đóng vai nhãn của đoạn, không phải tiêu đề bài (§3), nên nó nhỏ hơn `h3`.
-   Về cỡ thân bài và để `font-weight: 620` ở trên lo phần phân biệt. */
+/* `h4` acts as a paragraph label, not an article heading, so it is smaller than
+   `h3`. It uses the body size and lets `font-weight: 620` above do the distinguishing. */
 .prose h4 {
   font-size: var(--t-md);
 }
 
 /*
- * Phải khai lại `list-style`. Preflight của Tailwind đặt `list-style: none` cho
- * `ul`/`ol`, nên chỉ thêm `padding-left` thì danh sách thụt vào mà không có dấu
- * đầu dòng lẫn số. Lỗi này lộ ra khi xem tận mắt trang Hướng dẫn tích hợp OAuth:
- * mục "Luồng năm bước" mất hết số, tức mất luôn thông tin thứ tự — đúng thứ mà
- * design-rules §"Structure is information" nói phải giữ.
+ * `list-style` must be redeclared. Tailwind's preflight sets `list-style: none` on
+ * `ul`/`ol`, so adding only `padding-left` indents lists with no bullets and no
+ * numbers. This surfaced on a visual check of the OAuth integration guide: the
+ * "five-step flow" section lost all its numbers, and with them the ordering,
+ * exactly the structural information that must be kept.
  */
 .prose ul,
 .prose ol {
@@ -160,7 +159,7 @@
   color: var(--muted);
 }
 
-/* Số của danh sách thứ tự dùng chữ mono để cột số thẳng hàng. */
+/* Ordered-list numbers use mono so the number column lines up. */
 .prose ol > li::marker {
   font-family: var(--mono);
   font-size: var(--t-sm);

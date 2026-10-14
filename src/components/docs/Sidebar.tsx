@@ -4,27 +4,28 @@ import styles from "./Sidebar.module.css";
 
 export type SidebarProps = {
   /**
-   * Con cháu của tab đang mở (mockup v3 mục 02). Nơi gọi lấy bằng
-   * `findTrail(tree, activeHref)[0]?.children` — nút gốc là dải tab trên cùng
-   * nên nó không lặp lại ở đây.
+   * Descendants of the open tab. Callers get them via
+   * `findTrail(tree, activeHref)[0]?.children` — the root node is the top tab
+   * strip, so it is not repeated here.
    */
   nodes: NavTreeNode[];
-  /** Đường dẫn trang đang mở, để đánh dấu mục đang xem. */
+  /** Path of the current page, to mark the entry being viewed. */
   activeHref: string;
-  /** Tên gọi của vùng điều hướng, đã dịch. */
+  /** Accessible name of the navigation region, already translated. */
   label: string;
 };
 
 /**
- * Cột điều hướng trái của trang tài liệu (mockup v3 mục 02).
+ * Left navigation column of a docs page.
  *
- * Chỉ còn là cái vỏ: một `<nav>` có tên gọi, bên trong là `NavTree`. Trước đây
- * component này nhận `groups` phẳng và nơi gọi tự viết cứng hai nhóm "Lõi" và
- * "Ứng dụng vệ tinh"; giờ cấu trúc do CMS quản trong `NavNode` nên không chỗ nào
- * trong mã còn biết tên nhóm nào cả.
+ * Now just a shell: a named `<nav>` wrapping `NavTree`. This component used to
+ * take flat `groups`, with callers hard-coding the two groups "Lõi" and "Ứng
+ * dụng vệ tinh"; now the structure comes from the navigation tree, so no code
+ * knows any group name.
  *
- * Không có nút nào thì không dựng gì — cột trống có viền phải chỉ trông như giao
- * diện hỏng. Đó cũng là đường đi khi chưa có DB hoặc trang chưa được gắn vào cây.
+ * No nodes means nothing is rendered — an empty column with a right border only
+ * looks like a broken interface. That is also the path when a page is not
+ * attached to the tree.
  */
 export function Sidebar({ nodes, activeHref, label }: SidebarProps) {
   if (nodes.length === 0) return null;

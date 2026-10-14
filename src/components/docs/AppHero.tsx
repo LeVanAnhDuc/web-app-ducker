@@ -7,43 +7,42 @@ import { FallbackNotice } from "./FallbackNotice";
 import styles from "./AppHero.module.css";
 
 export type AppHeroLabels = {
-  /** Huy hiệu trạng thái tích hợp, đã dịch. */
+  /** Integration status badge, already translated. */
   status: string;
   privateRepo: string;
   repo: string;
-  /** Câu báo đang đọc bản ngôn ngữ khác. */
+  /** Notice that the reader is seeing another locale's version. */
   fallback: string;
 };
 
 export type AppHeroProps = {
   app: AppDetail;
-  /** Ngôn ngữ người đọc đang yêu cầu, để so với ngôn ngữ thật của nội dung. */
+  /** Locale the reader requested, compared against the content's actual locale. */
   locale: string;
-  /** Đường dẫn phân cấp, ví dụ "Ứng dụng / Lõi". */
+  /** Breadcrumb path, e.g. "Ứng dụng / Lõi". */
   crumb: string;
   labels: AppHeroLabels;
   /**
-   * Khối chèn **ngay dưới dòng mô tả**, trước hàng metadata.
+   * Slot rendered **right below the tagline**, before the metadata row.
    *
-   * Đúng một chỗ dùng: nút mở ngăn kéo điều hướng của màn hẹp (`NavDrawer`),
-   * và mockup mục 07 đặt nó đúng chỗ này — sau tiêu đề, trước nội dung. Đặt
-   * nó ngoài `AppHero`, ngay sau thẻ này, thì ở 375×667 nó rơi xuống y=639,
-   * tức là **dưới mép màn hình** — đo thật, không đoán: hàng metadata
-   * (slug, huy hiệu, chip công nghệ, liên kết repo) cao 114px và đoạn tóm tắt
-   * cao 84px chen vào giữa. Khung điện thoại trong mockup không vẽ hai thứ đó
-   * nên chỗ này không lộ ra trên giấy.
+   * Exactly one use: the narrow-screen navigation drawer button (`NavDrawer`),
+   * which belongs here — after the title, before the content. Placed outside
+   * `AppHero`, right after this element, it lands at y=639 on a 375×667
+   * viewport, i.e. **below the fold** — measured, not guessed: the metadata row
+   * (slug, badges, tech chips, repo link) is 114px tall and the summary 84px,
+   * and both sit in between.
    */
   drawer?: ReactNode;
 };
 
 /**
- * Đầu trang ứng dụng (mockup màn 02).
+ * App page header.
  *
- * Bất biến của design-rules §1: **tên hiển thị là `h1`, slug repo chỉ là chữ
- * mono ở vai phụ trong hàng metadata**. Slug không bao giờ leo lên `h1`.
+ * Invariant: **the display name is the `h1`, the repo slug is secondary mono
+ * text in the metadata row**. The slug never climbs into the `h1`.
  *
- * Repo riêng tư thì không dựng liên kết — bấm vào chỉ ra trang 404 của GitHub —
- * mà thay bằng huy hiệu nói thẳng repo đang riêng tư.
+ * A private repo gets no link — clicking it would only reach GitHub's 404 page —
+ * but a badge stating plainly that the repo is private.
  *
  * ADR-0018: `AppDetail` no longer carries `apiRepoUrl`, `demoUrl` or `summary` —
  * those belonged to the CMS editor, which the next task removes along with the
@@ -52,8 +51,8 @@ export type AppHeroProps = {
  */
 export function AppHero({ app, locale, crumb, labels, drawer }: AppHeroProps) {
   const showRepoLinks = !app.isRepoPrivate;
-  // Trạng thái tích hợp đã là "Repo riêng tư" thì thôi, không dựng hai huy hiệu
-  // nói cùng một chuyện.
+  // If the integration status already says "private repo", skip it: no two
+  // badges saying the same thing.
   const showPrivateBadge = app.isRepoPrivate && app.integration !== "private";
 
   return (

@@ -10,13 +10,13 @@ import { getNavTree } from "@/content";
 import styles from "./layout.module.css";
 
 /**
- * Khung của mọi trang công khai: thanh trên cùng (thương hiệu, ô tìm kiếm, dải
- * tab) và vùng nội dung.
+ * Frame of every public page: the top bar (brand, search box, tab strip) and the
+ * content area.
  *
- * Đây là chỗ đặt `<html>`/`<body>` chứ không phải `src/app/layout.tsx`: thẻ
- * `lang` phải theo locale của đường dẫn, mà layout gốc nằm ngoài `[locale]` nên
- * không đọc được tham số đó. Layout gốc vì vậy chỉ truyền `children` đi tiếp —
- * đúng khuôn mẫu "nhiều layout gốc" của App Router.
+ * `<html>`/`<body>` live here rather than in `src/app/layout.tsx`: the `lang`
+ * attribute must follow the path's locale, and the root layout sits outside
+ * `[locale]` so it cannot read that param. The root layout therefore only passes
+ * `children` through — the App Router "multiple root layouts" pattern.
  */
 export default async function PublicLayout({
   children,
@@ -27,21 +27,20 @@ export default async function PublicLayout({
 }) {
   const { locale } = await params;
 
-  // `[locale]` bắt cả đường dẫn lạ (`/foo/bar`); ngôn ngữ không có trong danh
-  // sách thì đây là trang không tồn tại, không phải trang tiếng Việt.
+  // `[locale]` also catches unknown paths (`/foo/bar`); a locale not in the list
+  // means the page does not exist, not that it is a Vietnamese page.
   if (!locales.includes(locale)) notFound();
 
-  // Bật kết xuất tĩnh cho next-intl: thiếu dòng này mọi trang con rơi về động.
+  // Enables static rendering for next-intl: without this line every child page goes dynamic.
   setRequestLocale(locale);
 
   /**
-   * Điều hướng đến từ **một** nguồn duy nhất: cây dựng từ `content/` (ADR-0018).
+   * Navigation comes from **one** source only: the tree built from `content/` (ADR-0018).
    *
-   * Nút gốc là dải tab trên cùng (spec §3.2): ba nhóm cố định (`content/nav.ts`)
-   * — ứng dụng, trò chơi, tài liệu — với con cháu của apps/docs suy ra từ chính
-   * các file trong `content/`, nên thêm một app/game/doc không bao giờ cần sửa
-   * cây bằng tay. `getNavTree` (`@/content`) không có gì để trả rỗng nữa — không
-   * còn `DATABASE_URL` để thiếu.
+   * The root nodes are the top tab strip: three fixed groups (`content/nav.ts`)
+   * — apps, games, docs — whose descendants are derived from the files in
+   * `content/` themselves, so adding an app/game/doc never requires editing the
+   * tree by hand. `getNavTree` (`@/content`) has no reason to return empty.
    */
   const tree = await getNavTree(locale);
 

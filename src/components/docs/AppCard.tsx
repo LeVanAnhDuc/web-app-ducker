@@ -4,32 +4,32 @@ import type { AppCard as AppCardRow } from "@/content";
 import styles from "./AppCard.module.css";
 
 /**
- * Dữ liệu một thẻ ứng dụng — hình dạng `AppCard` của `@/content` (ADR-0018),
- * đọc thẳng từ frontmatter. Không còn `status` biên tập (nháp / đã đăng / lưu
- * trữ) để lược bỏ: file-backed content không có trạng thái đó (R14).
+ * Data for one app card — the `AppCard` shape from `@/content` (ADR-0018),
+ * read straight from frontmatter. There is no editorial `status` to filter out:
+ * file-backed content has no such state (R14).
  */
 export type AppCardData = AppCardRow;
 
 export type AppCardProps = {
   app: AppCardData;
-  /** Tiền tố ngôn ngữ của mọi liên kết trong thẻ. */
+  /** Locale prefix for every link in the card. */
   locale: string;
   /**
-   * Nhãn huy hiệu trạng thái, **đã dịch**. Không có nhãn thì không dựng huy
-   * hiệu: thà thiếu huy hiệu còn hơn hiện tên khoá kỹ thuật cho người đọc.
+   * Status badge label, **already translated**. No label means no badge: better
+   * a missing badge than showing the reader a technical key.
    */
   statusLabel?: string;
-  /** Nhãn liên kết repo, đã dịch. Ví dụ "Xem trên GitHub". */
+  /** Repo link label, already translated, e.g. "View on GitHub". */
   repoLabel?: string;
   /** Group prefix for the name link; defaults to `/${locale}/apps`. Games pass `/${locale}/games`. */
   basePath?: string;
 };
 
 /**
- * Thẻ ứng dụng trong lưới trang chủ. Hình khối chép từ `.m-card` của mockup.
+ * App card in the home page grid.
  *
- * Bất biến quan trọng nhất (design-rules §1): **tên hiển thị là tiêu đề, slug
- * repo chỉ là chữ mono phụ**. Slug không bao giờ được leo vào thẻ tiêu đề.
+ * The most important invariant: **the display name is the heading, the repo
+ * slug is secondary mono text only**. The slug never climbs into the heading.
  *
  * `role="listitem"` is an ARIA role, not a tag change: the card stays an
  * `<article>` (unchanged CSS), but the card grids it sits in (home, `/apps`)
@@ -37,7 +37,7 @@ export type AppCardProps = {
  */
 export function AppCard({ app, locale, statusLabel, repoLabel, basePath }: AppCardProps) {
   const detailHref = `${basePath ?? `/${locale}/apps`}/${app.slug}`;
-  // Repo riêng tư thì không dựng liên kết: bấm vào chỉ ra trang 404 của GitHub.
+  // A private repo gets no link: clicking it would only reach GitHub's 404 page.
   const repoHref = !app.isRepoPrivate && app.repoUrl ? app.repoUrl : null;
 
   return (

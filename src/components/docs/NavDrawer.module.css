@@ -1,21 +1,20 @@
-/* Ngăn kéo điều hướng của màn hẹp — hình khối chép từ `.mb-drawer` trong mockup
-   mục 07 ("Trên điện thoại"). Mọi màu qua biến CSS (design-rules §2). */
+/* Navigation drawer for narrow screens. Every colour goes through a CSS variable. */
 
-/* Màn rộng đã có cột trái thật, nên nút này KHÔNG tồn tại về mặt thị giác ở đó.
-   Ngưỡng 980px trùng đúng ngưỡng `DocsShell` gập ba cột thành một, để không có
-   khoảng rộng nào vừa mất cột trái vừa chưa có nút. */
+/* Wide screens already have a real left column, so this button does NOT exist
+   visually there. The 980px breakpoint matches the one where `DocsShell` collapses
+   three columns into one, so no width loses the left column without gaining the button. */
 .trigger {
   display: none;
 }
 
-/* `.mb-drawer`: một hàng viền mảnh, `☰` bên trái, mũi xổ bên phải. */
+/* A thin bordered row: `☰` on the left, the disclosure arrow on the right. */
 @media (max-width: 980px) {
   .trigger {
     display: flex;
     align-items: center;
     gap: 8px;
     width: 100%;
-    /* Ngưỡng bấm WCAG 2.2 SC 2.5.8 (design-rules §3). */
+    /* WCAG 2.2 SC 2.5.8 tap target. */
     min-height: var(--tap);
     margin: 0 0 20px;
     padding: 9px 12px;
@@ -57,19 +56,19 @@
   color: var(--muted);
 }
 
-/* Lớp phủ. `position: fixed` nên nó không nong thân trang ra — thân trang không
-   bao giờ cuộn ngang (design-rules §9). */
+/* Overlay. `position: fixed`, so it never widens the page body; the body never
+   scrolls horizontally. */
 .overlay {
   position: fixed;
   inset: 0;
   z-index: 50;
   display: flex;
-  /* Nền mờ lấy từ token, không mã màu tay — cùng công thức `SearchDialog` dùng,
-     để hai hộp thoại của trang công khai phủ nền giống hệt nhau. */
+  /* Scrim comes from a token, not a hand-written colour: the same formula `SearchDialog`
+     uses, so the public site's two dialogs dim the page identically. */
   background: color-mix(in srgb, var(--ink) 32%, transparent);
 }
 
-/* Ngăn kéo trượt vào từ mép trái, đúng phía mà cột trái vẫn đứng ở màn rộng. */
+/* The drawer slides in from the left edge, the side where the left column stands on wide screens. */
 .panel {
   display: flex;
   flex-direction: column;
@@ -90,7 +89,7 @@
   }
 }
 
-/* Chuyển động tiết chế, và tắt hẳn khi người dùng đã nói là không muốn (§9). */
+/* Restrained motion, switched off entirely when the user has asked for less. */
 @media (prefers-reduced-motion: reduce) {
   .panel {
     animation: none;
@@ -106,8 +105,8 @@
   border-bottom: 1px solid var(--line);
 }
 
-/* `<p>` chứ không phải `<h2>`: khai `font-weight` trong module css sẽ thắng quy
-   tắc serif-400 của `globals.css` cho `h1,h2,h3` (bẫy số 6 trong status.md). */
+/* `<p>` rather than `<h2>`: a `font-weight` in a CSS module would beat the serif-400
+   rule `globals.css` sets for `h1,h2,h3` (a known trap). */
 .title {
   flex: 1 1 auto;
   min-width: 0;
@@ -144,7 +143,7 @@
   outline-offset: 2px;
 }
 
-/* Cây dài hơn màn hình thì cuộn trong lòng ngăn kéo, không kéo theo cả trang. */
+/* A tree taller than the screen scrolls inside the drawer, not the whole page. */
 .body {
   flex: 1 1 auto;
   min-height: 0;

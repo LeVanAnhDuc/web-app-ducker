@@ -1,25 +1,25 @@
 /**
- * So khớp mờ phía trình duyệt cho hộp tìm kiếm. Chạy trên chỉ mục đã tải sẵn
- * nên không gọi mạng khi người dùng gõ.
+ * Client-side fuzzy matching for the search box. It runs over the preloaded index,
+ * so typing never hits the network.
  */
 
 import { slugify } from "@/lib/slug";
 import type { SearchDoc } from "@/lib/search-index";
 
 /**
- * Chuẩn hoá cả truy vấn lẫn nội dung về cùng một dạng ASCII không dấu.
+ * Normalises both the query and the content to the same diacritic-free ASCII form.
  *
- * Dùng lại `slugify` là cố ý: tìm không dấu là yêu cầu thật, người Việt gõ
- * nhanh gần như luôn bỏ dấu ("tap luyen"), và nếu hai bên bỏ dấu bằng hai cơ
- * chế khác nhau thì sớm muộn cũng lệch. Kết quả có dạng `tap-luyen`, dấu gạch
- * nối đóng luôn vai trò ranh giới từ.
+ * Reusing `slugify` is deliberate: diacritic-insensitive search is a real need —
+ * Vietnamese users typing fast almost always drop the marks ("tap luyen") — and if
+ * the two sides stripped them with different mechanisms they would drift sooner or
+ * later. The result looks like `tap-luyen`; the hyphen doubles as the word boundary.
  */
 const normalize = (input: string): string => slugify(input);
 
-/** Số kết quả trả về mặc định — đủ cho danh sách gợi ý, không làm nghẽn giao diện. */
+/** Default number of results — enough for a suggestion list without clogging the UI. */
 const DEFAULT_LIMIT = 20;
 
-/** Điểm cho từng kiểu khớp; tiêu đề nặng hơn thân bài. */
+/** Score per kind of match; the title weighs more than the body. */
 const SCORE = {
   titleExact: 100,
   titlePrefix: 60,
@@ -34,8 +34,8 @@ function scoreDoc(doc: SearchDoc, phrase: string, tokens: string[]): number {
   const text = normalize(doc.text);
   const haystack = `${title}-${text}`;
 
-  // Mọi từ trong truy vấn đều phải xuất hiện ở đâu đó, nếu không thì kết quả
-  // sẽ loãng: gõ hai từ mà chỉ khớp một từ là gợi ý sai.
+  // Every word of the query must appear somewhere, otherwise the results get
+  // diluted: typing two words and matching only one is a wrong suggestion.
   if (!tokens.every((token) => haystack.includes(token))) return 0;
 
   let score = 0;
@@ -54,9 +54,9 @@ function scoreDoc(doc: SearchDoc, phrase: string, tokens: string[]): number {
 }
 
 /**
- * Trả về các mục khớp, sắp theo điểm giảm dần. Truy vấn rỗng trả mảng rỗng chứ
- * không trả toàn bộ chỉ mục: hộp tìm kiếm chưa gõ gì mà đã đổ ra mọi trang thì
- * người dùng không đọc được gì, và cũng che mất trạng thái "chưa có kết quả".
+ * Returns the matching entries, sorted by descending score. An empty query returns
+ * an empty array, not the whole index: a search box that dumps every page before
+ * anything is typed is unreadable, and it hides the "no results yet" state.
  */
 export function fuzzyMatch(
   query: string,
@@ -72,7 +72,7 @@ export function fuzzyMatch(
   return docs
     .map((doc, index) => ({ doc, index, score: scoreDoc(doc, phrase, tokens) }))
     .filter((hit) => hit.score > 0)
-    // Điểm bằng nhau thì giữ nguyên thứ tự chỉ mục cho kết quả ổn định.
+    // Equal scores keep index order so the results are stable.
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, Math.max(0, limit))
     .map((hit) => hit.doc);

@@ -5,24 +5,24 @@ import en from "./messages/en.json";
 import vi from "./messages/vi.json";
 
 /**
- * Chuỗi giao diện nạp tĩnh, không `import()` động theo biến.
+ * UI strings are loaded statically, never through a variable dynamic `import()`.
  *
- * Đây là tầng "sửa bằng deploy" của spec §9.1: bộ chuỗi đi cùng code nên bundler
- * phải thấy được cả hai file lúc build. Nạp động theo tên locale sẽ khiến chúng
- * rơi khỏi bundle edge và trang hiện ra trống chữ.
+ * The strings ship with the code, so the bundler must see both files at build
+ * time. Loading them dynamically by locale name drops them from the edge bundle
+ * and the page renders without text.
  */
 const messagesByLocale: Record<string, typeof vi> = { vi, en };
 
 export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
 
-  // `requestLocale` có thể là `undefined` (trang ngoài `[locale]`) hoặc một giá
-  // trị rác vì `[locale]` bắt luôn cả đường dẫn lạ. Cả hai đều lùi về mặc định.
+  // `requestLocale` can be `undefined` (a page outside `[locale]`) or a junk
+  // value, because `[locale]` also catches stray paths. Both fall back to the default.
   const locale =
     requested && locales.includes(requested) ? requested : defaultLocale;
 
-  // Locale mới thêm vào bảng `Locale` mà chưa kịp có file chuỗi giao diện thì
-  // dùng tạm bộ mặc định — nội dung vẫn ra đúng ngôn ngữ, chỉ nhãn nút là chưa.
+  // A locale added to `locales` before it has a UI strings file borrows the
+  // default set — content still renders in the right language, only the button labels lag.
   const messages = messagesByLocale[locale] ?? vi;
 
   return { locale, messages };

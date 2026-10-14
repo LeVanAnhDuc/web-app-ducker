@@ -7,13 +7,13 @@ import { fuzzyMatch } from "@/lib/fuzzy";
 import type { SearchDoc } from "@/lib/search-index";
 import styles from "./SearchDialog.module.css";
 
-/** Đủ dài cho một danh sách gợi ý đọc hết trong một màn hình. */
+/** Long enough for a suggestion list that fits on one screen. */
 const MAX_RESULTS = 8;
 
 /**
- * Trạng thái chỉ mục. Khởi điểm là `loading`: trước khi mở hộp thoại thì không
- * ai nhìn thấy trạng thái này, nên không cần thêm một nhánh `idle` chỉ để mô tả
- * "chưa gọi mạng" — việc đã gọi hay chưa do `loadedFor` giữ.
+ * Index state. It starts as `loading`: nobody sees this state before the dialog
+ * opens, so there is no need for an `idle` branch just to describe "not fetched
+ * yet" — whether the fetch has happened is tracked by `loadedFor`.
  */
 type IndexState =
   | { phase: "loading" }
@@ -21,19 +21,20 @@ type IndexState =
   | { phase: "error" };
 
 export type SearchDialogProps = {
-  /** Chỉ mục tách theo ngôn ngữ; cũng là tiền tố của mọi `href` trong kết quả. */
+  /** The index is split per locale; also the prefix of every `href` in the results. */
   locale: string;
 };
 
 /**
- * Hộp tìm kiếm của thanh trên cùng.
+ * Search box of the top bar.
  *
- * Chỉ mục tải **lười**: `GET /api/search-index/<locale>` chỉ chạy khi người dùng
- * mở hộp thoại lần đầu. Tải sẵn lúc dựng trang sẽ bắt mọi người đọc trả giá
- * băng thông cho một tính năng phần lớn không dùng tới.
+ * The index loads **lazily**: `GET /api/search-index/<locale>` runs only when the
+ * user first opens the dialog. Preloading it on page render would make every
+ * reader pay the bandwidth for a feature most never use.
  *
- * Lọc bằng `fuzzyMatch` phía trình duyệt nên gõ không gọi mạng, và tìm không dấu
- * ("tap luyen" ra "tập luyện") hoạt động đúng như người Việt gõ nhanh.
+ * Filtering runs in the browser via `fuzzyMatch`, so typing makes no network
+ * calls, and diacritic-free search ("tap luyen" finds "tập luyện") works the way
+ * Vietnamese users type quickly.
  */
 export function SearchDialog({ locale }: SearchDialogProps) {
   const t = useTranslations("search");
@@ -44,23 +45,23 @@ export function SearchDialog({ locale }: SearchDialogProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
-  /** Ngôn ngữ đã tải xong chỉ mục — cũng là chốt chặn để không gọi mạng lần hai. */
+  /** Locale whose index has loaded — also the guard against fetching twice. */
   const loadedFor = useRef<string | null>(null);
   const resultsId = useId();
 
-  /** Lần mở sau một lần hỏng phải xoá thông báo lỗi cũ, nếu không nó nằm lại chình ình. */
+  /** Opening after a failure must clear the old error message, or it lingers in plain view. */
   const clearStaleError = useCallback(() => {
     setIndex((current) => (current.phase === "error" ? { phase: "loading" } : current));
   }, []);
 
   const close = useCallback(() => {
     setOpen(false);
-    // Trả tiêu điểm về nút đã mở hộp thoại: đóng bằng Esc mà tiêu điểm rơi về
-    // <body> thì người dùng bàn phím mất chỗ đứng.
+    // Return focus to the button that opened the dialog: if closing with Esc
+    // drops focus to <body>, keyboard users lose their place.
     triggerRef.current?.focus();
   }, []);
 
-  // Phím tắt ⌘K / Ctrl+K, đúng như nhãn ghi trên nút.
+  // ⌘K / Ctrl+K shortcut, exactly as the button label says.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -74,7 +75,7 @@ export function SearchDialog({ locale }: SearchDialogProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [clearStaleError]);
 
-  // Tải chỉ mục đúng một lần, và chỉ khi hộp thoại đã mở.
+  // Load the index exactly once, and only once the dialog is open.
   useEffect(() => {
     if (!open || loadedFor.current === locale) return;
     loadedFor.current = locale;
@@ -90,8 +91,9 @@ export function SearchDialog({ locale }: SearchDialogProps) {
         if (!cancelled) setIndex({ phase: "ready", docs });
       })
       .catch(() => {
-        // Hỏng thì nói rõ và chỉ cách thử lại, không nuốt lỗi để ô tìm kiếm
-        // đứng im không hiểu vì sao. Mở chốt để lần mở sau gọi lại thật.
+        // On failure, say so and show how to retry rather than swallowing the
+        // error and leaving the search box inexplicably idle. Release the guard
+        // so the next open really fetches again.
         loadedFor.current = null;
         if (!cancelled) setIndex({ phase: "error" });
       });
@@ -101,7 +103,7 @@ export function SearchDialog({ locale }: SearchDialogProps) {
     };
   }, [open, locale]);
 
-  // Mở tới đâu, tiêu điểm tới đó.
+  // Focus follows the opening.
   useEffect(() => {
     if (open) inputRef.current?.focus();
   }, [open]);

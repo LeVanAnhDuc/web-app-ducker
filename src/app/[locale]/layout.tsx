@@ -4,17 +4,16 @@ import { setRequestLocale } from "next-intl/server";
 import { locales } from "@/i18n/locales";
 
 /**
- * Layout của tầng `[locale]` — **không** dựng `<html>`/`<body>`.
+ * Layout of the `[locale]` level — it does **not** render `<html>`/`<body>`.
  *
- * Nó tồn tại vì một lý do duy nhất: đặt ngôn ngữ của yêu cầu ở tầng cao nhất
- * còn đọc được `params.locale`. Nhờ vậy `not-found.tsx` cùng tầng lấy được
- * ngôn ngữ từ cache của next-intl thay vì phải đọc header — đọc header thì cả
- * `/vi` và `/vi/apps` rơi về kết xuất động, vì trang 404 cũng được dựng cùng
- * lúc với chúng.
+ * It exists for one reason only: to set the request locale at the highest level
+ * that can still read `params.locale`. That lets the sibling `not-found.tsx` get
+ * the locale from next-intl's cache instead of reading headers — reading headers
+ * would push both `/vi` and `/vi/apps` into dynamic rendering, because the 404
+ * page is built alongside them.
  *
- * `<html>`/`<body>` vẫn nằm ở layout của nhóm route `(public)`, đúng khuôn mẫu
- * "nhiều layout gốc" của App Router. Nhóm `(admin)` từng là root layout thứ
- * hai ở tầng này; nó đã bị xoá cùng toàn bộ khu quản trị (ADR-0019).
+ * `<html>`/`<body>` stay in the `(public)` route group's layout, the App Router
+ * "multiple root layouts" pattern.
  */
 export default async function LocaleLayout({
   children,
@@ -25,8 +24,8 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
 
-  // Ngôn ngữ lạ thì không đặt gì cả: next-intl lùi về locale mặc định, và
-  // layout của nhóm route mới là nơi quyết định đó có phải trang 404 hay không.
+  // An unknown locale sets nothing: next-intl falls back to the default locale,
+  // and the route group's layout is what decides whether this is a 404.
   if (locales.includes(locale)) setRequestLocale(locale);
 
   return children;

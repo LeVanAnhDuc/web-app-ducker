@@ -1,16 +1,16 @@
 import styles from "./CodeBlock.module.css";
 
 export type CodeBlockProps = {
-  /** HTML đã tô màu và đã sanitize, do `renderMarkdown` sinh ra. */
+  /** Highlighted, sanitized HTML produced by `renderMarkdown`. */
   html: string;
-  /** Tên gọi của hộp cuộn, dùng làm accessible name. */
+  /** Name of the scroll box, used as its accessible name. */
   label?: string;
   className?: string;
 };
 
 /**
- * Bọc khối mã đã tô màu trong một hộp cuộn ngang riêng.
- * `html` phải đi qua sanitize ở tầng markdown trước khi tới đây.
+ * Wraps a highlighted code block in its own horizontal scroll box.
+ * `html` must be sanitized in the markdown layer before it gets here.
  */
 export function CodeBlock({ html, label = "Khối mã", className }: CodeBlockProps) {
   return (

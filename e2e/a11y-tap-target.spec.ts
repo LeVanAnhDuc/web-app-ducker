@@ -1,11 +1,12 @@
 // e2e/a11y-tap-target.spec.ts
 //
-// Quét mọi phần tử bấm được và fail nếu còn cái nào nhỏ hơn 24×24 (WCAG 2.2 SC
-// 2.5.8), cộng kiểm thân trang không cuộn ngang ở 375px.
+// Scans every clickable element and fails if any is smaller than 24×24 (WCAG 2.2
+// SC 2.5.8), plus checks the page body does not scroll horizontally at 375px.
 //
-// Đây là hai lỗi giao diện duy nhất trong bộ này **đo được bằng máy**. Phần còn lại
-// — tiêu đề có đúng serif không, dấu tiếng Việt có vỡ không, khối mã có màu không —
-// CSS không khớp thì trình duyệt im lặng, nên chỉ mắt người bắt được. Xem
+// These are the only two UI faults in this suite that a **machine can measure**.
+// The rest — is the heading really serif, do Vietnamese diacritics break, is the
+// code block coloured — fail silently in the browser when CSS does not match, so
+// only a human eye catches them. See
 // `docs/02-requirements/nfr.md` NFR-A11Y-03.
 import { test, expect } from "@playwright/test";
 
@@ -17,17 +18,17 @@ const PAGES = [
   // ("ducker-id"). Same trap as the comment below: a wrong slug 404s and still
   // passes every assertion here, which would be this test lying green.
   "/vi/apps/web-app-ducker-id",
-  // Slug thật của trang hướng dẫn tích hợp OAuth. Kế hoạch viết
-  // `/vi/docs/tich-hop-oauth` — slug đó không tồn tại, và một trang 404 vẫn đạt mọi
-  // assertion dưới đây, nên sai chỗ này là bộ test tự báo xanh mà không kiểm gì.
+  // The real slug of the OAuth integration guide. An earlier plan wrote
+  // `/vi/docs/tich-hop-oauth` — that slug does not exist, and a 404 page still passes
+  // every assertion below, so getting this wrong makes the suite go green testing nothing.
   "/vi/docs/oauth-integration-guide",
 ];
 
 for (const path of PAGES) {
-  test(`vùng bấm ở ${path} đạt 24x24 (WCAG 2.2 SC 2.5.8)`, async ({ page }) => {
+  test(`tap targets on ${path} reach 24x24 (WCAG 2.2 SC 2.5.8)`, async ({ page }) => {
     const response = await page.goto(path);
-    // Chốt chống tự lừa: trang không tồn tại thì không có gì để đo.
-    expect(response?.status(), `${path} phải trả 200`).toBe(200);
+    // Guard against self-deception: a page that does not exist has nothing to measure.
+    expect(response?.status(), `${path} must return 200`).toBe(200);
 
     const small = await page.evaluate(() => {
       const sel = "a, button, input, select, [role=button]";
@@ -47,10 +48,10 @@ for (const path of PAGES) {
     expect(small, JSON.stringify(small, null, 2)).toEqual([]);
   });
 
-  test(`thân trang không cuộn ngang ở 375px — ${path}`, async ({ page }) => {
+  test(`page body does not scroll horizontally at 375px — ${path}`, async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 800 });
     const response = await page.goto(path);
-    expect(response?.status(), `${path} phải trả 200`).toBe(200);
+    expect(response?.status(), `${path} must return 200`).toBe(200);
 
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -60,17 +61,18 @@ for (const path of PAGES) {
 }
 
 // ---------------------------------------------------------------------------
-// Ngăn kéo điều hướng của màn hẹp (mockup mục 07).
+// Narrow-screen navigation drawer.
 //
-// Hai test trên chỉ đo trạng thái ĐÓNG: nút mở nằm trong luồng nên nó được quét,
-// còn mọi thứ bên trong ngăn kéo thì chưa tồn tại trong DOM. Mở ra rồi đo lại là
-// cách duy nhất biết cây trong ngăn kéo có đạt ngưỡng bấm hay không.
+// The two tests above only measure the CLOSED state: the open button is in the flow
+// so it gets scanned, but nothing inside the drawer exists in the DOM yet. Opening it
+// and measuring again is the only way to know whether the drawer's tree meets the
+// tap-target threshold.
 // ---------------------------------------------------------------------------
 
-/** Trang chắc chắn có cột trái, nên chắc chắn có ngăn kéo ở 375px. */
+/** A page that certainly has a left column, so certainly has a drawer at 375px. */
 const DRAWER_PAGE = "/vi/apps/web-app-ducker-id";
 
-test("ở 375px điều hướng tới được ngay đầu bài, không phải cuộn", async ({ page }) => {
+test("at 375px navigation is reachable at the top of the article, without scrolling", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });
   const response = await page.goto(DRAWER_PAGE);
   expect(response?.status()).toBe(200);
@@ -78,16 +80,16 @@ test("ở 375px điều hướng tới được ngay đầu bài, không phải 
   const trigger = page.getByRole("button", { name: /Điều hướng tài liệu/ });
   await expect(trigger).toBeVisible();
 
-  // "Không phải cuộn" đo được: đỉnh nút phải nằm trong khung nhìn đầu tiên.
+  // "Without scrolling" is measurable: the button's top must be inside the first viewport.
   const box = await trigger.boundingBox();
-  expect(box, "nút mở ngăn kéo phải có hình").not.toBeNull();
+  expect(box, "drawer open button must have a box").not.toBeNull();
   expect(box!.y).toBeLessThan(800);
 
-  // Cột trái không được vừa ẩn vừa chiếm chỗ: đóng thì nó không che nội dung nào.
+  // The left column must not be both hidden and taking space: closed, it covers no content.
   expect(await page.locator("[role=dialog]").count()).toBe(0);
 });
 
-test("ngăn kéo mở ra đủ ngưỡng bấm và đóng được bằng Esc — 375px", async ({ page }) => {
+test("open drawer meets the tap-target threshold and closes with Esc — 375px", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });
   const response = await page.goto(DRAWER_PAGE);
   expect(response?.status()).toBe(200);
@@ -116,7 +118,7 @@ test("ngăn kéo mở ra đủ ngưỡng bấm và đóng được bằng Esc �
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
 
-  // Tiêu điểm trở về nút mở, không rơi về <body>.
+  // Focus returns to the open button, not to <body>.
   const focused = await page.evaluate(
     () => document.activeElement?.getAttribute("aria-haspopup") ?? "",
   );

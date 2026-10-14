@@ -10,14 +10,14 @@ import { CodeBlock } from "@/components/ui/CodeBlock";
 import styles from "./SectionBody.module.css";
 
 export type MarkdownBodyLabels = {
-  /** Tên gọi hộp cuộn của khối mã, cho trình đọc màn hình. */
+  /** Accessible name of a code block's scroll box, for screen readers. */
   code: string;
-  /** Tên gọi hộp cuộn của bảng. */
+  /** Accessible name of a table's scroll box. */
   table: string;
 };
 
 export type MarkdownBodyProps = {
-  /** HTML đã kết xuất và sanitize từ `renderMarkdown`, headings đã gắn id. */
+  /** Rendered, sanitized HTML from `renderMarkdown`, with ids on headings. */
   html: string;
   labels: MarkdownBodyLabels;
 };
