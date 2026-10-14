@@ -2,24 +2,24 @@ import type { TocItem } from "@/content";
 import styles from "./Toc.module.css";
 
 export type TocProps = {
-  /** Mục lục đã dựng sẵn ở tầng dữ liệu; anchor đã được kiểm không trùng. */
+  /** Table of contents built in the data layer; anchors already checked for uniqueness. */
   items: TocItem[];
-  /** Tiêu đề khối, đã dịch. Ví dụ "Trong trang". */
+  /** Block heading, already translated, e.g. "Trong trang". */
   title: string;
 };
 
 /**
- * Mục lục trong trang — cột phải ở màn rộng, khối gập ở đầu bài trên điện thoại
- * (mockup màn 02 và màn 07).
+ * On-page table of contents — the right column on wide screens, a collapsible
+ * block at the top of the article on phones.
  *
- * Hai quyết định đáng ghi lại:
+ * Two decisions worth recording:
  *
- * 1. **Không mục nào thì không dựng gì cả.** Khung rỗng kèm tiêu đề "Trong
- *    trang" trông như mục lục hỏng chứ không như trang ngắn.
- * 2. **`<details open>` chứ không phải hai bản sao cho hai khổ màn.** Cùng một
- *    danh sách liên kết dùng cho cả hai bố cục, nên không có chuyện bản này có
- *    mục mà bản kia thiếu. Mặc định mở: người đọc thấy ngay cấu trúc bài, và
- *    trang vẫn dùng được khi JavaScript chưa tải.
+ * 1. **No items means nothing is rendered.** An empty frame headed "Trong
+ *    trang" looks like a broken table of contents, not a short page.
+ * 2. **`<details open>` rather than two copies for two screen sizes.** One list
+ *    of links serves both layouts, so one copy can never have an entry the other
+ *    lacks. Open by default: the reader sees the article's structure at once,
+ *    and the page still works before JavaScript loads.
  */
 export function Toc({ items, title }: TocProps) {
   if (items.length === 0) return null;

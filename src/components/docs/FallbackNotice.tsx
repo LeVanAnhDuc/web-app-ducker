@@ -1,33 +1,34 @@
 import styles from "./FallbackNotice.module.css";
 
 export type FallbackNoticeProps = {
-  /** Ngôn ngữ thật của nội dung đang hiện. */
+  /** Actual locale of the content being shown. */
   shownLocale: string;
-  /** Ngôn ngữ người đọc đang yêu cầu (locale của đường dẫn). */
+  /** Locale the reader requested (the path's locale). */
   wantedLocale: string;
-  /** Câu thông báo, đã dịch. */
+  /** Notice text, already translated. */
   label: string;
 };
 
 /**
- * Ghi chú "đang đọc bản ngôn ngữ khác".
+ * "You are reading another locale's version" notice.
  *
- * Đặt cạnh **từng** mục và **từng** tính năng chứ không phải một lần ở đầu
- * trang: bản dịch hoàn thiện không đều, nên một trang có thể vừa có mục đã dịch
- * vừa có mục chưa. Báo ở đầu trang sẽ nói sai về phần lớn nội dung bên dưới.
+ * Placed next to **each** section and **each** feature rather than once at the
+ * top of the page: translations are completed unevenly, so one page can mix
+ * translated and untranslated sections. A page-level notice would misstate most
+ * of the content below it.
  *
- * Đúng ngôn ngữ thì không dựng gì cả — thêm một dòng "bản dịch đầy đủ" vào mọi
- * mục chỉ làm loãng trang.
+ * When the locale matches, nothing is rendered — adding a "fully translated"
+ * line to every section would only dilute the page.
  */
 export function FallbackNotice({ shownLocale, wantedLocale, label }: FallbackNoticeProps) {
   if (shownLocale === wantedLocale) return null;
 
   return (
-    // Không đặt `lang` ở đây: câu thông báo viết bằng ngôn ngữ người đọc chọn,
-    // chỉ phần nội dung bên dưới mới thuộc `shownLocale`.
+    // No `lang` here: the notice is written in the reader's chosen language;
+    // only the content below belongs to `shownLocale`.
     <p className={styles.notice}>
-      {/* Mã ngôn ngữ là dấu hiệu nhìn, câu chữ bên cạnh mới là nội dung —
-          trình đọc màn hình chỉ cần đọc câu. */}
+      {/* The locale code is a visual cue; the text beside it is the content —
+          screen readers only need the text. */}
       <span className={styles.code} aria-hidden="true">
         {shownLocale}
       </span>

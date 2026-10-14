@@ -10,13 +10,13 @@ const items = [
 ];
 
 describe("WireDiagram", () => {
-  it("hiện tên hiển thị, không hiện slug", () => {
+  it("shows the display name, not the slug", () => {
     render(<WireDiagram items={items} coreLabel="IDMS" />);
     expect(screen.getByText("Calculate Badminton")).toBeInTheDocument();
     expect(screen.queryByText("app-calculate-badminton")).toBeNull();
   });
 
-  it("nét liền cho đã nối, nét đứt cho dự kiến, không nét cho độc lập", () => {
+  it("solid line for connected, dashed for planned, no line for standalone", () => {
     const { container } = render(<WireDiagram items={items} coreLabel="IDMS" />);
     const leads = container.querySelectorAll("[data-integration]");
     expect(leads[0].getAttribute("data-integration")).toBe("core");
@@ -24,12 +24,12 @@ describe("WireDiagram", () => {
     expect(leads[2].getAttribute("data-integration")).toBe("standalone");
   });
 
-  it("luôn kèm chú giải — kiểu nét vô nghĩa nếu không giải thích", () => {
+  it("always includes a legend — line styles mean nothing unexplained", () => {
     render(<WireDiagram items={items} coreLabel="IDMS" />);
     expect(screen.getByRole("list", { name: /chú giải/i })).toBeInTheDocument();
   });
 
-  it("danh sách rỗng vẫn dựng được, không đổ vỡ", () => {
+  it("renders an empty list without crashing", () => {
     const { container } = render(<WireDiagram items={[]} coreLabel="IDMS" />);
     expect(container.querySelectorAll("[data-integration]")).toHaveLength(0);
   });

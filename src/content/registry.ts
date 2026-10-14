@@ -43,18 +43,22 @@ export async function listGames(locale: string, root?: string): Promise<AppCard[
   return listEntries("games", locale, root);
 }
 
-export type AppSearchEntry = { slug: string; name: string; body: string };
+export type EntrySearchEntry = { slug: string; name: string; body: string };
 
 /**
- * Every app's slug, name and body for one locale, in a single `readGroup` pass.
+ * Every entry's slug, name and body in one group for one locale, in a single
+ * `readGroup` pass.
  *
- * Exists for the search index (I-3): building it by calling `getApp` once per app
- * from `listApps` re-reads the whole `apps` directory on every call (`readOne` is
- * `readGroup` plus a `find`), which is one directory scan and read per app on top
- * of the scan `listApps` itself already did. This reuses that single scan instead.
+ * Exists for the search index (I-3): building it by calling `getEntry` once per
+ * entry re-reads the whole directory on every call (`readOne` is `readGroup` plus
+ * a `find`), which is one directory scan and read per entry. This is one scan.
  */
-export async function listAppsWithBody(locale: string, root?: string): Promise<AppSearchEntry[]> {
-  return (await readGroup("apps", locale, root)).map((e) => ({
+export async function listEntriesWithBody(
+  group: EntryGroup,
+  locale: string,
+  root?: string,
+): Promise<EntrySearchEntry[]> {
+  return (await readGroup(group, locale, root)).map((e) => ({
     slug: e.data.slug!,
     name: e.data.name,
     body: e.body,

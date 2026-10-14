@@ -6,46 +6,48 @@ import { findTrail, type NavTreeNode } from "@/content/nav-tree";
 import styles from "./NavTree.module.css";
 
 export type NavTreeProps = {
-  /** Nút cùng cấp ở tầng ngoài nhất. Rỗng thì không dựng gì cả. */
+  /** Sibling nodes at the outermost level. Empty renders nothing. */
   nodes: NavTreeNode[];
-  /** Đường dẫn trang đang mở, đã kèm tiền tố locale — trùng khít với `href` của lá. */
+  /** Path of the current page, locale prefix included — matches a leaf's `href` exactly. */
   activeHref: string;
 };
 
 /**
- * Cây điều hướng công khai — hình khối chép từ `.nav-l`/`.nav-i`/`.nav-c`
- * trong mockup v3 mục 02.
+ * Public navigation tree.
  *
- * Hai loại phần tử, cố ý khác thẻ HTML:
+ * Two kinds of element, deliberately different HTML tags:
  *
- * - **Nút chứa là `<button>`**, không phải liên kết. `CONTAINER` không có URL
- *   riêng (spec §5): bấm vào nó chỉ mở/đóng. Dựng thành `<a href="#">` thì trình
- *   đọc màn hình đọc "liên kết", người dùng bấm và chờ một trang mới không bao
- *   giờ tới, còn Ctrl+click mở một tab trống.
- * - **Nút lá là `<a>`**, không toggle. Nó đi tới đâu đó thật, nên phải mở được
- *   bằng tab mới, copy được địa chỉ, và hiện ra ở thanh trạng thái khi trỏ tới.
+ * - **A container node is a `<button>`**, not a link. A `CONTAINER` has no URL
+ *   of its own: clicking it only expands/collapses. Rendered as `<a href="#">`,
+ *   a screen reader announces "link", the user clicks and waits for a page that
+ *   never comes, and Ctrl+click opens an empty tab.
+ * - **A leaf node is an `<a>`**, not a toggle. It really goes somewhere, so it
+ *   must open in a new tab, have a copyable address, and show in the status bar
+ *   on hover.
  *
- * `aria-expanded` là thứ duy nhất nói cho trình đọc màn hình biết nhánh đang mở
- * hay đóng; mũi `▾ ▸` chỉ dành cho mắt nên để `aria-hidden`.
+ * `aria-expanded` is the only thing telling a screen reader whether a branch is
+ * expanded; the `▾ ▸` arrows are for the eye only, hence `aria-hidden`.
  */
 export function NavTree({ nodes, activeHref }: NavTreeProps) {
   /**
-   * Chỉ lưu **những gì người dùng tự bấm**, không lưu toàn bộ trạng thái mở.
+   * Stores **only what the user clicked**, not the full expanded state.
    *
-   * Trạng thái hiệu dụng = ý người dùng nếu có, còn lại là "nhánh chứa trang đang
-   * xem thì mở". Nhờ vậy chuyển sang trang khác trong cùng cây (điều hướng phía
-   * client, component không bị dựng lại) vẫn tự mở đúng nhánh mới, mà nhánh người
-   * dùng vừa cố tình đóng thì không tự bật lên lại.
+   * Effective state = the user's choice if any, otherwise "the branch holding the
+   * current page is expanded". So moving to another page in the same tree
+   * (client-side navigation, the component is not remounted) still expands the
+   * right new branch, while a branch the user deliberately collapsed does not
+   * pop open again.
    */
   const [toggled, setToggled] = useState<Record<string, boolean>>({});
 
   /**
-   * Tiền tố riêng cho `id` của mỗi danh sách con.
+   * A per-instance prefix for each child list's `id`.
    *
-   * Cây này nay dựng **hai lần trên cùng một trang**: một lần ở cột trái, một
-   * lần trong ngăn kéo của màn hẹp. Lấy thẳng `nav-${node.id}` thì hai bản dùng
-   * trùng `id`, và `aria-controls` của bản này trỏ vào phần tử của bản kia —
-   * DOM sai luật, mà trình đọc màn hình thì đi theo `id` tìm thấy trước.
+   * This tree is now rendered **twice on the same page**: once in the left
+   * column, once in the narrow-screen drawer. Using plain `nav-${node.id}`, both
+   * copies would share `id`s and one copy's `aria-controls` would point at the
+   * other's element — invalid DOM, and screen readers follow whichever `id` they
+   * find first.
    */
   const uid = useId();
 
@@ -60,8 +62,8 @@ export function NavTree({ nodes, activeHref }: NavTreeProps) {
     <ul className={styles.list} data-depth={depth} id={id}>
       {siblings.map((node) => {
         if (node.kind !== "CONTAINER") {
-          // `href` rỗng ở một lá là dữ liệu mà CHECK constraint đã cấm. Bỏ mục đó
-          // đi: một liên kết dẫn tới `undefined` trông như dữ liệu thật.
+          // A leaf with an empty `href` is invalid data. Drop the entry: a link
+          // to `undefined` looks like real data.
           if (node.href === null) return null;
 
           const current = node.href === activeHref;
@@ -70,7 +72,7 @@ export function NavTree({ nodes, activeHref }: NavTreeProps) {
               <a
                 className={styles.item}
                 href={node.href}
-                // Mục đang xem đánh dấu bằng aria-current; viên nền chỉ là hệ quả.
+                // The current entry is marked with aria-current; the pill is only a consequence.
                 aria-current={current ? "page" : undefined}
               >
                 <span className={styles.marker} aria-hidden="true" />

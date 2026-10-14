@@ -2,27 +2,29 @@ import type { ReactNode } from "react";
 import styles from "./DocsShell.module.css";
 
 export type DocsShellProps = {
-  /** Cột trái. Bỏ trống thì lưới không chừa chỗ cho nó. */
+  /** Left column. When omitted, the grid reserves no space for it. */
   sidebar?: ReactNode;
-  /** Cột giữa: nội dung bài. */
+  /** Middle column: the article content. */
   main: ReactNode;
-  /** Cột phải. Bỏ trống thì lưới không chừa chỗ cho nó. */
+  /** Right column. When omitted, the grid reserves no space for it. */
   toc?: ReactNode;
 };
 
 /**
- * Bố cục ba cột của mọi trang tài liệu: điều hướng · nội dung · mục lục
- * (mockup màn 02 và 03). Dùng chung cho trang ứng dụng lẫn trang hướng dẫn.
+ * Three-column layout of every docs page: navigation · content · table of
+ * contents. Shared by app pages and guide pages.
  *
- * Số cột do dữ liệu quyết định, không cố định: trang không có mục lục thì lưới
- * chỉ hai cột chứ không chừa một dải trống 178px bên phải. Nơi gọi truyền
- * `undefined` khi không có gì để dựng — `Toc` tự trả `null` khi rỗng, nhưng
- * phần tử vẫn tồn tại trong cây nên lưới không tự biết điều đó.
+ * The data decides the column count, not a fixed layout: a page with no table
+ * of contents gets a two-column grid rather than an empty 178px strip on the
+ * right. Callers pass `undefined` when there is nothing to render — `Toc`
+ * returns `null` when empty, but the element still exists in the tree, so the
+ * grid cannot tell on its own.
  *
- * Tới 980px cả ba gập thành một cột: mục lục lên đầu bài, còn cột điều hướng
- * ẩn hẳn — nơi gọi dựng `NavDrawer` ngay đầu bài thay cho nó (design-rules §9,
- * mockup mục 07). Prop `sidebar` vẫn truyền như cũ ở mọi bề rộng; chỉ CSS quyết
- * định bề nào thấy nó.
+ * At 980px all three collapse into one column: the table of contents moves to
+ * the top of the article and the navigation column is hidden entirely — the
+ * caller renders `NavDrawer` at the top of the article in its place. The
+ * `sidebar` prop is passed the same at every width; only CSS decides which
+ * widths show it.
  */
 export function DocsShell({ sidebar, main, toc }: DocsShellProps) {
   return (

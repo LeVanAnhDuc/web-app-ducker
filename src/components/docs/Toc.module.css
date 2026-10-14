@@ -1,17 +1,17 @@
-/* Mục lục — hình khối chép từ `.m-toc` (màn 02) và `.mb-toc` (màn 07).
-   Vị trí trong lưới và cách gập cột do `DocsShell` lo; ở đây chỉ là dáng vẻ. */
+/* Table of contents.
+   Grid placement and column collapsing belong to `DocsShell`; this is appearance only. */
 
 .toc {
   padding: 30px 18px;
-  /* Viền trái nằm trên ô cột của `DocsShell` — xem `Sidebar.module.css`. */
+  /* The left border sits on `DocsShell`'s column cell; see `Sidebar.module.css`. */
 }
 
 .box {
   margin: 0;
 }
 
-/* Nhãn mono VIẾT HOA — ngoại lệ duy nhất của §3, đáy của nó là 11px chứ không
-   phải 10px. */
+/* UPPERCASE mono label, the one exception to the 14px floor; its minimum is 11px,
+   not 10px. */
 .summary {
   margin-bottom: 12px;
   font-family: var(--mono);
@@ -37,10 +37,10 @@
   display: block;
   padding: 4px 0 4px 11px;
   border-left: 2px solid var(--line-soft);
-  /* Mục lục là văn xuôi: tiêu đề mục viết thường, có dấu. `--t-sm` đúng là bậc
-     "mục lục" của §3, và mockup `.m-toc a` cũng ở 14px. */
+  /* The TOC is prose: lowercase section titles with diacritics. `--t-sm` is the
+     TOC step of the type scale (14px). */
   font-size: var(--t-sm);
-  /* Tiêu đề mục là văn xuôi có dấu tiếng Việt — leading không dưới 1.7. */
+  /* Section titles are prose with Vietnamese diacritics: leading no lower than 1.7. */
   line-height: 1.7;
   color: var(--muted);
   text-decoration: none;
@@ -51,7 +51,7 @@
   border-left-color: var(--accent);
 }
 
-/* Một cột: mục lục thành khối gập có viền ngay đầu bài (mockup màn 07). */
+/* One column: the TOC becomes a bordered collapsible block at the top of the article. */
 @media (max-width: 980px) {
   .toc {
     padding: 0;
@@ -63,7 +63,7 @@
     padding: 11px 13px;
   }
 
-  /* Đóng lại thì tiêu đề không còn khoảng trống thừa phía dưới. */
+  /* When closed, the heading has no leftover space below it. */
   .box:not([open]) .summary {
     margin-bottom: 0;
   }

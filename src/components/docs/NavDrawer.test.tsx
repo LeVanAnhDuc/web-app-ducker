@@ -23,28 +23,28 @@ const nodes = [
   },
 ];
 
-/** Nhãn mặc định tiếng Việt, đúng như component tự đặt khi nơi gọi không truyền. */
+/** The Vietnamese default label, exactly what the component uses when the caller passes none. */
 const OPEN_LABEL = "Điều hướng tài liệu";
 
 function renderDrawer() {
   return render(<NavDrawer nodes={nodes} activeHref="/vi/apps/match-cv" />);
 }
 
-/** Nút `☰` — lấy theo nhãn chứ không theo lớp CSS. */
+/** The `☰` button — queried by label, not by CSS class. */
 function trigger() {
   return screen.getByRole("button", { name: new RegExp(OPEN_LABEL) });
 }
 
 describe("NavDrawer", () => {
-  it("khi đóng thì chỉ có nút mở, không có hộp thoại nào che nội dung", () => {
+  it("when closed, there is only the open button and no dialog covering the content", () => {
     renderDrawer();
     expect(trigger()).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("dialog")).toBeNull();
-    // Cây chưa dựng: đóng mà vẫn có liên kết nghĩa là nó đang nằm đâu đó trong trang.
+    // Tree not rendered: a link while closed would mean it is hiding somewhere in the page.
     expect(screen.queryByRole("link", { name: "Match CV" })).toBeNull();
   });
 
-  it("bấm nút mở thì ngăn kéo hiện ra, và cây bên trong là NavTree thật", () => {
+  it("clicking the open button shows the drawer, and the tree inside is the real NavTree", () => {
     renderDrawer();
     fireEvent.click(trigger());
 
@@ -52,8 +52,8 @@ describe("NavDrawer", () => {
     expect(dialog).toHaveAttribute("aria-modal", "true");
     expect(trigger()).toHaveAttribute("aria-expanded", "true");
 
-    // Nút chứa là <button> toggle và nút lá là <a> — đúng hợp đồng của NavTree,
-    // nên đây là cây thật chứ không phải một danh sách chép tay.
+    // Container nodes are toggle <button>s and leaf nodes are <a> — NavTree's
+    // contract, so this is the real tree rather than a hand-copied list.
     expect(screen.getByRole("button", { name: /Vệ tinh/ })).toHaveAttribute(
       "aria-expanded",
       "true",
@@ -64,32 +64,32 @@ describe("NavDrawer", () => {
     );
   });
 
-  it("Esc đóng ngăn kéo", () => {
+  it("Esc closes the drawer", () => {
     renderDrawer();
     fireEvent.click(trigger());
     fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("bấm ra ngoài đóng ngăn kéo", () => {
+  it("clicking outside closes the drawer", () => {
     const { container } = renderDrawer();
     fireEvent.click(trigger());
 
-    // Lớp phủ là cha của panel; bấm đúng vào nó mới đóng.
+    // The overlay is the panel's parent; only a click on it closes.
     const overlay = screen.getByRole("dialog").parentElement!;
     fireEvent.mouseDown(overlay);
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(container.querySelector("[role=dialog]")).toBeNull();
   });
 
-  it("bấm TRONG panel thì KHÔNG đóng — nếu không thì mở nhánh nào cũng sập ngăn kéo", () => {
+  it("a click INSIDE the panel does NOT close it — otherwise expanding any branch would collapse the drawer", () => {
     renderDrawer();
     fireEvent.click(trigger());
     fireEvent.mouseDown(screen.getByRole("dialog"));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  it("đóng bằng Esc thì tiêu điểm trở về nút mở", () => {
+  it("closing with Esc returns focus to the open button", () => {
     renderDrawer();
     const button = trigger();
     fireEvent.click(button);
@@ -97,7 +97,7 @@ describe("NavDrawer", () => {
     expect(document.activeElement).toBe(button);
   });
 
-  it("đóng bằng nút Đóng thì tiêu điểm cũng trở về nút mở", () => {
+  it("closing with the Close button also returns focus to the open button", () => {
     renderDrawer();
     const button = trigger();
     fireEvent.click(button);
@@ -105,13 +105,13 @@ describe("NavDrawer", () => {
     expect(document.activeElement).toBe(button);
   });
 
-  it("mở tới đâu tiêu điểm tới đó — nút Đóng nhận tiêu điểm ngay", () => {
+  it("focus follows the opening — the Close button receives focus immediately", () => {
     renderDrawer();
     fireEvent.click(trigger());
     expect(document.activeElement).toBe(screen.getByRole("button", { name: "Đóng" }));
   });
 
-  it("bẫy tiêu điểm: Tab ở phần tử cuối vòng về phần tử đầu", () => {
+  it("focus trap: Tab on the last element wraps to the first", () => {
     renderDrawer();
     fireEvent.click(trigger());
 
@@ -126,7 +126,7 @@ describe("NavDrawer", () => {
     expect(document.activeElement).toBe(first);
   });
 
-  it("bẫy tiêu điểm: Shift+Tab ở phần tử đầu vòng về phần tử cuối", () => {
+  it("focus trap: Shift+Tab on the first element wraps to the last", () => {
     renderDrawer();
     fireEvent.click(trigger());
 
@@ -140,7 +140,7 @@ describe("NavDrawer", () => {
     expect(document.activeElement).toBe(last);
   });
 
-  it("Tab ở giữa vòng thì để trình duyệt tự đi, không cướp tiêu điểm", () => {
+  it("Tab in the middle of the cycle is left to the browser, focus is not hijacked", () => {
     renderDrawer();
     fireEvent.click(trigger());
 
@@ -150,19 +150,19 @@ describe("NavDrawer", () => {
     middle.focus();
 
     const handled = fireEvent.keyDown(dialog, { key: "Tab" });
-    // `fireEvent` trả false khi preventDefault đã được gọi.
+    // `fireEvent` returns false when preventDefault was called.
     expect(handled).toBe(true);
     expect(document.activeElement).toBe(middle);
   });
 
-  it("ký hiệu là ☰ chứ không phải emoji (design-rules §5)", () => {
+  it("the symbol is ☰, not an emoji", () => {
     renderDrawer();
     expect(trigger().textContent).toContain("☰");
-    // Dải emoji cơ bản: không ký tự nào của nút được rơi vào đó.
+    // Basic emoji range: no character of the button may fall in it.
     expect(trigger().textContent).not.toMatch(/[\u{1F300}-\u{1FAFF}]/u);
   });
 
-  it("nhận nhãn qua prop, không tự dịch bên trong", () => {
+  it("takes labels via props rather than translating internally", () => {
     render(
       <NavDrawer
         nodes={nodes}
@@ -175,12 +175,12 @@ describe("NavDrawer", () => {
     expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument();
   });
 
-  it("không nút nào thì không dựng cả nút mở", () => {
+  it("renders not even the open button when there are no nodes", () => {
     const { container } = render(<NavDrawer nodes={[]} activeHref="/vi" />);
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("không viết mã màu trực tiếp", () => {
+  it("writes no hard-coded colour values", () => {
     const { container } = renderDrawer();
     fireEvent.click(trigger());
     expect(container.innerHTML).not.toMatch(/#[0-9a-f]{6}/i);

@@ -1,12 +1,12 @@
-/* Trang chủ — bố cục chép từ mockup màn 01: hero (eyebrow → h1 → lede → sơ đồ
-   đấu nối → chú giải) rồi tới lưới thẻ ứng dụng. */
+/* Home page: hero (eyebrow → h1 → lede → wire diagram → legend), then the grid
+   of application cards. */
 
 .hero {
   padding: 52px 44px 44px;
   border-bottom: 1px solid var(--line);
 }
 
-/* Nhãn mono viết hoa, giãn chữ — bậc 11.5px của design-rules §3. */
+/* Uppercase, letter-spaced mono label (MASTER.md §2). */
 .eyebrow {
   margin: 0 0 16px;
   font-family: var(--mono);
@@ -16,10 +16,10 @@
   color: var(--muted);
 }
 
-/* Đậm và tracking âm để `globals.css` quyết — quy tắc `h1,h2,h3` ở đó đặt serif
-   weight 400 và `letter-spacing: 0` (mockup `.m-h1`). Khai lại ở đây thì thắng vì
-   selector class mạnh hơn selector thẻ, nên `700` và `-0.025em` cũ đã âm thầm vô
-   hiệu hoá cả hai — đúng kiểu lỗi CSS không test nào bắt được. */
+/* Weight and tracking are left to `globals.css` — its `h1,h2,h3` rule sets serif
+   weight 400 and `letter-spacing: 0`. Redeclaring them here wins, because a class
+   selector beats a type selector, so the old `700` and `-0.025em` silently
+   overrode both — exactly the kind of CSS bug no test catches. */
 .title {
   margin: 0 0 14px;
   max-width: 20ch;
@@ -38,12 +38,12 @@
 
 .wire {
   margin-top: 38px;
-  /* Sơ đồ tự co ở màn hẹp, nhưng nếu nội dung vẫn tràn thì cuộn trong hộp
-     riêng chứ không đẩy cả thân trang cuộn ngang (design-rules §5, §9). */
+  /* The diagram shrinks on narrow screens, but if it still overflows it scrolls
+     in its own box rather than making the whole page body scroll sideways. */
   overflow-x: auto;
 }
 
-/* -- màn hình trống: lời mời hành động, không phải chỗ than thở -- */
+/* -- empty state: a call to action, not a complaint -- */
 .empty {
   margin-top: 38px;
   max-width: 58ch;
@@ -67,7 +67,7 @@
   color: var(--muted);
 }
 
-/* -- lưới thẻ ứng dụng -- */
+/* -- application card grid -- */
 .apps {
   padding: 40px 44px 48px;
 }
@@ -101,7 +101,7 @@
   }
 }
 
-/* Đáp ứng tới 375px: lưới gập thành một cột, tiêu đề lùi một bậc cỡ chữ. */
+/* Responsive down to 375px: the grid collapses to one column, the title drops one type step. */
 @media (max-width: 720px) {
   .hero {
     padding: 32px 16px 28px;

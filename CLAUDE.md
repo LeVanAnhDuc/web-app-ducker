@@ -52,8 +52,8 @@ those subjects, so the two preview commands above reproduce exactly what CI publ
 deploys to Vercel from `main` only once they pass
 ([ADR-0022](docs/decisions/0022-deploy-from-actions-not-vercel-git.md)). The deploy step
 uses `vercel build`, never `next build` — only Vercel's own build honours
-`outputFileTracingIncludes`, and without it two route handlers ship green and return
-empty.
+`outputFileTracingIncludes`, and without it the search-index route handler ships green
+and returns empty.
 
 The build needs no environment at all: there is no database, no secret, and no object
 store to configure. `.env.example` lists only two optional, non-secret variables.

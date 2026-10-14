@@ -1,16 +1,16 @@
 /**
- * Tiện ích thuần cho slug và anchor. Không phụ thuộc vào bất cứ tầng nào khác.
+ * Pure helpers for slugs and anchors. No dependency on any other layer.
  */
 
-/** Dải dấu phụ tổ hợp mà NFD tách ra (U+0300..U+036F). */
+/** The combining diacritic range that NFD splits out (U+0300..U+036F). */
 const COMBINING_MARKS = new RegExp("[\\u0300-\\u036f]", "g");
 
 /**
- * Chuẩn hoá một chuỗi tiếng Việt thành slug ASCII an toàn cho URL.
+ * Normalises a Vietnamese string into a URL-safe ASCII slug.
  *
- * `đ` và `Đ` phải được thay TRƯỚC khi `normalize("NFD")`: chúng là chữ cái
- * riêng trong Unicode, không phải "d + dấu", nên NFD không tách được và bước
- * bỏ dấu phụ bên dưới sẽ bỏ sót chúng.
+ * `đ` and `Đ` must be replaced BEFORE `normalize("NFD")`: they are separate
+ * letters in Unicode, not "d + mark", so NFD cannot split them and the
+ * diacritic-stripping step below would miss them.
  */
 export function slugify(input: string): string {
   return input
@@ -19,8 +19,8 @@ export function slugify(input: string): string {
     .normalize("NFD")
     .replace(COMBINING_MARKS, "")
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-") // khoảng trắng và ký tự lạ gộp thành một gạch nối
-    .replace(/^-+|-+$/g, ""); // không để gạch nối thừa ở hai đầu
+    .replace(/[^a-z0-9]+/g, "-") // whitespace and odd characters collapse into one hyphen
+    .replace(/^-+|-+$/g, ""); // no stray hyphens at either end
 }
 
 /**
@@ -52,14 +52,14 @@ export function createAnchorAllocator(): (title: string) => string {
   };
 }
 
-/** Anchor của một mục dùng chung quy tắc với slug để `#...` luôn khớp mục lục. */
+/** A section's anchor follows the same rule as slugs so `#...` always matches the table of contents. */
 export function toAnchor(title: string): string {
   return slugify(title);
 }
 
 /**
- * Anchor trùng nhau khiến mục lục và liên kết `#` nhảy sai chỗ. Ràng buộc này
- * không diễn đạt được bằng schema DB (xem spec §6.4) nên phải kiểm ở đây.
+ * Duplicate anchors make the table of contents and `#` links jump to the wrong
+ * place. No schema can express this constraint, so it is checked here.
  */
 export function ensureUniqueAnchors(
   anchors: string[],

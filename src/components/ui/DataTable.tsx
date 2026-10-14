@@ -2,14 +2,14 @@ import type { ReactNode } from "react";
 import styles from "./DataTable.module.css";
 
 export type DataTableProps = {
-  /** Nội dung bảng: `<caption>`, `<thead>`, `<tbody>`. */
+  /** Table content: `<caption>`, `<thead>`, `<tbody>`. */
   children: ReactNode;
-  /** Tên gọi của hộp cuộn, dùng làm accessible name. */
+  /** Name of the scroll box, used as its accessible name. */
   label?: string;
   className?: string;
 };
 
-/** Bảng dữ liệu, luôn nằm trong hộp cuộn ngang riêng. */
+/** Data table, always inside its own horizontal scroll box. */
 export function DataTable({ children, label = "Bảng dữ liệu", className }: DataTableProps) {
   return (
     <div

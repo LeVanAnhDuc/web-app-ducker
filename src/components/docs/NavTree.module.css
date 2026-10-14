@@ -1,6 +1,5 @@
-/* Cây điều hướng công khai — hình khối chép từ `.nav-l`, `.nav-i`, `.nav-i.ct`,
-   `.nav-i.on` và `.nav-c` của mockup v3 mục 02. Mọi màu qua biến CSS
-   (design-rules §2). */
+/* Public navigation tree: levels, items, container items, the active item and the
+   disclosure cell. Every colour goes through a CSS variable. */
 
 .list {
   list-style: none;
@@ -8,17 +7,17 @@
   padding: 0;
 }
 
-/* `.nav-l .nav-l`: mỗi tầng lùi vào 12px và có một kẻ dọc mảnh. Kẻ dọc là thứ
-   duy nhất nói "những mục này thuộc mục trên" khi nhánh mở sâu ba tầng. */
+/* Nested levels: each level indents 12px and gets a thin vertical rule. The rule is
+   the only thing saying "these items belong to the one above" three levels deep. */
 .list .list {
   margin-left: 12px;
   padding-left: 9px;
   border-left: 1px solid var(--line-soft);
 }
 
-/* `.nav-i` dùng chung cho cả nút chứa (`<button>`) và nút lá (`<a>`) để hai loại
-   nằm thẳng hàng nhau. `min-height: var(--tap)` là ngưỡng bấm WCAG 2.2 SC 2.5.8
-   (design-rules §3) — sidebar là chỗ bấm nhiều nhất của cả trang. */
+/* Shared by container items (`<button>`) and leaves (`<a>`) so both line up.
+   `min-height: var(--tap)` is the WCAG 2.2 SC 2.5.8 tap target; the sidebar is the
+   most-tapped place on the whole page. */
 .item {
   display: flex;
   align-items: center;
@@ -28,11 +27,11 @@
   padding: 7px 10px;
   border: 0;
   border-radius: 6px;
-  /* Sai khác có chủ ý so với bậc cỡ §3: mockup đặt `.nav-i` ở 15px, và mockup
-     là bản đã duyệt nên nó thắng. */
+  /* A deliberate departure from the type scale: the approved design sets nav items
+     at 15px, and the approved design wins. */
   font-family: inherit;
   font-size: 15px;
-  /* Nhãn có dấu tiếng Việt, leading không dưới 1.7 (design-rules §3). */
+  /* Labels carry Vietnamese diacritics: leading no lower than 1.7. */
   line-height: 1.7;
   text-align: left;
   color: var(--ink-2);
@@ -45,34 +44,34 @@
   background: var(--fill-soft);
 }
 
-/* Tiêu điểm bàn phím phải thấy được ở mọi phần tử tương tác (design-rules §9). */
+/* Keyboard focus must be visible on every interactive element. */
 .item:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* `.nav-i.ct`: nút chứa đậm hơn và mực đầy, vì nó là đầu mục của cả một nhánh. */
+/* Container item: bolder and full ink, because it heads a whole branch. */
 .container {
   color: var(--ink);
   font-weight: 640;
   cursor: pointer;
 }
 
-/* `.nav-i.on`: mục đang xem là **viên nền đầy**, không phải vạch màu bên cạnh.
-   Nền đầy đọc được ở cả ba trạng thái chủ đề và không phụ thuộc vào hue. */
+/* Active item: a **filled pill**, not a coloured bar beside it.
+   A filled background reads in all three theme states and does not depend on hue. */
 .item[aria-current="page"] {
   background: var(--fill);
   color: var(--ink);
   font-weight: 560;
 }
 
-/* `.nav-c`: ô mũi xổ. Nút lá để trống ô này chứ không bỏ hẳn — bỏ thì nhãn của
-   lá lệch sang trái so với nhãn của nút chứa cùng tầng.
+/* Disclosure cell. Leaves keep this cell empty rather than dropping it; dropping it
+   would shift a leaf's label left of the container labels on the same level.
 
-   Mockup đặt `.nav-c` ở 11px, nhưng 11px là ngoại lệ dành riêng cho nhãn mono
-   VIẾT HOA (§3) và ô này chứa một hình mũi `▾ ▸` chứ không phải chữ để đọc —
-   nó không thuộc diện ngoại lệ. Về bậc nhãn mono 12px. Ô vẫn rộng 11px: mũi xổ
-   ở 12px chỉ chiếm khoảng 7px nên không tràn, và nhãn không bị xô sang phải. */
+   The design had this cell at 11px, but 11px is reserved for UPPERCASE mono labels
+   and this cell holds an arrow glyph `▾ ▸`, not text to read, so it does not
+   qualify. It uses the 12px mono label step. The cell stays 11px wide: at 12px the
+   arrow takes about 7px, so it does not overflow and the label is not pushed right. */
 .marker {
   flex: none;
   width: 11px;

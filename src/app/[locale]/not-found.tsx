@@ -3,19 +3,19 @@ import { getLocale, getTranslations } from "next-intl/server";
 import styles from "./status.module.css";
 
 /**
- * Trang 404 cho mọi đường dẫn dưới `[locale]`.
+ * 404 page for every path under `[locale]`.
  *
- * **Tự dựng `<html>`/`<body>`.** File này nằm ở tầng `[locale]`, còn
- * `<html>`/`<body>` lại nằm trong `(public)/layout.tsx` — layout đó không phải
- * tổ tiên của ranh giới not-found, nên khi `notFound()` được gọi thì nó không
- * chạy. Không tự dựng thì trang này ra HTML không có phần thân.
+ * **Renders its own `<html>`/`<body>`.** This file sits at the `[locale]` level,
+ * while `<html>`/`<body>` live in `(public)/layout.tsx` — that layout is not an
+ * ancestor of the not-found boundary, so it does not run when `notFound()` is
+ * called. Without rendering them here the page would be HTML with no body.
  *
- * `notFound()` không truyền tham số đường dẫn, nên ngôn ngữ lấy từ next-intl.
- * `[locale]/layout.tsx` đã gọi `setRequestLocale(locale)` nên `getLocale()` đọc
- * từ cache, không chạm header — chạm header thì `/vi` và `/vi/apps` rơi về kết
- * xuất động, vì trang 404 dựng cùng lúc với chúng. Locale không có trong danh
- * sách thì next-intl lùi về mặc định: vẫn đọc được, chỉ là không đúng ngôn ngữ
- * người gõ.
+ * `notFound()` passes no route params, so the locale comes from next-intl.
+ * `[locale]/layout.tsx` has already called `setRequestLocale(locale)`, so
+ * `getLocale()` reads from cache without touching headers — touching headers would
+ * push `/vi` and `/vi/apps` into dynamic rendering, because the 404 page is built
+ * alongside them. An unknown locale makes next-intl fall back to the default:
+ * still readable, just not in the language the user typed.
  */
 export default async function LocaleNotFound() {
   const locale = await getLocale();

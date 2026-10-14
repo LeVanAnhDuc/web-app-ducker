@@ -8,10 +8,10 @@ import { listApps, listGames } from "@/content";
 import styles from "./page.module.css";
 
 /**
- * Trang chủ dựng tĩnh cho từng ngôn ngữ (mockup màn 01).
+ * Home page, statically rendered per locale.
  *
- * Danh sách ứng dụng và trò chơi đọc thẳng từ `content/` (ADR-0018): registry của
- * hệ sinh thái — ứng dụng trước (với nhánh IdP trong sơ đồ đấu nối), trò chơi sau.
+ * The app and game lists are read straight from `content/` (ADR-0018): the
+ * ecosystem registry — apps first (with the IdP branch in the wire diagram), games after.
  */
 
 type PageParams = { params: Promise<{ locale: string }> };
@@ -85,8 +85,8 @@ export default async function HomePage({ params }: PageParams) {
             />
           </div>
         ) : (
-          // Chưa có ứng dụng nào thì không vẽ sơ đồ rỗng kèm chú giải cho một
-          // thứ không tồn tại — nói thẳng còn thiếu gì và thêm ở đâu.
+          // With no apps yet, do not draw an empty diagram with a legend for something
+          // that does not exist — say plainly what is missing and where to add it.
           <div className={styles.empty}>
             <p className={styles.emptyTitle}>{t("home.emptyTitle")}</p>
             <p className={styles.emptyBody}>{t("home.emptyBody")}</p>

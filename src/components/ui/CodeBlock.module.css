@@ -1,5 +1,5 @@
-/* Khối mã — hình khối chép từ .m-pre trong mockup đã duyệt.
-   Cuộn ngang nằm trong hộp riêng: thân trang không bao giờ cuộn ngang. */
+/* Code block.
+   Horizontal scroll stays in its own box: the page body never scrolls sideways. */
 
 .scroll {
   overflow-x: auto;
@@ -10,7 +10,7 @@
   margin: 0;
 }
 
-/* Hộp cuộn được nhận tiêu điểm để cuộn bằng bàn phím — phải thấy được. */
+/* The scroll box takes focus for keyboard scrolling — focus must be visible. */
 .scroll:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -22,9 +22,9 @@
   overflow: visible;
 }
 
-/* Mã là nội dung chính của trang hướng dẫn, không phải chú thích: nó về `--t-sm`
-   thay vì 12.5px ngoài bậc. Dòng dài hơn không đẩy thân trang — `.scroll` ở trên
-   đã là hộp `overflow-x: auto` riêng, nên phần thừa chỉ nằm trong hộp đó. */
+/* Code is primary content on a guide page, not a caption: it uses `--t-sm`
+   instead of the off-scale 12.5px. Longer lines do not push the page body —
+   `.scroll` above is its own `overflow-x: auto` box, so overflow stays inside it. */
 .scroll code {
   display: block;
   font-family: var(--mono);

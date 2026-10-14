@@ -1,27 +1,26 @@
 /* ============================================================
-   TOKENS — nguồn duy nhất cho màu và chữ của toàn site.
-   Sáng là bảng gốc. Hai khối tối chỉ ĐỊNH NGHĨA LẠI token,
-   không bao giờ style component.
+   TOKENS — the single source of colour and type for the whole site.
+   Light is the base palette. The two dark blocks only REDEFINE
+   tokens, never style a component.
 
-   Giá trị chép NGUYÊN VĂN từ mockup đã duyệt
-   docs/design/mockups/v3/index.html — cả ba khối chủ đề ở đầu
-   file đó. Khi tài liệu và mockup mâu thuẫn, mockup thắng.
-   Xem thêm spec §8 và design-rules.md §2, §3.
+   Values follow docs/design-system/ducker/MASTER.md §1 and §2,
+   all three theme blocks. When this file and MASTER.md disagree,
+   fix this file.
 
-   Chú ý: tokens.test.ts cắt file theo lần xuất hiện ĐẦU TIÊN của
-   chuỗi tên quy tắc truy vấn chủ đề, nên đừng nhắc chuỗi đó trong
-   chú thích — cắt nhầm thì test cũ đỏ mà không rõ vì sao.
+   Note: tokens.test.ts slices this file at the FIRST occurrence
+   of the theme-query at-rule name, so do not mention that string
+   in a comment — a wrong slice turns old tests red for no clear reason.
 
-   Bản sáng gần như phi màu: nhấn mạnh đến từ cỡ, đậm nhạt và
-   nền đầy, không từ hue. Cam đất chỉ sống ở bản tối.
+   Light is nearly colourless: emphasis comes from size, weight and
+   solid fills, not from hue. Burnt orange lives only in dark.
    ============================================================ */
 :root {
   --bg:        #FDFDF7;
   --surface:   #FFFFFF;
-  /* Nền viên cho mục đang chọn ở sidebar — nền đầy, không phải vạch màu. */
+  /* Pill fill for the selected sidebar item — a solid fill, not a coloured bar. */
   --fill:      #E4E4DE;
   --fill-soft: #F1F1EA;
-  /* Bí danh tương thích với mã cũ còn gọi --surface-2; cùng giá trị --fill-soft. */
+  /* Compatibility alias for code that still uses --surface-2; same value as --fill-soft. */
   --surface-2: #F1F1EA;
   --line:      #E2E2DA;
   --line-soft: #EDEDE5;
@@ -29,11 +28,11 @@
   --ink-2:     #3E3E3E;
   --muted:     #6B6B63;
   --accent:    #8A4B24;
-  /* Token đổi vai theo chủ đề: sáng là mực, tối là cam đất. */
+  /* Token that changes role with the theme: ink in light, burnt orange in dark. */
   --eyebrow:   #171717;
   --accent-bg: #F2E9E1;
 
-  /* Năm màu trạng thái chỉ dùng cho trạng thái, không trang trí. */
+  /* The five status colours are for status only, never decoration. */
   --st-core:         #6B3F8C;
   --st-core-bg:      #EFE8F4;
   --st-connected:    #2F6B4F;
@@ -47,35 +46,34 @@
 
   --shadow: 0 1px 2px rgba(23, 23, 23, .05), 0 8px 24px -12px rgba(23, 23, 23, .14);
 
-  /* Không webfont: bộ chữ phủ đủ dấu tiếng Việt đều nặng. */
+  /* No webfont: faces with full Vietnamese coverage are all heavy. */
   --sans: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
-  /* Georgia bị loại cố ý: thiếu glyph tiếng Việt dựng sẵn, "ế" ra dấu rời lơ lửng. */
+  /* Georgia is excluded on purpose: it lacks precomposed Vietnamese glyphs, so "ế" renders with a floating detached mark. */
   --serif: Constantia, "New York", "Iowan Old Style", Cambria, "Sitka Text", Charter, Palatino, "Palatino Linotype", "Times New Roman", serif;
   --mono: "Cascadia Mono", "Cascadia Code", ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  /* Bậc cỡ chữ đo từ năm trang docs lớn — đừng chèn cỡ ngoài bậc. */
-  --t-2xs: 12px;  /* nhãn mono, chip        */
-  --t-xs:  13px;  /* chú thích              */
-  --t-sm:  14px;  /* mục lục, nút, ô nhập   */
-  --t-md:  16px;  /* THÂN BÀI               */
-  --t-lg:  18px;  /* mô tả một dòng         */
+  /* Type scale measured from five large docs pages — do not insert off-scale sizes. */
+  --t-2xs: 12px;  /* mono labels, chips    */
+  --t-xs:  13px;  /* captions              */
+  --t-sm:  14px;  /* TOC, buttons, inputs  */
+  --t-md:  16px;  /* BODY TEXT             */
+  --t-lg:  18px;  /* one-line descriptions */
   --t-xl:  22px;
   --t-2xl: 26px;  /* H2                     */
   --t-3xl: 36px;  /* H1                     */
   --t-4xl: 44px;
 
-  /* Chữ thương hiệu — `.m-brand b` của mockup v3: serif 400, 23px. Cỡ này đứng
-     ngoài bậc trên vì nó là chữ ký hình ảnh, không phải chữ để đọc thành đoạn;
-     có tên riêng để ba nơi dùng nó (thanh trên, khung quản trị, màn đăng nhập)
-     không trôi mỗi nơi một số. */
+  /* Brand wordmark: serif 400, 23px. This size sits outside the scale above
+     because it is a visual signature, not text read as prose; it has its own
+     name so every place that uses it cannot drift to a different number. */
   --t-brand: 23px;
 
-  /* Ngưỡng bấm nhỏ nhất — WCAG 2.2 SC 2.5.8 đòi 24x24 CSS px.
-     Lấy 28 chứ không phải 24 để còn chỗ thở. Áp min-height/min-width
-     cho MỌI phần tử bấm được. */
+  /* Smallest tap target — WCAG 2.2 SC 2.5.8 requires 24x24 CSS px.
+     28 rather than 24 leaves breathing room. Apply min-height/min-width
+     to EVERY clickable element. */
   --tap: 28px;
 
-  /* Tiếng Việt có dấu chồng (ế ữ ộ ằ ể) — leading rộng để dấu không chạm dòng trên. */
+  /* Vietnamese stacks diacritics (ế ữ ộ ằ ể) — generous leading keeps marks off the line above. */
   --lh-body: 1.75;
   --lh-head: 1.25;
 

@@ -2,7 +2,7 @@
 
 > **Answers:** What can I change that makes the system wrong **silently** — tests still green, result still wrong?
 > **Status:** 🟢 complete — reviewed against this project 2026-09-14
-> **Updated:** 2026-10-04 · branch feat/github-readme-releases
+> **Updated:** 2026-10-11 · branch fix/audit-findings
 > **Update when:** a new invariant is discovered — usually right after someone has just broken one
 
 <!-- HOW TO FILL
@@ -23,30 +23,23 @@ DOES NOT CONTAIN: format/naming conventions (-> lint config), architecture
 
 | # | Invariant | What breaks if you violate it |
 | --- | --- | --- |
-| I1 | A node with children **must** be `CONTAINER` | An `APP` with children loses its repo, stack and features — the data is still there with no route to it |
-| I2 | A `CONTAINER` with no published child **cannot be published** | A tab that opens onto nothing |
-| I3 | **No cycles** — a node may not be its own descendant | Infinite loop while building the tree. Detection must walk **up** the parent chain; a `visited` set walking down never catches it, because a cycle has no root ancestor and the whole loop is simply unreachable — tree builds fine, data quietly vanishes |
-| I4 | An `App` / `DocPage` attaches to **exactly one** node | Appears twice in the sidebar and counts twice in the search index |
-| I5 | A `CONTAINER` must have a label in the **default locale** | A clickable blank line in the sidebar |
-| I6 | At least **one** published root node must exist | No tabs means no way into anything |
-| I7 | `kind` and the pointer columns agree: `APP ⟺ appId != null`, `DOC ⟺ docPageId != null`, `CONTAINER ⟺ both null` | A node claiming to be one kind while wired like another |
+| I3 | **No cycles** — a node may not be its own descendant | Infinite loop while building the tree. Detection must walk **up** the parent chain; a `visited` set walking down never catches it, because a cycle has no root ancestor and the whole loop is simply unreachable — tree builds fine, data quietly vanishes. Enforced by `assertNoCycle` in `buildNavTree` (`src/content/nav-tree.ts`) |
 
-I1–I7 were partly database-enforced; there is no database now. `content/nav.ts` builds
-every row once per app/doc/game group, so I1, I4, I7 hold by construction. Only I3 is
-still enforced in code: `assertNoCycle`, called from `buildNavTree`
-(`src/content/nav-tree.ts`), throws before a cycle can reach a rendered tree. I2, I5 and
-I6 live only inside `assertNavInvariants` in the same file, and nothing in `src/` or
-`e2e/` calls it — its only caller was the deleted `src/server/content/mutations.ts`.
-`wouldCreateCycle` is in the same state, exercised only by `nav-tree.test.ts`. Do not
-wire `assertNavInvariants` into `listNavRows` to close this gap: I2 ("a published
-CONTAINER must have a published child") would then throw on an empty content directory —
-turning the silent-empty-page failure mode of a missing `content/` bundle into a hard
-crash instead.
+I1, I2 and I4–I7 retired on 2026-10-11 (below): `listNavRows` builds every row from
+`content/nav.ts` and the entry readers, so they hold by construction, and the
+`assertNavInvariants` / `wouldCreateCycle` checks that only a deleted write path ever
+called are gone with the draft/publish `status` field.
 
 ## Retired
 
 | # | Invariant | Why retired |
 | --- | --- | --- |
+| ~~I1~~ | ~~A node with children must be `CONTAINER`~~ | **Retired 2026-10-11** — `listNavRows` makes only the three `content/nav.ts` groups containers, and every entry a leaf |
+| ~~I2~~ | ~~A `CONTAINER` with no published child cannot be published~~ | **Retired 2026-10-11** — there is no publish state. A group whose `content/` folder is empty simply gets no top tab (`topTabs`), and the `/[locale]/n/[id]` fallback route, which could only redirect to that same first leaf or 404, is deleted |
+| ~~I4~~ | ~~An `App` / `DocPage` attaches to exactly one node~~ | **Retired 2026-10-11** — one file is one row under its own group, by construction |
+| ~~I5~~ | ~~A `CONTAINER` must have a label in the default locale~~ | **Retired 2026-10-11** — the labels are literals in `content/nav.ts`; a missing one drops the node rather than inventing a label (`buildNavTree`) |
+| ~~I6~~ | ~~At least one published root node must exist~~ | **Retired 2026-10-11** — the three roots are literals in `content/nav.ts` |
+| ~~I7~~ | ~~`kind` and the pointer columns agree~~ | **Retired 2026-10-11** — there are no pointer columns; `kind` and `href` are set together in `listNavRows` |
 | ~~I8~~ | ~~Every writing server action starts with `await requireAdmin()`~~ | **Retired 2026-09-14** — there are no writing actions left; the administration surface is deleted (ADR-0019) |
 | ~~I9~~ | ~~Only `src/server/content/`, `src/server/auth/`, `src/server/media/` touch Prisma / Auth.js / the S3 SDK~~ | **Retired 2026-09-14** — none of the three is a dependency any more, so `boundary.test.ts` had nothing left to guard and is deleted with them. ADR-0019 §4: if a server dependency ever returns, this invariant must return with it |
 | ~~I10~~ | ~~Migrations are forward-only~~ | **Retired 2026-09-14** — there is no schema and no migration history (ADR-0018) |

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import styles from "./Badge.module.css";
 
-/** Năm trạng thái tích hợp dùng chung toàn site — xem design-rules §2. */
+/** The five integration statuses shared across the site — see design-rules §2. */
 export type StatusKind = "core" | "connected" | "planned" | "standalone" | "private";
 
 export type BadgeProps = {
@@ -11,8 +11,8 @@ export type BadgeProps = {
 };
 
 /**
- * Huy hiệu trạng thái. Màu do CSS chọn qua `[data-kind]`, component không
- * biết mã màu nào — đổi màu trạng thái chỉ sửa `tokens.css`.
+ * Status badge. CSS picks the colour via `[data-kind]`; the component knows no
+ * colour values — changing a status colour only touches `tokens.css`.
  */
 export function Badge({ kind, children, className }: BadgeProps) {
   return (

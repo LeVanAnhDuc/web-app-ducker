@@ -1,4 +1,4 @@
-/* Ghi chú bản dịch — nhỏ, nằm sát nội dung nó nói về, không cướp chỗ của bài. */
+/* Translation note: small, close to the content it describes, never crowding the article. */
 
 .notice {
   display: flex;
@@ -6,15 +6,15 @@
   flex-wrap: wrap;
   gap: 7px;
   margin: 0 0 10px;
-  /* Ghi chú vẫn là văn xuôi có dấu tiếng Việt, nên nó ở sàn 14px của §3;
-     13px cũ nằm dưới sàn. */
+  /* The note is still prose with Vietnamese diacritics, so it sits on the 14px
+     floor; the old 13px was below it. */
   font-size: var(--t-sm);
   line-height: 1.7;
   color: var(--muted);
 }
 
-/* Mã ngôn ngữ: nhãn mono VIẾT HOA — đúng ngoại lệ duy nhất của §3, nên được
-   xuống 11px. 10px cũ thấp hơn cả ngoại lệ đó. */
+/* Locale code: an UPPERCASE mono label, the one exception to the 14px floor, so
+   it may drop to 11px. The old 10px was below even that exception. */
 .code {
   flex: none;
   border: 1px solid var(--line);

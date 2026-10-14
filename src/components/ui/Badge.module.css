@@ -1,12 +1,12 @@
-/* Huy hiệu trạng thái — chép hình khối từ .m-badge / .b-* trong mockup đã duyệt.
-   Màu chọn bằng bộ chọn thuộc tính [data-kind], KHÔNG map trong JS:
-   đổi màu một trạng thái chỉ cần sửa src/styles/tokens.css. */
+/* Status badge.
+   Colour is chosen by the [data-kind] attribute selector, NOT mapped in JS:
+   changing a status colour only needs an edit to src/styles/tokens.css. */
 
 .badge {
   display: inline-block;
   font-family: var(--mono);
-  /* Nhãn mono VIẾT HOA — ngoại lệ duy nhất của §3, đáy là 11px. Mockup
-     `.m-badge` cũng đúng 11px; 10px cũ nằm dưới cả ngoại lệ đó. */
+  /* UPPERCASE mono label — the only exception in MASTER.md §2, floor 11px.
+     The old 10px was below even that exception. */
   font-size: 11px;
   line-height: 1.6;
   letter-spacing: 0.09em;
@@ -15,7 +15,7 @@
   border-radius: 3px;
   white-space: nowrap;
 
-  /* Mặc định trung tính, để thiếu data-kind không bao giờ ra chữ vô hình. */
+  /* Neutral default, so a missing data-kind never renders invisible text. */
   background: var(--surface-2);
   color: var(--muted);
 }

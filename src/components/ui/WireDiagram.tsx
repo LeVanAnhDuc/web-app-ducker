@@ -2,7 +2,7 @@ import { Badge, type StatusKind } from "./Badge";
 import styles from "./WireDiagram.module.css";
 
 export type WireItem = {
-  /** Tên hiển thị, viết hoa đầu từ. Không bao giờ là slug repo. */
+  /** Display name, title-cased. Never the repo slug. */
   name: string;
   desc?: string;
   integration: StatusKind;
@@ -10,15 +10,15 @@ export type WireItem = {
 
 export type WireDiagramProps = {
   items: WireItem[];
-  /** Nhãn của trục dọc, ví dụ "IDMS". */
+  /** Label of the vertical spine, e.g. "IDMS". */
   coreLabel: string;
-  /** Nhãn huy hiệu theo trạng thái — chỉ là chữ, để dịch được. */
+  /** Badge label per status — plain text, so it can be translated. */
   labels?: Partial<Record<StatusKind, string>>;
-  /** Chú thích từng kiểu nét trong chú giải. */
+  /** Caption for each line style in the legend. */
   legendLabels?: Partial<Record<StatusKind, string>>;
-  /** Tên gọi của danh sách chú giải, dùng làm accessible name. */
+  /** Name of the legend list, used as its accessible name. */
   legendTitle?: string;
-  /** Tên gọi của danh sách nhánh, dùng làm accessible name. */
+  /** Name of the branch list, used as its accessible name. */
   itemsTitle?: string;
 };
 
@@ -38,13 +38,13 @@ const defaultLegendLabels: Record<StatusKind, string> = {
   private: "Repo riêng tư",
 };
 
-/** Bốn kiểu nét cần giải thích; "core" dùng chung nét với "connected". */
+/** The four line styles that need explaining; "core" shares its line with "connected". */
 const legendOrder: StatusKind[] = ["connected", "planned", "private", "standalone"];
 
 /**
- * Sơ đồ đấu nối: IDMS là trục dọc, mỗi ứng dụng là một nhánh.
- * Kiểu nét mang thông tin thật (liền = đã nối, đứt = dự kiến hoặc repo riêng tư,
- * không nét = độc lập) nên sơ đồ **luôn** kèm chú giải.
+ * Wire diagram: IDMS is the vertical spine, each app is a branch.
+ * Line style carries real information (solid = connected, dashed = planned or
+ * private repo, no line = standalone), so the diagram **always** has a legend.
  */
 export function WireDiagram({
   items,

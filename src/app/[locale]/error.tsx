@@ -10,17 +10,17 @@ import vi from "@/i18n/messages/vi.json";
 import styles from "./status.module.css";
 
 /**
- * Ranh giới lỗi cho mọi đường dẫn dưới `[locale]`.
+ * Error boundary for every path under `[locale]`.
  *
- * Hai chuyện phải tự làm ở đây, cùng một lý do: ranh giới lỗi nằm **ngoài**
- * `(public)/layout.tsx`, nên khi nó chạy thì layout đó không chạy.
+ * Two things must be done here by hand, for the same reason: the error boundary
+ * sits **outside** `(public)/layout.tsx`, so when it runs that layout does not.
  *
- * 1. **Tự dựng `<html>`/`<body>`** — không có ai dựng hộ.
- * 2. **Tự dựng `NextIntlClientProvider`** với bộ chuỗi nạp tĩnh. Không dùng
- *    được `getTranslations` vì file này buộc phải là client component, mà
- *    provider của layout thì không bao trùm tới đây. Nạp tĩnh cũng là điều
- *    đúng cho một trang lỗi: nó phải hiện được cả khi phần lấy dữ liệu của máy
- *    chủ đang hỏng.
+ * 1. **Render `<html>`/`<body>` itself** — nobody else will.
+ * 2. **Render `NextIntlClientProvider` itself** with statically imported messages.
+ *    `getTranslations` is unavailable because this file must be a client
+ *    component, and the layout's provider does not reach here. Static loading is
+ *    also right for an error page: it must render even when the server's data
+ *    fetching is broken.
  */
 
 const messagesByLocale: Record<string, typeof vi> = { vi, en };
@@ -33,7 +33,7 @@ function ErrorBody({ reset }: { reset: () => void }) {
       <p className={styles.code}>500</p>
       <h1 className={styles.title}>{t("title")}</h1>
       <p className={styles.body}>{t("body")}</p>
-      {/* Nút nói đúng việc nó làm: dựng lại đúng nhánh vừa lỗi. */}
+      {/* The button says exactly what it does: re-render the branch that just failed. */}
       <button className={styles.action} type="button" onClick={reset}>
         {t("retry")}
       </button>
@@ -48,7 +48,7 @@ export default function LocaleError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  // Trang lỗi không hiện chi tiết kỹ thuật cho người đọc; chỗ để lần là log.
+  // The error page shows readers no technical detail; the log is where to trace it.
   useEffect(() => {
     console.error(error);
   }, [error]);

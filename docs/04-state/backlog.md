@@ -2,7 +2,7 @@
 
 > **Answers:** What is being worked on, what comes next, and what is owed?
 > **Status:** 🟢 complete
-> **Updated:** 2026-10-11 · branch ci/project-scoped-token
+> **Updated:** 2026-10-11 · branch fix/audit-findings
 > **Update when:** work starts or finishes · brainstorming produces new work · a shortcut is taken deliberately
 
 <!-- HOW TO FILL
@@ -18,7 +18,17 @@ DOES NOT CONTAIN: out-of-scope features (-> 01-product/overview.md §Non-Goals).
 
 ## In progress
 
-**Nothing is in flight (2026-10-11).** Every branch is merged: PRs #1–#15 are on `main`,
+**`fix/audit-findings` (2026-10-11) — built and verified, awaiting the commit review and a PR.**
+An audit of `src/` against the docs. Search now indexes games and 404s an unknown
+locale (FR-24); `sitemap.xml`, `robots.txt` and `metadataBase` (FR-28); the dead
+draft/publish model, `assertNavInvariants`, `wouldCreateCycle` and the `/[locale]/n/[id]`
+route deleted (I1, I2, I4–I7 retired); `middleware.ts` → `proxy.ts`; `engines.node` 22.x
+pins CI and Vercel; Next 16.3.1 → 16.4.0 with every dependency refreshed in range (33
+advisories → 2, none high in production) and `pnpm audit --prod` gating CI (NFR-SEC-05);
+every Vietnamese comment in `src/`, `e2e/` and the configs translated. Verified:
+typecheck, lint, 252 unit tests, build, 21/21 e2e.
+
+**Before that branch, nothing was in flight (2026-10-11).** Every branch is merged: PRs #1–#15 are on `main`,
 no PR or issue is open, `.worktrees/` is empty, and the latest release is `v0.2.3`
 (2026-10-10). The last feature work, in order:
 
@@ -116,13 +126,11 @@ There are no database-backed tests left to skip — the database is gone
 | Work | Related | Priority | Why that priority |
 | --- | --- | --- | --- |
 | Delete the old all-projects Vercel token | ADR-0024 | high | it can still deploy or delete any project in the account; replaced by a project-scoped one — see §In progress |
-| Align the Node version — Vercel runs functions on 24.x, CI builds on 22 | ADR-0022 | low | no failure seen; one `engines.node` field in `package.json` pins both |
 | **"Ink and state" repaint** — not yet specified. Apply [`MASTER.md`](../design-system/ducker/MASTER.md) to the surviving CSS modules: rewrite `src/styles/tokens.css` and `tokens.test.ts`, and raise `--tap` (still `28px`) and the threshold in `e2e/a11y-tap-target.spec.ts` to 44px | ADR-0017 | high | the design system and the code still describe two different products. Approved mockup: 12 artboards, 4 screens × 375 / 768 / 1440 — an Artifact, **not in this repository**. The tap change alone turns that e2e spec red until it is updated |
 | Resolve the `NFR-A11Y-06` / `MASTER.md` §7 conflict on mono UPPERCASE labels, and the `I14` / `MASTER.md` §2 conflict on heading weight | NFR-A11Y-06 · I14 | high | owed to the repaint branch, resolved explicitly, not silently. `NFR-A11Y-06` blesses mono UPPERCASE 11px labels used in 20+ places; `MASTER.md` §7 forbids both. `I14` pins `h1,h2,h3` to serif-400; `MASTER.md` §2 makes headings tight heavy sans |
-| Wire `pnpm audit` into CI | NFR-SEC-05 | high | `ci.yml` runs no audit step, so the threshold is manual. The advisory count has not been re-measured since 2026-09-13, before five dependencies were removed |
-| Rename `src/middleware.ts` to the `proxy` convention | — | medium | Next 16 warns the `middleware` file convention is deprecated |
 | Add a CSS-level `color-scheme` to each theme block while rewriting `tokens.css` | FR-15 · [ADR-0020](../decisions/0020-next-themes-for-the-theme.md) | medium | next-themes sets the property at runtime, so visitors with JavaScript disabled get none. The token rewrite already owns that file |
 | Author the `features` frontmatter field | — | low | no content file sets it, so `FeatureGrid` renders on no page. The deleted `prisma/seed.ts` (`git show e085a74:prisma/seed.ts`) authored feature blocks for five applications; since #12 every page also shows its README, so this is a content task of reduced value |
+| Silence Turbopack's "Dynamic filesystem access causes tracing of the whole project" (4 warnings, all `readdir`/`readFile` in `src/content/read.ts`) | — | low | seen on the first build with Next 16.4.0, 2026-10-11; not known whether 16.3.1 printed it too. Costs bundle size, not correctness — the README/ISR pages' traces do include `content/**` |
 
 ## Open decisions
 
@@ -139,9 +147,10 @@ There are no database-backed tests left to skip — the database is gone
 
 - **Adding a language needs one redeploy** (NFR-I18N-05, [ADR-0015](../decisions/0015-generated-locale-list-costs-one-redeploy.md)) —
   now an edit to `src/i18n/locales.ts` rather than a database row, same cost either way.
-- **`NEXT_PUBLIC_SITE_URL` is read nowhere.** `playwright.config.ts` used to read it and
-  stopped — that value, `http://localhost:3000`, was exactly how an e2e run wandered
-  into another project's app. There is no `sitemap.ts` or canonical using it yet.
+- **`NEXT_PUBLIC_SITE_URL` is optional.** `src/lib/site-url.ts` reads it for canonical,
+  `hreflang`, `sitemap.xml` and `robots.txt`; blank means the production URL. Playwright
+  must not read it again — `http://localhost:3000` is how an e2e run once wandered into
+  another project's app.
 
 ## Technical debt — deliberate shortcuts
 
@@ -173,7 +182,7 @@ cp .env.example .env
 pnpm dev                         # http://localhost:3000 → redirects to /vi
 ```
 
-Node 20+. No environment variables are required — the site renders its full content
+Node 22 (`engines.node`). No environment variables are required — the site renders its full content
 from `content/**.mdx` either way.
 
 **Superdesign MCP is machine-level configuration and is not in this repo.** Reinstall

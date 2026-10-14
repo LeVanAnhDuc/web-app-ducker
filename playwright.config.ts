@@ -1,22 +1,22 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * E2E chạy trên **cổng riêng**, không dùng 3000.
+ * E2E runs on **its own port**, not 3000.
  *
- * Trước đây config này lấy `NEXT_PUBLIC_SITE_URL` (= `http://localhost:3000`) làm
- * `baseURL` và bật `reuseExistingServer: !process.env.CI`. Hai thứ đó cộng lại nghĩa
- * là **bất kỳ** tiến trình nào đang chiếm cổng 3000 cũng được nhận làm "server của
- * dự án này" — kể cả app của một dự án khác. Đã xảy ra thật: cổng 3000 do
- * `app-AI-workflow-automation-platform` chiếm, và cả bộ e2e báo xanh trong khi
- * không một request nào chạm vào Ducker.
+ * This config used to take `NEXT_PUBLIC_SITE_URL` (= `http://localhost:3000`) as
+ * `baseURL` and set `reuseExistingServer: !process.env.CI`. Together those meant
+ * **any** process holding port 3000 was accepted as "this project's server" —
+ * including another project's app. It really happened: port 3000 was held by
+ * `app-AI-workflow-automation-platform`, and the whole e2e suite reported green while
+ * not a single request reached Ducker.
  *
- * Vì sao chọn cổng riêng + `reuseExistingServer: false` chứ không phải một bước
- * "kiểm danh tính app trước khi chạy": kiểm danh tính vẫn phải đoán xem dấu hiệu nào
- * là đủ để nhận ra Ducker, và mỗi lần đổi giao diện là một lần phải sửa lại dấu hiệu
- * đó. Cổng riêng thì không có gì để đoán — Playwright luôn tự dựng server từ chính
- * mã trong thư mục này, và nếu cổng bị chiếm nó **dừng với lỗi** thay vì âm thầm
- * test sai app. Cái giá phải trả: `pnpm build` phải chạy trước `pnpm e2e`, vì
- * không còn dev server nào để mượn.
+ * Why a dedicated port + `reuseExistingServer: false` rather than an "identify the
+ * app before running" step: identification still has to guess which signal is
+ * enough to recognise Ducker, and every UI change means fixing that signal again.
+ * A dedicated port leaves nothing to guess — Playwright always builds the server from
+ * the code in this directory, and if the port is taken it **fails with an error** instead
+ * of silently testing the wrong app. The price: `pnpm build` must run before `pnpm e2e`,
+ * since there is no dev server left to borrow.
  */
 const port = Number(process.env.E2E_PORT ?? 3210);
 const baseURL = `http://127.0.0.1:${port}`;
@@ -26,7 +26,7 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
-  // Máy Windows này chạy song song hay flaky — giữ một worker.
+  // Parallel runs are flaky on this Windows machine — keep one worker.
   workers: 1,
   reporter: "list",
   use: {
@@ -43,7 +43,7 @@ export default defineConfig({
     // npm-to-pnpm migration in fff75d2, which left the whole suite unrunnable.
     command: `pnpm start --port ${port} --hostname 127.0.0.1`,
     url: baseURL,
-    // Không bao giờ mượn server có sẵn: xem khối chú thích trên.
+    // Never borrow an existing server: see the comment block above.
     reuseExistingServer: false,
     timeout: 120_000,
   },

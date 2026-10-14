@@ -1,4 +1,4 @@
-/* Khung trang công khai. Thanh trên cùng dính đỉnh, phần còn lại là nội dung. */
+/* Public page shell. The top bar sticks to the top; the rest is content. */
 
 .shell {
   display: flex;
@@ -10,9 +10,10 @@
 .main {
   flex: 1 1 auto;
   min-width: 0;
-  /* Cột dọc để trang tài liệu (`DocsShell`) giãn kín phần màn hình còn lại
-     dưới thanh trên cùng — nhờ vậy hai cột bên chạm đáy màn hình kể cả khi bài
-     ngắn. Trang khác chỉ có một phần tử gốc, giãn ngang như khối thường. */
+  /* A column so the docs page (`DocsShell`) fills the remaining viewport below
+     the top bar — that way both side columns reach the bottom even when the
+     article is short. Other pages have a single root element that stretches
+     horizontally like a normal block. */
   display: flex;
   flex-direction: column;
 }

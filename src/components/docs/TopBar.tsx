@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { locales } from "@/i18n/locales";
-import { findTrail, firstLeafHref, navHref, type NavTreeNode } from "@/content/nav-tree";
+import { findTrail, navHref, topTabs, type NavTreeNode } from "@/content/nav-tree";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { SearchDialog } from "./SearchDialog";
 import styles from "./TopBar.module.css";
@@ -12,22 +12,21 @@ import styles from "./TopBar.module.css";
 export type TopBarProps = {
   locale: string;
   /**
-   * **Toàn bộ** cây điều hướng đã publish, không chỉ nút gốc.
+   * The **whole** navigation tree, not just its roots.
    *
-   * Dải tab là các nút gốc, nhưng tab nào đang mở thì phải suy từ đường dẫn hiện
-   * tại xuống tới lá (`findTrail`) — mà đường dẫn chỉ biết được ở phía client.
-   * Cây rỗng (chưa có DB, hoặc chưa có nút gốc nào publish) thì không dựng dải
-   * tab, và trang vẫn hiện bình thường.
+   * The tabs are the roots, but which one is open has to be traced from the current
+   * path down to a leaf (`findTrail`) — and the path is only known on the client.
+   * With no tab to draw, the strip is left out and the page renders as normal.
    */
   tree?: NavTreeNode[];
 };
 
-/** Đổi phần locale ở đầu đường dẫn, giữ nguyên phần còn lại. */
+/** Swaps the locale segment at the start of a path, keeping the rest. */
 function withLocale(pathname: string, nextLocale: string): string {
   const segments = pathname.split("/");
 
-  // ["", "vi", "apps", …] — chỉ thay khi đoạn đầu đúng là một locale đã biết,
-  // để đường dẫn lạ không bị cắt mất đoạn đầu.
+  // ["", "vi", "apps", …] — replace only when the first segment is a known locale,
+  // so an unknown path does not lose its first segment.
   if (segments.length > 1 && locales.includes(segments[1])) {
     segments[1] = nextLocale;
     return segments.join("/") || "/";
@@ -37,16 +36,14 @@ function withLocale(pathname: string, nextLocale: string): string {
 }
 
 /**
- * Thanh trên cùng của mọi trang công khai: thương hiệu, ô tìm kiếm, nút chuyển
- * ngôn ngữ, nút chuyển chủ đề — rồi **dải tab dựng từ nút gốc của cây điều
- * hướng** (mockup v3 mục 02: `.m-mast` trên, `.m-tabs` dưới).
+ * The bar on top of every public page: brand, search, language switch, theme
+ * switch — then **the tab strip, built from the navigation tree's roots**.
  *
- * Không còn mục nào viết cứng. Trước đây bốn mục "Hệ sinh thái · Ứng dụng ·
- * Hướng dẫn · API" nằm thẳng trong mã, nên thêm một nhóm nội dung trong CMS
- * không hiện ra đâu cả, mà hai mục cuối lại trỏ vào route không tồn tại.
+ * No tab is hard-coded; adding a content group to `content/nav.ts` is enough.
  *
- * Là client component vì cả nút chuyển ngôn ngữ lẫn tab đang mở đều phải biết
- * đường dẫn hiện tại — chuyển ngôn ngữ mà văng về trang chủ là mất chỗ đang đọc.
+ * A client component because both the language switch and the open tab need the
+ * current path — a language switch that jumps back to the home page loses the
+ * reader's place.
  */
 export function TopBar({ locale, tree = [] }: TopBarProps) {
   const t = useTranslations();
@@ -56,6 +53,8 @@ export function TopBar({ locale, tree = [] }: TopBarProps) {
   // tree (the home page, a doc not yet attached) lights no tab — more honest than
   // lighting one at random. `navHref` folds a Releases tab onto its entry (I22).
   const activeTabId = findTrail(tree, navHref(pathname))[0]?.id;
+  // A container has no page of its own, so each tab points at its first leaf.
+  const tabs = topTabs(tree);
 
   return (
     <header className={styles.header}>
@@ -84,8 +83,8 @@ export function TopBar({ locale, tree = [] }: TopBarProps) {
             ))}
           </nav>
 
-          {/* Nhãn truyền xuống chứ không gọi `useTranslations` bên trong nút:
-              `ThemeToggle` phải render được trần trong test, không provider. */}
+          {/* Labels are passed down rather than read with `useTranslations` inside:
+              `ThemeToggle` must render bare in tests, with no provider. */}
           <ThemeToggle
             labels={{
               group: t("theme.label"),
@@ -97,29 +96,19 @@ export function TopBar({ locale, tree = [] }: TopBarProps) {
         </div>
       </div>
 
-      {tree.length > 0 ? (
+      {tabs.length > 0 ? (
         <nav className={styles.tabs} aria-label={t("nav.label")}>
-          {tree.map((node) => {
-            /**
-             * Nút chứa không có URL riêng (spec §5), nên tab trỏ thẳng tới lá đầu
-             * tiên của nó — một cú nhảy ít hơn so với đi qua `/n/[id]`. Route đó
-             * vẫn cần cho ai gõ thẳng hoặc chia sẻ địa chỉ của nút chứa, và là
-             * đường dự phòng ở đây cho nhánh không còn lá nào publish (I2 cấm,
-             * nhưng nếu vẫn xảy ra thì `/n/[id]` trả 404 chứ không trỏ đi đâu sai).
-             */
-            const href = firstLeafHref(node) ?? `/${locale}/n/${node.id}`;
-            return (
-              <a
-                key={node.id}
-                className={styles.tab}
-                href={href}
-                // Tab đang mở đánh dấu bằng aria-current; gạch chân là hệ quả.
-                aria-current={node.id === activeTabId ? "page" : undefined}
-              >
-                {node.label}
-              </a>
-            );
-          })}
+          {tabs.map((tab) => (
+            <a
+              key={tab.id}
+              className={styles.tab}
+              href={tab.href}
+              // The open tab is marked with aria-current; the underline follows from it.
+              aria-current={tab.id === activeTabId ? "page" : undefined}
+            >
+              {tab.label}
+            </a>
+          ))}
         </nav>
       ) : null}
     </header>

@@ -5,15 +5,15 @@ export type CalloutTone = "note" | "warning";
 
 export type CalloutProps = {
   tone?: CalloutTone;
-  /** Nhãn ngắn ở đầu khối, ví dụ "Lưu ý" hoặc "Trạng thái". */
+  /** Short label at the top of the block, e.g. "Lưu ý" or "Trạng thái". */
   title?: ReactNode;
   children: ReactNode;
   className?: string;
 };
 
 /**
- * Khối ghi chú. Dùng `tone="warning"` khi trang mô tả thứ chưa tồn tại —
- * design-rules §7 bắt buộc nói thật về hiện trạng.
+ * Note block. Use `tone="warning"` when the page describes something that does not
+ * exist yet — design-rules §7 requires being honest about the current state.
  */
 export function Callout({ tone = "note", title, children, className }: CalloutProps) {
   return (

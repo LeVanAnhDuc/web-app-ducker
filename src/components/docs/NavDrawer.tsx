@@ -7,20 +7,20 @@ import { NavTree } from "./NavTree";
 import styles from "./NavDrawer.module.css";
 
 export type NavDrawerLabels = {
-  /** Chữ trên nút mở, cũng là tên gọi của hộp thoại. */
+  /** Text on the open button, also the dialog's accessible name. */
   open: string;
-  /** Chữ trên nút đóng bên trong ngăn kéo. */
+  /** Text on the close button inside the drawer. */
   close: string;
 };
 
 export type NavDrawerProps = {
-  /** Đúng những nút mà cột trái dựng — cùng một nhánh, cùng một cây. */
+  /** Exactly the nodes the left column renders — same branch, same tree. */
   nodes: NavTreeNode[];
-  /** Đường dẫn trang đang mở, để đánh dấu mục đang xem. */
+  /** Path of the current page, to mark the entry being viewed. */
   activeHref: string;
   /**
-   * Nhãn đã dịch. Mặc định tiếng Việt để component render được **trần** trong
-   * test, không cần provider của next-intl (quy ước như `ThemeToggle`).
+   * Translated labels. Defaults to Vietnamese so the component renders **bare**
+   * in tests without a next-intl provider (same convention as `ThemeToggle`).
    */
   labels?: Partial<NavDrawerLabels>;
 };
@@ -30,7 +30,7 @@ const DEFAULT_LABELS: NavDrawerLabels = {
   close: "Đóng",
 };
 
-/** Mọi thứ bấm/tab tới được bên trong ngăn kéo, theo đúng thứ tự DOM. */
+/** Everything clickable/tabbable inside the drawer, in DOM order. */
 function focusablesIn(root: HTMLElement | null): HTMLElement[] {
   if (!root) return [];
   return [
@@ -41,24 +41,25 @@ function focusablesIn(root: HTMLElement | null): HTMLElement[] {
 }
 
 /**
- * Ngăn kéo điều hướng của màn hẹp (mockup v2 mục 07 — "Trên điện thoại").
+ * Narrow-screen navigation drawer.
  *
- * Ở màn rộng cột trái luôn hiện, nên **nút này ẩn hoàn toàn** bằng CSS. Dưới
- * 980px cột trái biến mất và chỗ của nó là nút `☰` đặt ngay đầu bài. Bản trước
- * đẩy cột trái xuống **cuối trang**: người đọc trên điện thoại phải cuộn hết bài
- * mới thấy điều hướng, tức là coi như không có điều hướng.
+ * On wide screens the left column is always visible, so **this button is hidden
+ * entirely** by CSS. Below 980px the left column disappears and a `☰` button at
+ * the top of the article takes its place. The previous version pushed the left
+ * column to the **bottom of the page**: phone readers had to scroll through the
+ * whole article to reach navigation, which amounts to having none.
  *
- * Cây bên trong là **chính `NavTree`** mà cột trái dùng, không phải một cây thứ
- * hai: hai bản cây rồi sẽ lệch nhau ở lần sửa thứ ba.
+ * The tree inside is **the same `NavTree`** the left column uses, not a second
+ * tree: two copies would drift apart by the third edit.
  *
- * Ba việc của một hộp thoại thật, làm giống hệt `SearchDialog`:
+ * The three duties of a real dialog, done exactly like `SearchDialog`:
  *
- * - `Esc` và bấm ra ngoài đều đóng;
- * - đóng xong **trả tiêu điểm về nút mở**, nếu không người dùng bàn phím rơi về
- *   `<body>` và mất chỗ đứng;
- * - **bẫy tiêu điểm** khi đang mở — `Tab` ở phần tử cuối vòng về phần tử đầu.
- *   Không có bẫy thì Tab đi thẳng ra sau lưng lớp phủ, tới những liên kết mắt
- *   không nhìn thấy.
+ * - `Esc` and clicking outside both close it;
+ * - closing **returns focus to the open button**, otherwise keyboard users drop
+ *   to `<body>` and lose their place;
+ * - **focus trap** while open — `Tab` on the last element wraps to the first.
+ *   Without the trap, Tab walks out behind the overlay to links the eye cannot
+ *   see.
  */
 export function NavDrawer({ nodes, activeHref, labels }: NavDrawerProps) {
   const text = { ...DEFAULT_LABELS, ...labels };
@@ -74,14 +75,14 @@ export function NavDrawer({ nodes, activeHref, labels }: NavDrawerProps) {
     triggerRef.current?.focus();
   }, []);
 
-  // Mở tới đâu, tiêu điểm tới đó — nút đóng là điểm vào an toàn nhất, vì nó là
-  // đường ra và nằm ngay đầu vòng Tab.
+  // Focus follows the opening — the close button is the safest entry point,
+  // since it is the way out and sits at the start of the Tab cycle.
   useEffect(() => {
     if (open) closeRef.current?.focus();
   }, [open]);
 
-  // Nền không cuộn khi ngăn kéo đang mở: cuộn được cả hai lớp thì ngón tay kéo
-  // trúng lớp nào là chuyện may rủi.
+  // The background does not scroll while the drawer is open: if both layers
+  // scroll, which one a finger drags is down to luck.
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
@@ -91,7 +92,7 @@ export function NavDrawer({ nodes, activeHref, labels }: NavDrawerProps) {
     };
   }, [open]);
 
-  /** Vòng tiêu điểm khép kín trong panel. */
+  /** Closed focus loop inside the panel. */
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape") {
       event.stopPropagation();
@@ -117,8 +118,8 @@ export function NavDrawer({ nodes, activeHref, labels }: NavDrawerProps) {
     }
   };
 
-  // Không có nút nào thì không có gì để mở — nút `☰` dẫn tới một ngăn kéo rỗng
-  // còn tệ hơn là không có nút.
+  // No nodes means nothing to open — a `☰` button leading to an empty drawer is
+  // worse than no button.
   if (nodes.length === 0) return null;
 
   return (
@@ -131,7 +132,7 @@ export function NavDrawer({ nodes, activeHref, labels }: NavDrawerProps) {
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
-        {/* `☰` là ký hiệu chữ (U+2630), không phải emoji — design-rules §5. */}
+        {/* `☰` is a text symbol (U+2630), not an emoji. */}
         <span className={styles.icon} aria-hidden="true">
           ☰
         </span>

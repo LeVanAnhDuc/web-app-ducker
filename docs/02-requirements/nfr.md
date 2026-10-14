@@ -2,7 +2,7 @@
 
 > **Answers:** Which thresholds apply to **every** feature, so they need not be restated each time?
 > **Status:** 🟢 complete — reviewed against this project 2026-09-14
-> **Updated:** 2026-09-14 · commit 3e4e67a
+> **Updated:** 2026-10-11 · branch fix/audit-findings
 > **Update when:** a new resource type appears · a new user group appears · an incident produces a new threshold
 
 <!-- HOW TO FILL
@@ -43,7 +43,7 @@ row still states the bar a future write path would have to clear.
 | NFR-SEC-02 | ⚪ Vacuous — do not log the administrator email, password hash, session tokens, or request bodies. There is no administrator account, session, or request body that writes anything | — |
 | NFR-SEC-03 | ⚪ Vacuous — sign-in rate limiting. There is no sign-in; `src/server/auth/rate-limit.ts` is deleted | — |
 | NFR-SEC-04 | Secrets are read from environment variables only. Never hardcoded, never committed. **Still applies in principle, currently vacuous in practice** — `.env.example` lists no secret, because the build reads none | grep + review |
-| NFR-SEC-05 | No dependency vulnerability at high severity or above | `pnpm audit`. ⚠️ **not yet wired into CI** — this repo has no `.github/workflows/`; the check is manual today |
+| NFR-SEC-05 | No dependency vulnerability at high severity or above | `pnpm audit --prod --audit-level=high`, a step of `ci.yml`'s `static` job. Production dependencies only: on 2026-10-11 the one high advisory left (`braces`, through `eslint-config-next`) is dev tooling with no patched version published |
 | NFR-SEC-06 | ⚪ Vacuous — errors returned to the client carry no stack trace, table name, or SQL. There is no database and no table to name | — |
 | ~~NFR-SEC-07~~ | ~~Draft preview is gated by `PREVIEW_SECRET`; a refused preview wrongly answers 200 instead of 403/503~~ | **Retired 2026-09-14** — the preview route is deleted; a draft is now a branch and Vercel's per-branch preview URL replaces it (ADR-0019 §2) |
 

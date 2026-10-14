@@ -1,11 +1,12 @@
-/* Bố cục ba cột — chép từ `.m-docs` trong mockup đã duyệt.
-   Bề rộng cột: 208px điều hướng · phần còn lại nội dung · 178px mục lục. */
+/* Three-column layout.
+   Column widths: 208px navigation · the rest content · 178px table of contents. */
 
 .shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  /* Giãn kín `<main>` (một cột flex) và kéo ba cột cao bằng nhau: viền và nền
-     của hai cột bên chạy suốt tới đáy màn hình thay vì dừng ở mục cuối. */
+  /* Fill `<main>` (a flex column) and stretch the three columns to equal height: the
+     borders and backgrounds of the side columns run to the bottom of the screen
+     instead of stopping at the last item. */
   flex: 1 0 auto;
   align-items: stretch;
 }
@@ -22,8 +23,8 @@
   grid-template-columns: 208px minmax(0, 1fr) 178px;
 }
 
-/* Ô cột cao bằng cả lưới nên viền và nền nằm ở đây, không nằm trên phần tử
-   bên trong — phần tử đó chỉ cao bằng nội dung của nó. */
+/* The column cell is as tall as the whole grid, so borders and backgrounds live
+   here, not on the inner element, which is only as tall as its content. */
 .sidebarSlot {
   border-right: 1px solid var(--line);
   background: var(--surface);
@@ -33,9 +34,9 @@
   border-left: 1px solid var(--line);
 }
 
-/* Hai cột ngoài đi theo người đọc suốt bài dài. Đây là bố cục, không phải
-   hiệu ứng cuộn — không có gì chuyển động. Phần dính là nội dung bên trong,
-   vì ô cột giờ cao bằng cả lưới thì tự nó không còn gì để dính. */
+/* The two outer columns follow the reader through long articles. This is layout,
+   not a scroll effect; nothing moves. The sticky part is the inner content,
+   because the column cell is now as tall as the grid and has nothing to stick to. */
 .sidebarSlot > *,
 .tocSlot > * {
   position: sticky;
@@ -48,16 +49,17 @@
   min-width: 0;
 }
 
-/* Ba cột gập thành một (design-rules §9). Mục lục lên đầu bài.
+/* The three columns collapse into one. The table of contents moves to the top.
 
-   Cột điều hướng thì **biến mất hẳn** ở đây, không xuống cuối trang như bản
-   trước: nó đã được thay bằng ngăn kéo `NavDrawer` mở từ nút `☰` đặt ngay đầu
-   bài (mockup mục 07). Đẩy nó xuống cuối nghĩa là người đọc trên điện thoại
-   phải cuộn hết bài mới thấy điều hướng — coi như không có điều hướng.
+   The navigation column **disappears entirely** here rather than dropping to the
+   bottom of the page as it used to: it is replaced by the `NavDrawer` opened from
+   the `☰` button at the top of the article. Pushing it to the bottom meant a phone
+   reader had to scroll through the whole article to find navigation, which is as
+   good as having none.
 
-   `display: none` chứ không phải xoá khỏi cây: `DocsShell` vẫn nhận `sidebar`
-   như cũ, nên màn rộng không đổi gì cả và quy tắc "chừa cột theo việc prop có
-   tồn tại" vẫn nguyên vẹn. */
+   `display: none` rather than removing it from the tree: `DocsShell` still receives
+   `sidebar` as before, so wide screens are unchanged and the rule "reserve the
+   column based on whether the prop exists" stays intact. */
 @media (max-width: 980px) {
   .shell,
   .shell[data-sidebar="yes"],

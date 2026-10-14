@@ -2,7 +2,7 @@
 
 > **Answers:** Which functions does the system have, and what state is each in?
 > **Status:** 🟢 complete
-> **Updated:** 2026-09-13 · commit b2d70a8
+> **Updated:** 2026-10-11 · branch fix/audit-findings
 > **Update when:** brainstorming produces a new function (assign a new FR) · an FR changes state
 
 <!-- HOW TO FILL
@@ -33,10 +33,11 @@ was chosen (-> decisions/).
 | FR-16 | SEO: `hreflang` for every enabled locale plus `x-default`, self-canonical | US-01 | xong |
 | FR-22 | Catalogue entries authored as files under `content/`, one file per record per locale | US-09 | đang |
 | FR-23 | Games group: the twelve duck games listed as their own section, flat, no IdP branch | US-01 | đang |
-| FR-24 | Search index built from the content files at build time, not from a database | US-02 | đang |
+| FR-24 | Search index read from the content files on each request — apps, games and docs — not from a database; an unknown locale answers 404 | US-02 | xong |
 | FR-25 | README tab: an entry with a public GitHub repo shows its README, relative links and images absolutised, refreshed hourly. See [ADR-0023](../decisions/0023-readme-and-releases-from-github.md) | US-01 | xong |
 | FR-26 | Releases tab: every published release newest first, the newest open; an empty and an unavailable state, each linking to GitHub | US-01 | xong |
 | FR-27 | Games get detail pages like apps; `/apps` and `/games` are overview pages, opened by the top tabs and listed first in each sidebar | US-01 | xong |
+| FR-28 | `/sitemap.xml` and `/robots.txt`: every public page once per locale with the same `hreflang` set as the page (FR-16); canonical and alternates are absolute URLs on the production host | US-01 | xong |
 
 ## Administration (CMS) — retired 2026-09-13
 

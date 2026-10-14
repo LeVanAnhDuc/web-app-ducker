@@ -14,28 +14,28 @@ const tree = [{
 }];
 
 describe("NavTree", () => {
-  it("nút chứa là <button> toggle, KHÔNG phải liên kết", () => {
+  it("a container node is a toggle <button>, NOT a link", () => {
     render(<NavTree nodes={tree} activeHref="/vi/apps/match-cv" />);
     expect(screen.getByRole("button", { name: /Vệ tinh/ })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /Vệ tinh/ })).toBeNull();
   });
 
-  it("nút lá là liên kết, KHÔNG toggle", () => {
+  it("a leaf node is a link, NOT a toggle", () => {
     render(<NavTree nodes={tree} activeHref="/vi/apps/match-cv" />);
     expect(screen.getByRole("link", { name: "Match CV" })).toHaveAttribute("href", "/vi/apps/match-cv");
   });
 
-  it("lồng được ba tầng", () => {
+  it("nests three levels deep", () => {
     render(<NavTree nodes={tree} activeHref="/vi/apps/badminton" />);
     expect(screen.getByRole("link", { name: "Calculate Badminton" })).toBeInTheDocument();
   });
 
-  it("nhánh chứa mục đang xem được mở sẵn", () => {
+  it("the branch holding the current entry starts expanded", () => {
     render(<NavTree nodes={tree} activeHref="/vi/apps/badminton" />);
     expect(screen.getByRole("button", { name: /Công cụ nhỏ/ })).toHaveAttribute("aria-expanded", "true");
   });
 
-  it("bấm nút chứa thì đóng nhánh lại", () => {
+  it("clicking a container node collapses the branch", () => {
     render(<NavTree nodes={tree} activeHref="/vi/apps/badminton" />);
     const b = screen.getByRole("button", { name: /Vệ tinh/ });
     fireEvent.click(b);
@@ -44,26 +44,26 @@ describe("NavTree", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Thêm ngoài năm test của kế hoạch: hai chốt mà năm test kia không bắt được.
+// Extra checks that the five tests above do not catch.
 // ---------------------------------------------------------------------------
 
-describe("NavTree — chốt thêm", () => {
-  it("nút lá KHÔNG có aria-expanded — nó không mở đóng gì cả", () => {
+describe("NavTree — extra checks", () => {
+  it("a leaf node has NO aria-expanded — it expands nothing", () => {
     render(<NavTree nodes={tree} activeHref="/vi/apps/match-cv" />);
     expect(screen.getByRole("link", { name: "Match CV" })).not.toHaveAttribute("aria-expanded");
   });
 
-  it("mục đang xem đánh dấu bằng aria-current, viên nền chỉ là hệ quả", () => {
+  it("the current entry is marked with aria-current; the pill is only a consequence", () => {
     render(<NavTree nodes={tree} activeHref="/vi/apps/match-cv" />);
     expect(screen.getByRole("link", { name: "Match CV" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("không viết mã màu trực tiếp", () => {
+  it("writes no hard-coded colour values", () => {
     const { container } = render(<NavTree nodes={tree} activeHref="/vi/apps/match-cv" />);
     expect(container.innerHTML).not.toMatch(/#[0-9a-f]{6}/i);
   });
 
-  it("cây rỗng thì không dựng gì cả", () => {
+  it("an empty tree renders nothing", () => {
     const { container } = render(<NavTree nodes={[]} activeHref="/vi" />);
     expect(container).toBeEmptyDOMElement();
   });

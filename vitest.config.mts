@@ -13,14 +13,14 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     globals: false,
-    // e2e do Playwright chạy, không để vitest nhặt vào.
+    // e2e is run by Playwright; keep vitest from picking it up.
     //
-    // `**/` là bắt buộc ở node_modules: khai `exclude` là GHI ĐÈ default
-    // `**/node_modules/**` của vitest, nên một mẫu không có tiền tố chỉ loại trừ
-    // node_modules ở gốc. Mọi node_modules lồng bên trong vẫn bị quét — và
-    // `.worktrees/<feature>/node_modules/` thì luôn có, vì quy ước của workspace là
-    // làm feature trong worktree. Hậu quả không phải test đỏ mà là vitest TREO,
-    // lặng lẽ chạy hàng nghìn file test của dependency.
+    // The `**/` prefix on node_modules is required: declaring `exclude` OVERRIDES
+    // vitest's default `**/node_modules/**`, so an unprefixed pattern only excludes
+    // the root node_modules. Every nested node_modules is still scanned — and
+    // `.worktrees/<feature>/node_modules/` always exists, because the workspace
+    // convention is to build features in worktrees. The result is not a red test but a HUNG vitest,
+    // quietly running thousands of dependency test files.
     exclude: [
       "**/node_modules/**",
       ".worktrees/**",

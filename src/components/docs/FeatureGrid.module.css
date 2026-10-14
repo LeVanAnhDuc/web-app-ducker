@@ -1,13 +1,13 @@
-/* Lưới tính năng — hình khối chép từ `.m-feats` / `.m-feat` trong mockup. */
+/* Feature grid. */
 
 .block {
   margin-top: 30px;
 }
 
-/* `<h2>`: không khai `font-weight` — design-rules §3 để h1–h3 ở serif 400, mà
-   selector class ở đây mạnh hơn selector thẻ nên khai lại là vô hiệu hoá nó.
-   Bỏ weight rồi thì 18px không còn đứng trên tên tính năng 16px nữa, nên nó
-   nhận đúng bậc H2 (26px) — cùng cỡ với các tiêu đề mục khác của trang. */
+/* `<h2>`: no `font-weight`. h1-h3 are serif 400, and a class selector here beats
+   the type selector, so redeclaring it would override that.
+   Without the weight, 18px no longer stands out above the 16px feature names, so
+   it takes the proper H2 step (26px), the same as the page's other section titles. */
 .title {
   margin: 0 0 16px;
   font-size: var(--t-2xl);
@@ -26,9 +26,10 @@
   padding: 13px 15px;
 }
 
-/* Tên tính năng và mô tả cùng lên một bậc: 13.5/12.5px cũ đều dưới sàn 14px.
-   Chênh lệch giữa hai dòng giờ do bậc cỡ và màu gánh, không do nửa pixel —
-   và cũng không do `font-weight`, vì đây là `<h3>` (xem chú thích `.title`). */
+/* Feature name and description both move up a step: the old 13.5/12.5px were both
+   under the 14px floor. The contrast between the two lines now comes from size step
+   and colour, not half a pixel, and not from `font-weight` either, because this is
+   an `<h3>` (see the `.title` comment). */
 .name {
   margin: 0 0 4px;
   font-size: var(--t-md);
@@ -38,13 +39,13 @@
 .desc {
   margin: 0;
   font-size: var(--t-sm);
-  /* Văn xuôi: leading không dưới 1.7 vì dấu tiếng Việt chồng nhau. */
+  /* Prose: leading no lower than 1.7, because Vietnamese diacritics collide. */
   line-height: 1.7;
   color: var(--muted);
   overflow-wrap: break-word;
 }
 
-/* Một cột từ 720px xuống — mockup màn 07 (`.mb-main .m-feats`). */
+/* One column from 720px down. */
 @media (max-width: 720px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);

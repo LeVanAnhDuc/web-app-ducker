@@ -8,19 +8,19 @@ const docs = [
 ];
 
 describe("fuzzyMatch", () => {
-  it("khớp theo tiêu đề", () => {
+  it("matches on the title", () => {
     expect(fuzzyMatch("gym", docs)[0].title).toBe("Manage Gym");
   });
-  it("khớp theo nội dung", () => {
+  it("matches on the body text", () => {
     expect(fuzzyMatch("consent", docs)[0].title).toBe("Ducker ID");
   });
-  it("bỏ qua dấu — gõ 'tap luyen' vẫn ra 'tập luyện'", () => {
+  it("ignores diacritics — typing 'tap luyen' still finds 'tập luyện'", () => {
     expect(fuzzyMatch("tap luyen", docs)[0].title).toBe("Manage Gym");
   });
-  it("không khớp thì trả mảng rỗng", () => {
+  it("returns an empty array when nothing matches", () => {
     expect(fuzzyMatch("zzzzz", docs)).toEqual([]);
   });
-  it("truy vấn rỗng trả mảng rỗng, không trả tất cả", () => {
+  it("an empty query returns an empty array, not everything", () => {
     expect(fuzzyMatch("", docs)).toEqual([]);
   });
 });
