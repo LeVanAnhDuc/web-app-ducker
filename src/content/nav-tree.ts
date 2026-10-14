@@ -1,41 +1,23 @@
 /**
- * Cây điều hướng: dựng cây từ danh sách phẳng, tìm đường, và kiểm bất biến.
+ * The navigation tree: build it from a flat row list, find a trail through it.
  *
- * Thuần: không chạm hệ thống tệp, không chạm Next.js. Đây là module sống sót
- * duy nhất của tầng server cũ (Prisma) sau khi chuyển sang nội dung dựa trên
- * tệp — `src/content/nav.ts` (`listNavRows`) nay dựng mảng phẳng thẳng từ
- * `content/nav.ts` cùng các reader app/doc, rồi giao cho các hàm ở đây, thay
- * vì đọc `NavNode` ra từ Prisma như trước (ADR-0018). Không còn `mutations.ts`
- * để gọi `assertNavInvariants` / `wouldCreateCycle` trước khi ghi — không còn
- * đường ghi nào nữa, nên hai hàm đó hiện không có nơi gọi trong production; chỉ
- * `assertNoCycle` (I3) còn được gọi, từ `buildNavTree` bên dưới. Chi tiết:
- * `docs/03-design/invariants.md`.
- *
- * Nút gốc (`parentId = null`) là dải tab trên cùng; con cháu của tab đang mở là
- * sidebar trái. URL giữ phẳng — cây chỉ điều khiển cách hiển thị điều hướng.
+ * Pure — no filesystem, no Next.js. `listNavRows` (`src/content/nav.ts`) builds the
+ * flat rows from `content/nav.ts` and the entry readers, then hands them here
+ * (ADR-0018). Root nodes (`parentId = null`) are the top tab strip; the open tab's
+ * descendants are the left sidebar. URLs stay flat — the tree only drives how
+ * navigation is drawn. Invariants: `docs/03-design/invariants.md`.
  */
-import { statusValues } from "@/lib/schemas";
 
-/**
- * Ba loại nút (spec §3.1). Viết thẳng chứ không import từ `@prisma/client`, cùng
- * lối với `statusValues` trong `@/lib/schemas`: module này phải chạy được trong
- * test, nơi Prisma Client có thể chưa được sinh.
- */
+/** The three node kinds. A `CONTAINER` has no page of its own; `APP` and `DOC` are leaves. */
 export const navKindValues = ["CONTAINER", "APP", "DOC"] as const;
 export type NavKind = (typeof navKindValues)[number];
 
-type Status = (typeof statusValues)[number];
-
 /**
- * Một giá trị đã chọn xong ngôn ngữ.
+ * A value whose language has been chosen.
  *
- * `locale` là ngôn ngữ thực sự của `value`, không phải ngôn ngữ người dùng yêu
- * cầu. `isFallback` để trang hiện badge "Chưa có bản <ngôn ngữ>" (spec §7.1) —
- * badge này vừa trung thực với người đọc, vừa tự thành danh sách việc cần dịch.
- *
- * Carried over from `src/server/content/resolve.ts` (R13): the only consumer
- * of `resolveTranslation` left after the file-backed move is `buildNavTree`
- * below, so the helper moves with it instead of `resolve.ts` moving whole.
+ * `locale` is the language `value` is actually in, not the one asked for.
+ * `isFallback` lets a page show a "not yet in <language>" badge — honest to the
+ * reader, and a to-translate list in its own right.
  */
 export type Translated<T> = {
   value: T;
@@ -44,12 +26,11 @@ export type Translated<T> = {
 };
 
 /**
- * Chọn bản dịch cho locale `want`, lùi về `fallback` khi thiếu.
+ * Picks the translation for `want`, falling back to `fallback` when it is missing.
  *
- * Trả `null` khi không có cả bản mặc định, để trang gọi `notFound()`. Tuyệt đối
- * không bịa nhãn thay thế từ slug: "ducker-id" hiện ra chỗ đáng lẽ là
- * "Ducker ID" trông như dữ liệu thật nên sẽ lọt qua mọi vòng kiểm tra,
- * còn 404 thì lộ ngay.
+ * Returns `null` when the default is missing too. Never invent a label from the
+ * slug: "ducker-id" where "Ducker ID" belongs looks like real data and slips past
+ * every check, while an absent item is noticed at once.
  */
 export function resolveTranslation<T extends { locale: string }>(
   rows: T[],
@@ -65,18 +46,16 @@ export function resolveTranslation<T extends { locale: string }>(
   return null;
 }
 
-/** Một dòng phẳng, đã kèm mọi bản dịch cần để chọn nhãn — dựng bởi `listNavRows` (`src/content/nav.ts`) từ `content/nav.ts` và các reader app/doc, không còn đọc từ DB. */
+/** One flat row, carrying every translation needed to pick its label. Built by `listNavRows` (`src/content/nav.ts`). */
 export type NavRow = {
   id: string;
   parentId: string | null;
   order: number;
-  status: Status;
   kind: NavKind;
-  /** Nhãn ứng viên theo locale: CONTAINER lấy từ `content/nav.ts`, APP/DOC lấy
-   *  từ frontmatter `name`/`title` của file `.mdx` tương ứng — không còn
-   *  `NavNodeTranslation` / `AppTranslation.name` / `DocPageTranslation.title`. */
+  /** Candidate labels by locale: a CONTAINER's come from `content/nav.ts`, an
+   *  APP's or DOC's from the `name` frontmatter of its `.mdx` file. */
   labels: { locale: string; value: string }[];
-  /** null với CONTAINER. */
+  /** `null` for a CONTAINER. */
   href: string | null;
 };
 
@@ -89,19 +68,18 @@ export type NavTreeNode = {
   children: NavTreeNode[];
 };
 
-/** Anh em sắp theo `order`; `order` trùng thì theo `id` để thứ tự không nhảy giữa hai lần build. */
+/** Siblings sort by `order`, then by `id`, so equal orders do not swap between two builds. */
 function bySiblingOrder(a: NavRow, b: NavRow): number {
   return a.order - b.order || a.id.localeCompare(b.id);
 }
 
 /**
- * Ném lỗi khi trong `rows` có chu trình (I3).
+ * Throws when `rows` contain a cycle (I3).
  *
- * Chu trình không bao giờ tới được từ nút gốc — mỗi nút chỉ có một cha, nên một
- * nút đã nằm trong vòng thì không còn tổ tiên nào là nút gốc. Vì vậy nếu chỉ đi
- * xuống từ gốc thì cây vẫn dựng xong và cả vòng lặng lẽ biến mất, đúng kiểu lỗi
- * không ai phát hiện. Ta đi *lên* theo chuỗi cha của từng dòng để chu trình nổ
- * ra thành lỗi thay vì thành dữ liệu mất tích.
+ * A cycle is never reachable from a root — each node has one parent, so a node
+ * inside a loop has no root ancestor. Walking down from the roots, the tree builds
+ * fine and the whole loop quietly vanishes. Walking *up* each row's parent chain
+ * turns the cycle into an error instead of missing data.
  */
 function assertNoCycle(rows: NavRow[]): void {
   const byId = new Map(rows.map((r) => [r.id, r]));
@@ -114,9 +92,8 @@ function assertNoCycle(rows: NavRow[]): void {
     while (current && !safe.has(current.id)) {
       if (walked.has(current.id)) {
         throw new Error(
-          `Nút điều hướng "${current.id}" là hậu duệ của chính nó — cây có chu trình. ` +
-            "Không dựng được cây từ dữ liệu này. Hãy sửa nút cha của một nút trong vòng " +
-            `(${[...walked].join(" → ")}).`,
+          `Nav node "${current.id}" is its own descendant — the tree has a cycle. ` +
+            `Fix the parent of one node in the loop (${[...walked].join(" → ")}).`,
         );
       }
       walked.add(current.id);
@@ -128,30 +105,27 @@ function assertNoCycle(rows: NavRow[]): void {
 }
 
 /**
- * Dựng cây từ danh sách phẳng, chỉ lấy nút đã publish.
+ * Builds the tree from the flat list.
  *
- * Chịu được dữ liệu xấu theo hai lối khác nhau, có chủ ý:
+ * Tolerates bad data in two deliberately different ways:
  *
- * - **Nút mồ côi bị bỏ, im lặng.** Cha không tồn tại (hoặc cha chưa publish)
- *   nghĩa là cả nhánh không có đường vào; bỏ đi thì phần còn lại của điều hướng
- *   vẫn hiện. Sập cả cây vì một nút lạc là cái giá quá đắt.
- * - **Chu trình thì ném lỗi.** Đây là dữ liệu không thể hiển thị đúng bằng bất kỳ
- *   cách nào, và bỏ im lặng sẽ làm mất hẳn một nhánh mà không ai biết.
+ * - **An orphan is dropped, silently.** A missing parent means the branch has no
+ *   way in; dropping it keeps the rest of the navigation. Crashing the whole tree
+ *   over one stray node costs too much.
+ * - **A cycle throws.** No rendering of it is correct, and dropping it silently
+ *   would lose a branch without anyone knowing.
  *
- * Nút không có nhãn ở cả locale yêu cầu lẫn locale mặc định cũng bị bỏ (cùng
- * nhánh của nó): tuyệt đối không lấy slug hay id làm nhãn thay thế — "khong-nhan"
- * hiện ra chỗ đáng lẽ là "Hướng dẫn" trông như dữ liệu thật nên sẽ lọt qua mọi
- * vòng kiểm tra, còn một mục vắng mặt thì thấy ngay.
+ * A node with no label in either the wanted or the default locale is dropped too,
+ * with its branch: never use a slug or id as a stand-in label.
  */
 export function buildNavTree(rows: NavRow[], locale: string, fallback: string): NavTreeNode[] {
-  const published = rows.filter((row) => row.status === "PUBLISHED");
-  assertNoCycle(published);
+  assertNoCycle(rows);
 
-  const byId = new Map(published.map((row) => [row.id, row]));
+  const byId = new Map(rows.map((row) => [row.id, row]));
   const childrenOf = new Map<string | null, NavRow[]>();
 
-  for (const row of published) {
-    // Cha không nằm trong tập publish → mồ côi, bỏ cả nhánh.
+  for (const row of rows) {
+    // Parent not in the list → orphan; the whole branch goes.
     if (row.parentId !== null && !byId.has(row.parentId)) continue;
     const siblings = childrenOf.get(row.parentId);
     if (siblings) siblings.push(row);
@@ -160,14 +134,14 @@ export function buildNavTree(rows: NavRow[], locale: string, fallback: string): 
 
   for (const siblings of childrenOf.values()) siblings.sort(bySiblingOrder);
 
-  // `path` là chuỗi tổ tiên của nút đang dựng. `assertNoCycle` đã loại mọi chu
-  // trình nên tập này không bao giờ chặn thật; giữ lại làm chốt cuối để một lỗi
-  // trong chính hàm này cũng thành ngoại lệ thay vì treo trang.
+  // `path` is the ancestor chain of the node being built. `assertNoCycle` has
+  // already ruled out every cycle, so this never fires; it stays as a last guard so
+  // a bug in this function itself throws instead of hanging the page.
   const path = new Set<string>();
 
   const build = (row: NavRow): NavTreeNode | null => {
     if (path.has(row.id)) {
-      throw new Error(`Nút điều hướng "${row.id}" xuất hiện hai lần trên cùng một đường — cây có chu trình.`);
+      throw new Error(`Nav node "${row.id}" appears twice on one path — the tree has a cycle.`);
     }
     path.add(row.id);
     try {
@@ -197,8 +171,8 @@ export function buildNavTree(rows: NavRow[], locale: string, fallback: string): 
 }
 
 /**
- * Đường từ gốc tới nút mang `href` đã cho — để biết tab nào đang mở và mở sẵn
- * nhánh nào. Không tìm thấy thì trả mảng rỗng.
+ * The path from a root to the node with the given `href` — which tab is open and
+ * which branches start expanded. Empty when nothing matches.
  */
 export function findTrail(tree: NavTreeNode[], href: string): NavTreeNode[] {
   for (const node of tree) {
@@ -210,9 +184,8 @@ export function findTrail(tree: NavTreeNode[], href: string): NavTreeNode[] {
 }
 
 /**
- * Lá đầu tiên theo thứ tự cây, dùng khi ai đó mở thẳng URL của một nút chứa —
- * `CONTAINER` không có URL riêng nên route `/n/[id]` chuyển hướng tới đây. Không
- * có lá nào thì trả `null` để route gọi `notFound()`.
+ * The first leaf in tree order — where a top tab points, since a `CONTAINER` has no
+ * page of its own. `null` when the branch has no leaf; the tab is then not drawn.
  */
 export function firstLeafHref(node: NavTreeNode): string | null {
   if (node.href !== null) return node.href;
@@ -221,6 +194,20 @@ export function firstLeafHref(node: NavTreeNode): string | null {
     if (href !== null) return href;
   }
   return null;
+}
+
+/**
+ * The top tab strip: one tab per root, pointing at its first leaf.
+ *
+ * A root with no leaf (its `content/` folder is empty) gets no tab. There used to
+ * be a `/[locale]/n/[id]` route to fall back on; it could only ever redirect to
+ * this same first leaf or 404, so a tab that leads nowhere is simply not drawn.
+ */
+export function topTabs(tree: NavTreeNode[]): { id: string; label: string; href: string }[] {
+  return tree.flatMap((node) => {
+    const href = firstLeafHref(node);
+    return href === null ? [] : [{ id: node.id, label: node.label, href }];
+  });
 }
 
 /**
@@ -233,113 +220,4 @@ export function firstLeafHref(node: NavTreeNode): string | null {
  */
 export function navHref(pathname: string): string {
   return pathname.replace(/^(\/[^/]+\/(?:apps|games)\/[^/]+)\/releases$/, "$1");
-}
-
-/**
- * Kiểm bốn bất biến kiểm được từ danh sách phẳng: I1, I2, I5, I6 (spec §4).
- *
- * Không còn nơi nào trong production gọi hàm này nữa — nơi gọi duy nhất trước
- * đây là `src/server/content/mutations.ts`, đã xoá cùng tầng ghi (ADR-0019); giờ
- * chỉ `nav-tree.test.ts` còn gọi trực tiếp. I1, I4, I7 nay đúng do cách
- * `listNavRows` dựng dữ liệu, không cần kiểm nữa; xem `docs/03-design/invariants.md`.
- * `wouldCreateCycle` (I3, bên dưới) ở cùng tình trạng — không có nơi gọi trong
- * production, chỉ được kiểm bởi test. Đừng nối lại hàm này vào `listNavRows` để
- * "khôi phục" việc kiểm: I2 sẽ ném lỗi ngay khi một thư mục nội dung rỗng, biến
- * một trang trống lặng lẽ thành một lần sập ứng dụng.
- *
- * Chỉ xét nút đã publish: bản nháp được phép dở dang: đó là ý nghĩa của nháp.
- */
-export function assertNavInvariants(rows: NavRow[], defaultLocale: string): void {
-  const published = rows.filter((row) => row.status === "PUBLISHED");
-  const publishedIds = new Set(published.map((row) => row.id));
-
-  const publishedChildren = new Map<string, number>();
-  for (const row of published) {
-    if (row.parentId === null || !publishedIds.has(row.parentId)) continue;
-    publishedChildren.set(row.parentId, (publishedChildren.get(row.parentId) ?? 0) + 1);
-  }
-
-  // I1 — nút có con phải là CONTAINER.
-  //
-  // Kiểm trước I2 vì đây là vi phạm nặng hơn: yêu cầu gốc "cha có con thì không
-  // có nội dung, chỉ toggle mở con" mà áp thẳng lên một `APP` sẽ khiến ứng dụng
-  // đó mất repo, tech stack, tính năng và mục nội dung — dữ liệu vẫn nằm nguyên
-  // trong DB nhưng không còn đường nào tới được. Vì vậy `APP`/`DOC` luôn là lá,
-  // và toàn bộ cấu trúc cây do `CONTAINER` tạo ra (spec §3.2).
-  for (const row of published) {
-    if (row.kind === "CONTAINER") continue;
-    if ((publishedChildren.get(row.id) ?? 0) > 0) {
-      throw new Error(
-        `Nút "${row.id}" có con nhưng loại là ${row.kind}, không phải nút chứa. ` +
-          "Chỉ nút chứa (CONTAINER) được có con: ứng dụng và trang tài liệu luôn là lá, " +
-          "nếu không nội dung của chúng (repo, tech stack, tính năng) không còn đường nào tới được. " +
-          "Hãy tạo một nút chứa rồi đặt cả hai vào trong.",
-      );
-    }
-  }
-
-  // I2 — nút chứa không có con đã publish thì không publish được.
-  for (const row of published) {
-    if (row.kind !== "CONTAINER") continue;
-    if ((publishedChildren.get(row.id) ?? 0) === 0) {
-      throw new Error(
-        `Nút chứa "${row.id}" đang publish nhưng rỗng — không có con nào đã publish. ` +
-          "Bấm vào nó sẽ chẳng xổ ra gì, tức là hứa một thứ không có. " +
-          "Hãy thêm nội dung vào rồi publish, hoặc hạ nút này xuống nháp.",
-      );
-    }
-  }
-
-  // I5 — nút chứa phải có nhãn ở locale mặc định.
-  for (const row of published) {
-    if (row.kind !== "CONTAINER") continue;
-    const hasDefaultLabel = row.labels.some(
-      (label) => label.locale === defaultLocale && label.value.trim() !== "",
-    );
-    if (!hasDefaultLabel) {
-      throw new Error(
-        `Nút chứa "${row.id}" chưa có nhãn ở locale mặc định "${defaultLocale}". ` +
-          "Không có nhãn thì sidebar hiện một dòng trống bấm được, không ai đoán được nó là gì — " +
-          "và ta không bịa nhãn từ id để lấp chỗ.",
-      );
-    }
-  }
-
-  // I6 — phải có ít nhất một nút gốc đã publish.
-  if (!published.some((row) => row.parentId === null)) {
-    throw new Error(
-      "Không còn nút gốc nào đã publish. Nút gốc chính là dải tab trên cùng, " +
-        "nên không có nút gốc nghĩa là không có đường vào bất cứ đâu.",
-    );
-  }
-}
-
-/**
- * `true` khi gán `newParentId` làm cha của `nodeId` sẽ tạo chu trình (I3).
- *
- * Chặn cả trường hợp nút làm cha của chính nó. Kiểm trên **mọi** dòng, kể cả
- * nháp: chu trình nằm sẵn trong bản nháp rồi publish thì cũng treo trang.
- */
-export function wouldCreateCycle(
-  rows: NavRow[],
-  nodeId: string,
-  newParentId: string | null,
-): boolean {
-  if (newParentId === null) return false;
-  if (newParentId === nodeId) return true;
-
-  const byId = new Map(rows.map((row) => [row.id, row]));
-  const walked = new Set<string>();
-  let current = byId.get(newParentId);
-
-  while (current) {
-    if (current.id === nodeId) return true;
-    // Dữ liệu đã có chu trình từ trước: trả `true` để chặn nước đi thay vì lặp
-    // vô hạn. `buildNavTree` là nơi báo lỗi cho chu trình cũ đó.
-    if (walked.has(current.id)) return true;
-    walked.add(current.id);
-    current = current.parentId === null ? undefined : byId.get(current.parentId);
-  }
-
-  return false;
 }

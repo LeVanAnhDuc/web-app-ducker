@@ -12,7 +12,6 @@ function containerRow(id: string, labels: Record<string, string>, order: number)
     id,
     parentId: null,
     order,
-    status: "PUBLISHED",
     kind: "CONTAINER",
     href: null,
     labels: Object.entries(labels).map(([locale, value]) => ({ locale, value })),
@@ -31,7 +30,6 @@ function childRow(
     id: `${parentId}:${source.slug}`,
     parentId,
     order,
-    status: "PUBLISHED",
     kind,
     href: `${base}/${source.slug}`,
     labels: [{ locale, value: source.name }],
@@ -45,9 +43,6 @@ function childRow(
  * each opened by an Overview leaf (`content/nav.ts`) so `firstLeafHref` points
  * the top tab at `/apps` or `/games`. Games used to be a childless leaf (R5)
  * because they had no detail route; ADR-0023 gave them one.
- *
- * Every row comes out `status: "PUBLISHED"` (R14): file-backed content has no
- * draft state, and `buildNavTree` still filters on that field.
  */
 export async function listNavRows(locale: string): Promise<NavRow[]> {
   const rows: NavRow[] = [];
@@ -60,7 +55,6 @@ export async function listNavRows(locale: string): Promise<NavRow[]> {
         parentId: group.id,
         // Before every entry, whose orders start at 0.
         order: -1,
-        status: "PUBLISHED",
         kind: "APP",
         href: `/${locale}/${group.id}`,
         labels: Object.entries(group.overview).map(([loc, value]) => ({ locale: loc, value })),
@@ -81,12 +75,6 @@ export async function listNavRows(locale: string): Promise<NavRow[]> {
 /**
  * The public navigation tree for one locale: root nodes are the top tab strip,
  * descendants of the open tab are the left sidebar.
- *
- * The file-backed replacement for `getNavTree` in `@/server/content/queries` —
- * same shape, built from `listNavRows` instead of Prisma. There is no draft
- * state to filter here (every row from `listNavRows` is already `PUBLISHED`,
- * per R14), but `buildNavTree` still does that filtering from its Prisma-era
- * contract, so it is harmless to route through it unchanged.
  */
 export async function getNavTree(locale: string): Promise<NavTreeNode[]> {
   return buildNavTree(await listNavRows(locale), locale, defaultLocale);

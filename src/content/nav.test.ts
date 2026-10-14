@@ -90,11 +90,6 @@ describe("listNavRows", () => {
     expect(rows.some((r) => r.id === "docs:overview")).toBe(false);
   });
 
-  it("emits status PUBLISHED on every row (R14 — file-backed content has no draft state)", async () => {
-    const rows = await listNavRows("vi");
-    expect(rows.every((r) => r.status === "PUBLISHED")).toBe(true);
-  });
-
   it("uses the authored title as doc row labels, not the slug", async () => {
     const rows = await listNavRows("vi");
     const docChildren = rows.filter((r) => r.parentId === "docs");
