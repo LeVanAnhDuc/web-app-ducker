@@ -1,10 +1,9 @@
-// Danh sách locale, khai tay. Từng được `scripts/generate-locales.ts` sinh ra từ
-// bảng `Locale` (ADR-0015); bảng đó không còn tồn tại (ADR-0018, ADR-0019), nên
-// file này quay về là một hằng số bình thường, cùng kiểu với `content/nav.ts`.
+// The locale list, written by hand. It used to be generated from the `Locale`
+// table (ADR-0015); that table is gone (ADR-0018, ADR-0019), so this is a plain
+// constant, like `content/nav.ts`.
 //
-// Middleware (`src/middleware.ts`) chạy ở edge trên mọi request và import file
-// này trực tiếp — không có bước sinh nào ở giữa nữa. Thêm một ngôn ngữ vẫn cần
-// sửa file này rồi redeploy, chỉ khác là sửa thẳng tay thay vì qua CMS.
+// The proxy (`src/proxy.ts`) imports it directly on every request. Adding a
+// language still means editing this file and redeploying.
 
 export const locales: readonly string[] = ["vi", "en"];
 export const defaultLocale: string = "vi";
