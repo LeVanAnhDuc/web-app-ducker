@@ -18,11 +18,10 @@ description, or publishing a guide is an edit to a file under `content/` and a
 push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 [ADR-0019](docs/decisions/0019-no-administration-surface.md).
 
-> **Status:** the application code is complete — **250 unit tests** pass
-> (`pnpm test:run`), `tsc --noEmit` is clean, and `pnpm build` succeeds with
-> **no environment variables at all**. `pnpm e2e` passes **16/16**.
-> **Never deployed to Vercel**, but nothing blocks it any more — the deploy
-> chain that used to wait on Neon/R2 credentials is gone with the CMS.
+> **Status:** live at https://web-app-ducker.vercel.app since 2026-10-11. **252
+> unit tests** pass (`pnpm test:run`), `tsc --noEmit` is clean, `pnpm build`
+> succeeds with **no environment variables at all**, and `pnpm e2e` passes
+> **21/21**.
 
 ## Features
 
@@ -34,7 +33,10 @@ push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
   - `/apps` and `/games` are overview pages — every entry as one ruled row —
     opened by the top tabs and listed first in each sidebar
   - Standalone doc pages, each with its own detail page
-  - A table of contents, a search dialog, and a sidebar navigation tree
+  - A table of contents, a search dialog covering apps, games and guides, and
+    a sidebar navigation tree
+  - A `sitemap.xml` and `robots.txt`, with absolute canonical and `hreflang`
+    links on every page
 
 - **A games section**
   - Duck-themed games are their own top-level group alongside apps and docs,
@@ -58,7 +60,7 @@ push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 - **Multiple languages, honestly labelled**
   - Locale is a filename suffix (`<slug>.<locale>.mdx`), not a database row;
     the routing list lives in `src/i18n/locales.ts`, a hand-maintained
-    constant the edge middleware imports directly
+    constant the locale-routing proxy imports directly
   - **Untranslated content falls back and says so** — a notice sits beside
     each entry that is showing another language, not once at the top of the
     page
@@ -83,11 +85,11 @@ push — see [ADR-0018](docs/decisions/0018-content-is-files-not-rows.md) and
 
 Next.js 16 · next-intl · Vercel. No database, no auth layer, no object store.
 
-Testing: Vitest (250 unit tests) and Playwright (21 e2e).
+Testing: Vitest (252 unit tests) and Playwright (21 e2e).
 
 ## Running
 
-Needs Node 20+ and [pnpm](https://pnpm.io) 10 (`corepack enable pnpm`).
+Needs Node 22 and [pnpm](https://pnpm.io) 10 (`corepack enable pnpm`).
 
 ```bash
 pnpm install               # install; nothing to generate, no environment needed

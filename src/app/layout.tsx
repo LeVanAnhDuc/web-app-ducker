@@ -1,16 +1,27 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@/styles/globals.css";
 
+import { siteUrl } from "@/lib/site-url";
+
 /**
- * Layout gốc chỉ truyền `children` đi tiếp — **không** dựng `<html>`/`<body>`.
+ * Every page's `canonical` and `hreflang` alternates are relative paths; this turns
+ * them into absolute URLs on the real host instead of whatever Next would guess.
+ */
+export const metadata: Metadata = {
+  metadataBase: siteUrl(),
+};
+
+/**
+ * The root layout only passes `children` on — it does **not** render `<html>`/`<body>`.
  *
- * Thẻ `lang` phải theo ngôn ngữ của đường dẫn, mà tham số `[locale]` chỉ đọc
- * được từ layout nằm bên trong `src/app/[locale]/`. Vì vậy `<html>`/`<body>`
- * nằm ở `src/app/[locale]/(public)/layout.tsx`, đúng khuôn mẫu "nhiều layout
- * gốc" của App Router. Nhóm `(admin)` từng là root layout thứ hai; nó đã bị
- * xoá cùng toàn bộ khu quản trị (ADR-0019).
+ * The `lang` attribute has to follow the path's locale, and the `[locale]` param is
+ * only readable from a layout inside `src/app/[locale]/`. So `<html>`/`<body>` live
+ * in `src/app/[locale]/(public)/layout.tsx` — the App Router's "multiple root
+ * layouts" pattern.
  *
- * File vẫn phải tồn tại: đây là nơi nạp `globals.css` cho toàn bộ cây route.
+ * The file still has to exist: it loads `globals.css` and `metadataBase` for the
+ * whole route tree.
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return children;
