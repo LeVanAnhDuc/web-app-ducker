@@ -2,7 +2,7 @@ import { mkdtempSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import { buildContentSearchIndex } from "./route";
+import { buildContentSearchIndex, GET } from "./route";
 
 let root: string;
 
@@ -10,6 +10,7 @@ beforeAll(() => {
   root = mkdtempSync(join(tmpdir(), "ducker-search-index-"));
   mkdirSync(join(root, "apps"), { recursive: true });
   mkdirSync(join(root, "docs"), { recursive: true });
+  mkdirSync(join(root, "games"), { recursive: true });
 
   const writeApp = (f: string, name: string, order: number, body: string) =>
     writeFileSync(join(root, "apps", f), `---\nname: ${name}\nstatus: core\norder: ${order}\n---\n${body}`);
@@ -18,6 +19,16 @@ beforeAll(() => {
 
   writeApp("ducker-id.vi.mdx", "Ducker ID", 10, "Nha cung cap danh tinh.");
   writeApp("ducker-id.en.mdx", "Ducker ID", 10, "Identity provider for the ecosystem.");
+
+  writeFileSync(
+    join(root, "games", "duck-flap.vi.mdx"),
+    `---
+name: Duck Flap
+status: standalone
+order: 10
+---
+Vuot ong nuoc.`,
+  );
 
   writeDoc("getting-started.vi.mdx", "Bat dau", 10, "Huong dan bat dau.");
   writeDoc("getting-started.en.mdx", "Getting Started", 10, "Getting started guide.");
@@ -49,8 +60,33 @@ describe("buildContentSearchIndex", () => {
     expect(apiRef?.text).toContain("English only reference document");
   });
 
+  it("includes games, linked to their detail pages (FR-27)", async () => {
+    const index = await buildContentSearchIndex("en", root);
+    const game = index.find((d) => d.kind === "game");
+    expect(game?.href).toBe("/en/games/duck-flap");
+    expect(game?.title).toBe("Duck Flap");
+    expect(game?.text).toContain("Vuot ong nuoc");
+  });
+
   it("does not include the English-only document in the Vietnamese index", async () => {
     const index = await buildContentSearchIndex("vi", root);
     expect(index.some((d) => d.href === "/vi/docs/api-reference")).toBe(false);
+  });
+});
+
+describe("GET", () => {
+  const call = (locale: string) =>
+    GET(new Request(`http://x/api/search-index/${locale}`), { params: Promise.resolve({ locale }) });
+
+  it("answers 404 for a locale that is not enabled", async () => {
+    // Otherwise it serves the default locale's content under `/xx/...` hrefs,
+    // every one of which is a 404 page.
+    expect((await call("xx")).status).toBe(404);
+  });
+
+  it("answers 200 with an array for an enabled locale", async () => {
+    const res = await call("vi");
+    expect(res.status).toBe(200);
+    expect(Array.isArray(await res.json())).toBe(true);
   });
 });

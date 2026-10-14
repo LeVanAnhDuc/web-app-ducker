@@ -17,12 +17,12 @@
     "label": "Language"
   },
   "search": {
-    "placeholder": "Search apps, guides…",
+    "placeholder": "Search apps, games, guides…",
     "empty": "No results found.",
     "open": "Search",
     "shortcut": "⌘K",
     "label": "Search the documentation",
-    "hint": "Type to search apps and guides.",
+    "hint": "Type to search apps, games and guides.",
     "loading": "Loading the search index…",
     "error": "The search index could not be loaded. Close the dialog and open it again to retry.",
     "close": "Close"

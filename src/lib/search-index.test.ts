@@ -3,13 +3,13 @@ import { describe, it, expect } from "vitest";
 import { stripMarkdown, buildSearchIndex } from "./search-index";
 
 describe("stripMarkdown", () => {
-  it("bỏ ký hiệu tiêu đề và nhấn mạnh", () => {
+  it("strips heading and emphasis markers", () => {
     expect(stripMarkdown("## Tính năng\n\n**đậm** và *nghiêng*")).toBe("Tính năng đậm và nghiêng");
   });
-  it("bỏ khối mã — lệnh shell làm nhiễu kết quả tìm", () => {
+  it("drops code blocks — shell commands pollute search results", () => {
     expect(stripMarkdown("Chạy:\n\n```bash\nnpm install\n```\n\nXong.")).toBe("Chạy: Xong.");
   });
-  it("giữ chữ trong liên kết, bỏ URL", () => {
+  it("keeps link text, drops the URL", () => {
     expect(stripMarkdown("[GitHub](https://github.com/a/b)")).toBe("GitHub");
   });
 });
@@ -18,21 +18,23 @@ describe("buildSearchIndex", () => {
   const input = {
     apps: [{ slug: "ducker-id", name: "Ducker ID",
              sections: [{ title: "Là gì", body: "Giao diện của IDMS." }] }],
+    games: [{ slug: "duck-flap", name: "Duck Flap",
+              sections: [{ title: "", body: "Vượt ống nước." }] }],
     docs: [{ slug: "tich-hop-oauth", title: "Tích hợp OAuth",
              sections: [{ title: "Luồng", body: "Năm bước." }] }],
     locale: "vi",
   };
 
-  it("sinh href có tiền tố locale", () => {
+  it("builds hrefs with the locale prefix", () => {
     const idx = buildSearchIndex(input);
-    expect(idx.map(d => d.href)).toEqual(["/vi/apps/ducker-id", "/vi/docs/tich-hop-oauth"]);
+    expect(idx.map(d => d.href)).toEqual(["/vi/apps/ducker-id", "/vi/games/duck-flap", "/vi/docs/tich-hop-oauth"]);
   });
 
-  it("dùng tên hiển thị làm tiêu đề, không dùng slug", () => {
+  it("uses the display name as the title, not the slug", () => {
     expect(buildSearchIndex(input)[0].title).toBe("Ducker ID");
   });
 
-  it("gộp nội dung mọi mục vào một chuỗi tìm được", () => {
+  it("merges every section's content into one searchable string", () => {
     expect(buildSearchIndex(input)[0].text).toContain("Giao diện của IDMS");
     expect(buildSearchIndex(input)[0].text).toContain("Là gì");
   });

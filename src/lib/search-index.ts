@@ -1,70 +1,71 @@
 /**
- * Dựng chỉ mục tìm kiếm từ nội dung. Thuần, không chạm Prisma hay mạng, để
- * `src/server/content/queries.ts` gọi được và test chạy không cần DB.
+ * Builds the search index from content. Pure — no filesystem, no network — so the
+ * route handler feeds it whatever the content layer read, and tests need no files.
  */
 
-/** Một mục trong chỉ mục tìm kiếm, đủ để hiển thị kết quả mà không cần gọi lại server. */
+/** One index entry: enough to render a result without asking the server again. */
 export type SearchDoc = {
   href: string;
   title: string;
-  kind: "app" | "doc";
+  kind: "app" | "game" | "doc";
   text: string;
 };
 
-/** Một mục nội dung của app hoặc trang docs. `body` là markdown thô. */
+/** One block of an entry's content. `body` is raw markdown. */
 type SectionInput = { title: string; body: string };
 
 export type SearchIndexInput = {
   apps: { slug: string; name: string; sections: SectionInput[] }[];
+  games: { slug: string; name: string; sections: SectionInput[] }[];
   docs: { slug: string; title: string; sections: SectionInput[] }[];
   locale: string;
 };
 
 /**
- * Gỡ ký hiệu markdown, chỉ giữ lại chữ người đọc thấy.
+ * Strips markdown syntax, keeping only the words a reader sees.
  *
- * Khối mã bị bỏ hẳn chứ không chỉ gỡ dấu nháy: lệnh shell (`pnpm install`,
- * `docker compose up`) lặp lại ở hàng chục trang nên nếu giữ, mọi truy vấn
- * dính từ khoá kỹ thuật đều trả về gần như toàn bộ chỉ mục.
+ * Code blocks are dropped whole, not just unfenced: shell commands (`pnpm install`,
+ * `docker compose up`) repeat across dozens of pages, so keeping them would make any
+ * technical query match nearly the whole index.
  */
 export function stripMarkdown(md: string): string {
   return (
     md
-      // Khối mã rào (``` hoặc ~~~) — bỏ cả nội dung.
+      // Fenced code (``` or ~~~) — contents and all.
       .replace(/^[ \t]*(```|~~~)[\s\S]*?^[ \t]*\1[ \t]*$/gm, " ")
-      // Khối mã rào không được đóng ở cuối chuỗi.
+      // A fence left unclosed at the end of the string.
       .replace(/^[ \t]*(```|~~~)[\s\S]*$/m, " ")
-      // Ảnh: bỏ hẳn, alt thường là mô tả trùng lặp với chú thích quanh đó.
+      // Images: dropped; the alt text usually repeats the caption around it.
       .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-      // Liên kết: giữ chữ, bỏ URL.
+      // Links: keep the text, drop the URL.
       .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-      // Liên kết tham chiếu `[chữ][nhãn]` và định nghĩa nhãn ở cuối trang.
+      // Reference links `[text][label]` and the label definitions at the end.
       .replace(/^\s*\[[^\]]+\]:\s*\S+.*$/gm, " ")
       .replace(/\[([^\]]*)\]\[[^\]]*\]/g, "$1")
-      // Thẻ HTML thô, gồm cả autolink `<https://...>`.
+      // Raw HTML tags, autolinks `<https://...>` included.
       .replace(/<[^>\n]*>/g, " ")
-      // Mã nội tuyến: giữ chữ bên trong (thường là tên trường, tên biến).
+      // Inline code: keep the text inside (usually a field or variable name).
       .replace(/`+([^`]*)`+/g, "$1")
-      // Ký hiệu tiêu đề, trích dẫn, đầu mục danh sách.
+      // Heading, blockquote and list markers.
       .replace(/^[ \t]{0,3}#{1,6}[ \t]+/gm, "")
       .replace(/^[ \t]{0,3}>[ \t]?/gm, "")
       .replace(/^[ \t]*(?:[-*+]|\d+[.)])[ \t]+/gm, "")
-      // Đường kẻ ngang.
+      // Horizontal rules.
       .replace(/^[ \t]*(?:[-*_][ \t]*){3,}$/gm, " ")
-      // Đường phân cách của bảng GFM, rồi tới dấu gạch đứng.
+      // The GFM table delimiter row, then the pipes.
       .replace(/^[ \t]*\|?[ \t]*:?-{2,}:?[ \t]*(?:\|[ \t]*:?-{2,}:?[ \t]*)*\|?[ \t]*$/gm, " ")
       .replace(/\|/g, " ")
-      // Ký hiệu nhấn mạnh. Dấu `_` chỉ bỏ khi đứng ở rìa từ, để `snake_case`
-      // trong tên trường không bị dính thành một khối vô nghĩa.
+      // Emphasis markers. `_` goes only at a word's edge, so a `snake_case`
+      // field name does not collapse into one meaningless token.
       .replace(/\*\*|~~|\*/g, "")
       .replace(/(^|\s)_+|_+(?=\s|$)/g, "$1")
-      // Gộp mọi khoảng trắng: kết quả là một dòng duy nhất.
+      // Collapse all whitespace: the result is a single line.
       .replace(/\s+/g, " ")
       .trim()
   );
 }
 
-/** Gộp tiêu đề và thân của mọi mục thành một chuỗi phẳng để so khớp. */
+/** Flattens every block's title and body into one string to match against. */
 function flattenSections(sections: SectionInput[]): string {
   return sections
     .flatMap((s) => [s.title, stripMarkdown(s.body)])
@@ -75,8 +76,8 @@ function flattenSections(sections: SectionInput[]): string {
 }
 
 /**
- * Dựng chỉ mục cho một locale. `title` luôn là tên hiển thị (Ducker ID),
- * không bao giờ là slug — slug chỉ đóng vai trò phụ trong giao diện.
+ * Builds the index for one locale. `title` is always the display name (Ducker ID),
+ * never the slug — the slug only ever plays a secondary role in the interface.
  */
 export function buildSearchIndex(input: SearchIndexInput): SearchDoc[] {
   const { locale } = input;
@@ -88,6 +89,13 @@ export function buildSearchIndex(input: SearchIndexInput): SearchDoc[] {
     text: flattenSections(app.sections),
   }));
 
+  const games: SearchDoc[] = input.games.map((game) => ({
+    href: `/${locale}/games/${game.slug}`,
+    title: game.name,
+    kind: "game",
+    text: flattenSections(game.sections),
+  }));
+
   const docs: SearchDoc[] = input.docs.map((doc) => ({
     href: `/${locale}/docs/${doc.slug}`,
     title: doc.title,
@@ -95,5 +103,5 @@ export function buildSearchIndex(input: SearchIndexInput): SearchDoc[] {
     text: flattenSections(doc.sections),
   }));
 
-  return [...apps, ...docs];
+  return [...apps, ...games, ...docs];
 }
